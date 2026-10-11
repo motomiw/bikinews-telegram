@@ -1,0 +1,40 @@
+name: Быки News → Telegram
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'     # каждые 20 минут
+  workflow_dispatch:            # кнопка «Run workflow» для ручного запуска
+    inputs:
+      test:
+        description: 'Отправить тестовое сообщение в канал'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write               # чтобы сохранять state.json (что уже опубликовано)
+
+concurrency:
+  group: telegram-poster
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Публикация новостей
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+          TG_TEST: ${{ github.event.inputs.test }}
+        run: python poster.py
+      - name: Сохранить, что уже опубликовано
+        run: |
+          git config user.name "bikinews-bot"
+          git config user.email "bikinews-bot@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || (git commit -m "Обновлён state.json" && git push)
