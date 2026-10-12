@@ -86,7 +86,7 @@ def _card(p):
             f'<li><span class="mono">{x["d"]}</span><a href="matches.html#{x["anchor"]}">{x["comp"]} · {_e(x["opp"])}, {x["where"]} {x["sc"]}</a>'
             f'<b class="mono">{x["min"]}{" пен." if x["pen"] else ""}</b></li>' for x in gl) + '</ul></details>')
     inj = f' <span class="inj">{_e(p["inj"])}</span>' if p.get('inj') else ''
-    return (f'<li class="pl" id="p{p["n"]}"><div class="pl-n">{p["n"]}</div><div class="pl-b"><h3>{_e(p["name"])}{inj}</h3>'
+    return (f'<li class="pl" id="p{p["n"]}"><div class="pl-n"><span class="jr big" aria-label="номер {p["n"]}"><svg viewBox="0 0 40 40"><path d="M13 3 2.5 8.5l3.5 8.2 4-1.7V37h20V15l4 1.7 3.5-8.2L27 3c-1.6 2.6-4 4-7 4s-5.4-1.4-7-4z"/></svg><b>{p["n"]}</b></span></div><div class="pl-b"><h3>{_e(p["name"])}{inj}</h3>'
             f'<div class="pl-m">{_e(p["c"])} · {a} {_pl(a, "год", "года", "лет")}</div>{rows}{det}</div></li>')
 
 _POS = [('gk', 'Вратари'), ('df', 'Защитники'), ('mf', 'Полузащитники'), ('fw', 'Нападающие')]
@@ -111,10 +111,11 @@ main.sq { display: block; padding-block: 8px 56px; }
 .lead-top h2 { font-family: var(--font-display); font-size: 18px; margin: 0; }
 .lds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 24px; margin-top: 12px; }
 .ld h3 { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: var(--accent); margin: 0 0 8px; }
-.jr { position: relative; display: inline-grid; place-items: center; width: 36px; height: 36px; flex: none; }
+.jr { --s: 36px; position: relative; display: inline-grid; place-items: center; width: var(--s); height: var(--s); flex: none; }
+.jr.big { --s: 50px; }
 .jr svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .jr svg path { fill: var(--turf); stroke: var(--signal); stroke-width: 1.6; stroke-linejoin: round; }
-.jr b { position: relative; font-family: var(--font-display); font-size: 9.5px; font-weight: 800; letter-spacing: -.03em; color: var(--signal); padding-top: 6px; line-height: 1; }
+.jr b { position: relative; font-family: var(--font-display); font-size: calc(var(--s) * .23); font-weight: 800; letter-spacing: -.05em; color: #fff; padding-top: calc(var(--s) * .16); line-height: 1; }
 .ld li .who { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .ld ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .ld li { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; }
@@ -127,7 +128,7 @@ main.sq { display: block; padding-block: 8px 56px; }
 .pls { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
 .pl { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; align-items: start; scroll-margin-top: 120px; }
 .pl:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-.pl-n { font-family: var(--font-display); font-weight: 900; font-size: 28px; color: var(--accent); text-align: center; line-height: 1.1; }
+.pl-n { display: flex; justify-content: center; }
 .pl h3 { margin: 0; font-size: 16px; }
 .pl-m { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
 .pl-t { width: 100%; border-collapse: collapse; margin-top: 6px; }
@@ -154,7 +155,7 @@ main.sq { display: block; padding-block: 8px 56px; }
   .lds { grid-template-columns: minmax(0, 1fr); }
   .pls { grid-template-columns: minmax(0, 1fr); }
   .pl { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; }
-  .pl-n { font-size: 24px; }
+  .jr.big { --s: 40px; }
 }
 '''
 
