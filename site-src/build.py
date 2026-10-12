@@ -42,8 +42,17 @@ def head(title, desc, path=''):
 
 # ---------- главная ----------
 style_end = SRC.index('</style>') + len('</style>')
-index = (head('Быки News — новости ФК «Краснодар»', 'Фан-сайт о «Краснодаре»: главные новости, матчи, таблица РПЛ и бомбардиры. Обновляется каждый день.')
-         + SRC[:style_end] + '\n</head>\n<body>\n' + SRC[style_end:].lstrip('\n') + '</body>\n</html>\n')
+INDEX_TITLE = 'Быки News — новости ФК «Краснодар»'
+INDEX_DESC = ('Новости ФК «Краснодар» каждый день: итоги и анонсы матчей, слова Мусаева и игроков, '
+              'травмы, трансферы, таблица РПЛ и бомбардиры. Неофициальный фан-сайт о Быках.')
+INDEX_LD = ('<script type="application/ld+json">' + json.dumps({
+    '@context': 'https://schema.org', '@type': 'WebSite', 'name': 'Быки News',
+    'alternateName': 'bikinews.ru', 'url': 'https://bikinews.ru/', 'inLanguage': 'ru',
+    'description': INDEX_DESC}, ensure_ascii=False) + '</script>\n')
+# <title> в мастере короткий («Быки News») — для поисковиков ставим полный
+index_src_head = re.sub(r'<title>.*?</title>', '<title>' + INDEX_TITLE + '</title>', SRC[:style_end], count=1, flags=re.S)
+index = (head(INDEX_TITLE, INDEX_DESC) + INDEX_LD
+         + index_src_head + '\n</head>\n<body>\n' + SRC[style_end:].lstrip('\n') + '</body>\n</html>\n')
 (OUT / 'index.html').write_text(index, encoding='utf-8')
 
 # ---------- «Главное» → JSON ----------
