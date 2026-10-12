@@ -245,6 +245,7 @@ main.cl { display: block; padding-block: 8px 56px; }
 .cl .btn { display: inline-block; margin-top: 10px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; border-radius: 999px; padding: 8px 14px; font-size: 14px; }
 .cl .muted { color: var(--muted); font-size: 13px; }
 .cl .maps { display: flex; flex-wrap: wrap; gap: 8px; }
+.cb .facts-list { margin: 0 0 10px; }
 .cl-note { color: var(--muted); font-size: 13px; margin-top: 22px; border-top: 1px solid var(--line); padding-top: 12px; }
 .cl-note a { color: var(--accent); }
 @media (max-width: 760px) {
@@ -274,8 +275,15 @@ club_main = f'''<main class="wrap cl" id="top">
       <li><b>2026</b><span>Серебро РПЛ и финал Кубка со «Спартаком»: 1:1, в серии пенальти 3:4</span></li>
     </ul></section>
     <section class="cb"><h2>Стадион — Ozon Арена</h2>
-      <p>Так стадион «Краснодар» называется с 1 мая 2025 года. Вмещает больше 33 тысяч зрителей. Внутри — панорамный экран площадью 4700 м², снаружи — медиафасад по всему периметру.</p>
-      <p>Адрес: Краснодар, ул. Разведчика Леонова, 1. Рядом — парк Галицкого площадью 22 гектара. В дни матчей ходят шаттлы от крупных транспортных узлов.</p>
+      <p>Домашний стадион «Краснодара». Строился с апреля 2013 по октябрь 2016 года, вмещает 33 000 зрителей.</p>
+      <ul class="facts-list">
+        <li>Вантовая крыша закрывает все трибуны, в холодную погоду места подогреваются инфракрасными обогревателями.</li>
+        <li>По всему периметру чаши — медиаэкран площадью 4700 м².</li>
+        <li>Поле 105 × 68 м с подогревом, принудительной аэрацией, охлаждением и искусственным освещением газона.</li>
+        <li>Порядок на матчах обеспечивают до 700 стюардов.</li>
+        <li>Рядом — парк площадью 21 гектар.</li>
+      </ul>
+      <p><b>Адрес:</b> Краснодар, ул. Разведчика Леонова, 1.<br><b>Парковка:</b> на улице Героя Владислава Посадского, у стадиона Академии ФК «Краснодар». В дни матчей ходят шаттлы от крупных транспортных узлов.</p>
       <div class="maps"><a class="btn" href="https://yandex.ru/maps/?text=Ozon%20%D0%90%D1%80%D0%B5%D0%BD%D0%B0%2C%20%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B4%D0%B0%D1%80" target="_blank" rel="noopener">Яндекс Карты ↗</a> <a class="btn" href="https://2gis.ru/krasnodar/firm/70000001025023333" target="_blank" rel="noopener">2ГИС ↗</a></div></section>
     <section class="cb"><h2>Билеты</h2><ul>
       <li>Официально: <b>ticket.fckrasnodar.ru</b>, приложение клуба, кассы стадиона; также «Яндекс Афиша» и Кассир.ру.</li>
