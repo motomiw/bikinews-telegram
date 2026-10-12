@@ -284,7 +284,7 @@ club_main = f'''<main class="wrap cl" id="top">
         <li>Рядом — парк площадью 21 гектар.</li>
       </ul>
       <p><b>Адрес:</b> Краснодар, ул. Разведчика Леонова, 1.<br><b>Парковка:</b> на улице Героя Владислава Посадского, у стадиона Академии ФК «Краснодар». В дни матчей ходят шаттлы от крупных транспортных узлов.</p>
-      <div class="maps"><a class="btn" href="https://yandex.ru/maps/?text=Ozon%20%D0%90%D1%80%D0%B5%D0%BD%D0%B0%2C%20%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B4%D0%B0%D1%80" target="_blank" rel="noopener">Яндекс Карты ↗</a> <a class="btn" href="https://2gis.ru/krasnodar/firm/70000001025023333" target="_blank" rel="noopener">2ГИС ↗</a></div></section>
+      <div class="maps"><a class="btn" href="https://yandex.ru/maps/?rtext=~45.044167%2C39.029444&amp;rtt=auto" target="_blank" rel="noopener">Маршрут в Яндекс Картах ↗</a> <a class="btn" href="https://2gis.ru/krasnodar/directions/points/%7C39.029444%2C45.044167%3B70000001025023333" target="_blank" rel="noopener">Маршрут в 2ГИС ↗</a></div></section>
     <section class="cb"><h2>Билеты</h2><ul>
       <li>Официально: <b>ticket.fckrasnodar.ru</b>, приложение клуба, кассы стадиона; также «Яндекс Афиша» и Кассир.ру.</li>
       <li>На кубковые матчи с октября нужен <b>Fan ID</b> — без него онлайн-покупка недоступна.</li>
