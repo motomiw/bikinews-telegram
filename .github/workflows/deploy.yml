@@ -43,7 +43,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_DIR }}
+          server-dir: public_html/    # папка сайта внутри FTP (FTP-пользователь открывает /home/i/imotomiwru/BiKi/)
           protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
           local-dir: ./dist/
           # Скрипт трогает только файлы, которые сам выкладывал.
