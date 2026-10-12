@@ -110,12 +110,17 @@ main.sq { display: block; padding-block: 8px 56px; }
 .lead-top { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
 .lead-top h2 { font-family: var(--font-display); font-size: 18px; margin: 0; }
 .lds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 24px; margin-top: 12px; }
-.ld h3 { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
-.ld ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
-.ld li { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.ld h3 { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: var(--accent); margin: 0 0 8px; }
+.jr { position: relative; display: inline-grid; place-items: center; width: 36px; height: 36px; flex: none; }
+.jr svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.jr svg path { fill: var(--turf); stroke: var(--signal); stroke-width: 1.6; stroke-linejoin: round; }
+.jr b { position: relative; font-family: var(--font-display); font-size: 9.5px; font-weight: 800; letter-spacing: -.03em; color: var(--signal); padding-top: 6px; line-height: 1; }
+.ld li .who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ld ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ld li { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; }
 .ld li a { text-decoration: none; }
 .ld li a:hover { color: var(--accent); }
-.ld li b { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+.ld li > b { font-family: var(--font-display); font-size: 17px; font-variant-numeric: tabular-nums; }
 .ld .none { color: var(--muted); font-size: 13px; }
 .grp { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4.5vw, 34px); margin: 36px 0 12px; display: flex; align-items: baseline; gap: 8px; }
 .grp span { font-family: var(--font-mono); font-size: 15px; color: var(--muted); }
@@ -158,13 +163,14 @@ SQUAD_JS = r'''
   var D = __DATA__;
   var box = document.getElementById('ldBox'), mode = 'all';
   var CAT = [['Голы', 'gl'], ['Передачи', 'a'], ['Матчи', 'g']];
+  var JR = '<svg viewBox="0 0 40 40"><path d="M13 3 2.5 8.5l3.5 8.2 4-1.7V37h20V15l4 1.7 3.5-8.2L27 3c-1.6 2.6-4 4-7 4s-5.4-1.4-7-4z"/></svg>';
   function val(p, k) { return mode === 'rpl' ? p['r' + k] : mode === 'cup' ? p['c' + k] : p['r' + k] + p['c' + k]; }
   function esc(t) { var e = document.createElement('div'); e.textContent = t; return e.innerHTML; }
   function render() {
     box.innerHTML = CAT.map(function (c) {
       var top = D.filter(function (p) { return val(p, c[1]) > 0; }).sort(function (a, b) { return val(b, c[1]) - val(a, c[1]); }).slice(0, 4);
       return '<div class="ld"><h3>' + c[0] + '</h3>' + (top.length ? '<ol>' + top.map(function (p) {
-        return '<li><a href="#p' + p.id + '">' + esc(p.n) + '</a><b>' + val(p, c[1]) + '</b></li>';
+        return '<li><a class="who" href="#p' + p.id + '"><span class="jr" aria-hidden="true">' + JR + '<b>' + p.id + '</b></span>' + esc(p.n) + '</a><b>' + val(p, c[1]) + '</b></li>';
       }).join('') + '</ol>' : '<p class="none">Пока никого</p>') + '</div>';
     }).join('');
   }
