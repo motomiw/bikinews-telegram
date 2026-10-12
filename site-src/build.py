@@ -249,8 +249,8 @@ news = (head('Новости «Краснодара» — Быки News', 'Вс�
 print('index', len(index), 'news', len(news), 'glavnoe', len(items))
 
 exec(open(ROOT / 'matches_build.py', encoding='utf-8').read())
-exec(open(ROOT / 'privacy_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'squad_build.py', encoding='utf-8').read())
+exec(open(ROOT / 'privacy_build.py', encoding='utf-8').read())
 
 # статические файлы (шрифты, логотипы, иконки, robots, sitemap, .htaccess)
 shutil.copytree(ROOT / 'static', OUT, dirs_exist_ok=True)

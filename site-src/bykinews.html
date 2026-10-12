@@ -247,12 +247,26 @@ table.st { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 5
 .vcard:hover h3 { color: var(--accent); }
 .vcard .vmeta { color: var(--muted); font-size: 13px; }
 
-.foot { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--muted); font-size: 14px; }
-.foot .wrap { display: flex; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; }
-.foot p { margin: 0; max-width: 64ch; }
-.foot .wrap > p + p { flex-basis: 100%; order: 3; font-size: 13px; }
-.foot .contact { display: grid; gap: 6px; }
-.foot a { color: var(--accent); }
+.foot { background: var(--turf); color: var(--on-turf-muted); padding-block: 36px 28px; font-size: 14px; margin-top: 24px; }
+.foot a { color: var(--on-turf); text-decoration: none; }
+.foot a:hover { color: var(--signal); }
+.f-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr); gap: 28px 40px; }
+.f-name { font-family: var(--font-display); font-weight: 900; font-size: 20px; color: var(--on-turf); display: block; }
+.f-brand p { margin: 8px 0 14px; max-width: 40ch; }
+.f-soc { display: flex; gap: 8px; flex-wrap: wrap; }
+.f-soc a { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--signal); color: var(--signal); border-radius: 999px; padding: 5px 12px; font-weight: 700; font-size: 13px; }
+.f-soc a:hover { background: var(--signal); color: var(--on-signal); }
+.f-soc svg { width: 15px; height: 15px; fill: currentColor; }
+.f-col { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.f-col h2 { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--signal); margin: 0 0 2px; }
+.f-col span { font-size: 13px; }
+.f-bottom { display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: baseline; border-top: 1px solid rgba(237,245,239,.16); margin-top: 28px; padding-top: 16px; font-size: 13px; }
+.f-bottom p { margin: 0; flex: 0 0 100%; font-size: 12px; opacity: .85; }
+@media (max-width: 700px) {
+  .f-top { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  nav.f-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; }
+  nav.f-col h2 { grid-column: 1 / -1; }
+}
 
 @media (max-width: 900px) {
   #live { position: static; }
@@ -585,13 +599,30 @@ table.st { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 5
 
 <footer class="foot">
   <div class="wrap">
-    <p><b style="color:var(--ink)">Быки News</b> — неофициальный фан-проект болельщиков. Сайт не связан с ФК «Краснодар»; названия и символика клубов принадлежат их правообладателям. Статистика: Sports.ru, LiveResult.</p>
-    <p>Новости на сайте — пересказ публикаций спортивных СМИ, источник указан под каждой новостью. Права на исходные материалы принадлежат их правообладателям. Сайт не является средством массовой информации.</p>
-    <div class="contact">
-      <p>Новости в Telegram: <a href="https://t.me/bikinews" target="_blank" rel="noopener">@bikinews</a> · в MAX: <a href="https://max.ru/channel_bikinews" target="_blank" rel="noopener">channel_bikinews</a></p>
-      <p>Правообладателям и по всем вопросам: <a href="mailto:i@bikinews.ru">i@bikinews.ru</a></p>
-      <p><a href="privacy.html">Политика конфиденциальности</a></p>
-      <p class="mono">© 2026 bikinews.ru</p>
+    <div class="f-top">
+      <div class="f-brand">
+        <b class="f-name">БЫКИ NEWS</b>
+        <p>Неофициальный фан-сайт о ФК «Краснодар»: новости, матчи, таблица и состав.</p>
+        <div class="f-soc">
+          <a href="https://t.me/bikinews" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 3.2 2.9 10.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5zM8.9 13.2l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7.1-.3 3.3-1.8-4.7z"/></svg>Telegram</a>
+          <a href="https://max.ru/channel_bikinews" target="_blank" rel="noopener" aria-label="MAX"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M4 11A9 9 0 1 1 7.6 18.2C6.6 19.6 5.6 20.5 4.5 20.7C3.9 20.8 4.1 19.6 4.1 17.2C4.1 15 4 13 4 11ZM13 6.4A4.6 4.6 0 1 0 13 15.6A4.6 4.6 0 1 0 13 6.4Z"/></svg>MAX</a>
+        </div>
+      </div>
+      <nav class="f-col" aria-label="Разделы сайта">
+        <h2>Разделы</h2>
+        <a href="./">Главная</a><a href="matches.html">Матчи</a><a href="./#table">Таблица</a>
+        <a href="squad.html">Состав</a><a href="news.html">Новости</a><a href="club.html">Клуб</a>
+      </nav>
+      <div class="f-col">
+        <h2>Связь</h2>
+        <a href="mailto:i@bikinews.ru">i@bikinews.ru</a>
+        <span>Для правообладателей и по любым вопросам</span>
+      </div>
+    </div>
+    <div class="f-bottom">
+      <span>© 2026 Быки News</span>
+      <a href="privacy.html">Политика конфиденциальности</a>
+      <p>Сайт не связан с ФК «Краснодар» и не является СМИ. Новости — пересказ публикаций со ссылкой на источник; права на материалы и символику клубов принадлежат их владельцам.</p>
     </div>
   </div>
 </footer>
