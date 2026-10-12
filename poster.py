@@ -61,12 +61,18 @@ def main():
     if any(str(g.get('id', '')).startswith('g') for g in gl):
         print('На сайте ещё старая версия glavnoe.json — пересказы пропускаю до обновления сайта')
         gl = [] if not first else gl
-    if not first and st.get('v') != 2:
-        # переход на постоянные номера новостей: всё, что уже на сайте, считаем опубликованным
-        st['posted'] = [g['id'] for g in gl if g['id'] not in ('n96ac17bf',)]; st['v'] = 2   # новость про «Факел» ещё не выходила
-        print('Обновление формата: отмечено как опубликованное —', len(gl))
+    NOT_YET = ('n99917600', 'n7ec4b5e3', 'n92feea3e')   # «Факел» сменил тренера, анонс матча, цифры клуба — ещё не выходили
+    if not first and st.get('v') != 3:
+        ids = [g['id'] for g in gl]
+        if not all(x in ids for x in NOT_YET):
+            print('На сайте ещё не залит свежий glavnoe.json — жду обновления сайта')
+            gl = []
+        else:
+            # переход на постоянные номера новостей: всё, что уже на сайте, считаем опубликованным, кроме трёх новых
+            st['posted'] = [i for i in ids if i not in NOT_YET]; st['v'] = 3
+            print('Обновление формата: отмечено как опубликованное —', len(st['posted']))
     elif first:
-        st['v'] = 2
+        st['v'] = 3
     if first:
         st['posted'] = [g['id'] for g in gl]
         print('Первый запуск: отмечено как уже опубликованное —', len(gl))
@@ -102,6 +108,9 @@ def main():
     st['digest'] = dict(list(st['digest'].items())[-20:])
     json.dump(st, open(STATE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
+
+if __name__ == '__main__':
+    main()
 
 if __name__ == '__main__':
     main()
