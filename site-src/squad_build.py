@@ -112,7 +112,7 @@ main.sq { display: block; padding-block: 8px 56px; }
 .lds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 24px; margin-top: 12px; }
 .ld h3 { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: var(--accent); margin: 0 0 8px; }
 .jr { --s: 36px; position: relative; display: inline-grid; place-items: center; width: var(--s); height: var(--s); flex: none; }
-.jr.big { --s: 50px; }
+.jr.big { --s: 64px; }
 .jr svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .jr svg path { fill: var(--turf); stroke: var(--signal); stroke-width: 1.6; stroke-linejoin: round; }
 .jr b { position: relative; font-family: var(--font-display); font-size: calc(var(--s) * .23); font-weight: 800; letter-spacing: -.05em; color: #fff; padding-top: calc(var(--s) * .16); line-height: 1; }
@@ -126,7 +126,7 @@ main.sq { display: block; padding-block: 8px 56px; }
 .grp { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4.5vw, 34px); margin: 36px 0 12px; display: flex; align-items: baseline; gap: 8px; }
 .grp span { font-family: var(--font-mono); font-size: 15px; color: var(--muted); }
 .pls { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
-.pl { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; align-items: start; scroll-margin-top: 120px; }
+.pl { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; align-items: start; scroll-margin-top: 120px; }
 .pl:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .pl-n { display: flex; justify-content: center; }
 .pl h3 { margin: 0; font-size: 16px; }
@@ -154,8 +154,8 @@ main.sq { display: block; padding-block: 8px 56px; }
 @media (max-width: 700px) {
   .lds { grid-template-columns: minmax(0, 1fr); }
   .pls { grid-template-columns: minmax(0, 1fr); }
-  .pl { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; }
-  .jr.big { --s: 40px; }
+  .pl { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+  .jr.big { --s: 52px; }
 }
 '''
 
