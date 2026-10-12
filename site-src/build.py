@@ -177,7 +177,7 @@ NEWS_JS = r'''
     return '<li><article class="np-item"><time class="mono">' + time + '</time><div class="np-body">' +
       '<div class="np-meta"><span class="src-name">' + esc(n.source) + '</span></div>' +
       '<h3><a href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.title) + ' <span class="ext">↗</span></a></h3>' +
-      (n.text ? '<p>' + esc(n.text) + '</p>' : '') + '</div></article></li>';
+      (n.text ? '<p>' + esc(String(n.text).replace(/(\S)(Читать (?:дальше|далее))/gi, '$1 $2')) + '</p>' : '') + '</div></article></li>';
   }
 
   function render() {
