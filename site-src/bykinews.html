@@ -268,7 +268,7 @@ nav.f-col h2 { grid-column: 1 / -1; grid-row: 1; }
 .f-bottom p { margin: 0; flex: 0 0 100%; font-size: 12px; opacity: .85; }
 @media (max-width: 700px) {
   .f-top { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  nav.f-col { grid-template-columns: repeat(2, max-content); grid-auto-flow: row; gap: 10px 56px; }
+  nav.f-col { grid-template-columns: repeat(3, max-content); grid-template-rows: auto repeat(2, auto); grid-auto-flow: column; gap: 10px 40px; }
 }
 
 @media (max-width: 900px) {
