@@ -98,7 +98,7 @@ TG_LINK = re.search(r'<a class="cta tg".*?</a>\s*<a class="mx".*?</a>', SRC, fla
 def nav_header(cur):
     items = [('./', 'Главная', ''), ('matches.html', 'Матчи', 'matches'), ('./#table', 'Таблица', ''), ('squad.html', 'Состав', 'squad'), ('news.html', 'Новости', 'news'), ('club.html', 'Клуб', 'club')]
     nav = '<nav class="nav" aria-label="Разделы">\n' + ''.join(
-        f'      <a href="{h}"' + (' aria-current="page"' if k == cur else '') + f'>{t}</a>\n' for h, t, k in items) + '      ' + TG_LINK + '\n    </nav>'
+        f'      <a href="{h}"' + (' class="home"' if t == 'Главная' else '') + (' aria-current="page"' if k == cur else '') + f'>{t}</a>\n' for h, t, k in items) + '      ' + TG_LINK + '\n    </nav>'
     return re.sub(r'<nav class="nav".*?</nav>', nav, HEADER_BASE, flags=re.S)
 header = nav_header('news')
 footer = SRC[SRC.index('<footer class="foot">'):SRC.index('</footer>') + len('</footer>')]
