@@ -68,15 +68,17 @@ def _stat(v, w):
 def _card(p):
     rg, rm, rgl, ra, ry, rr = p['rpl']; cg, cgl, ca, cy = p['cup']
     a = _age(p['bd'])
-    rows = ''
+    gk = p['pos'] == 'gk'
+    cols = ['Игры', 'Мин'] + ([] if gk else ['Голы']) + ['Пасы', 'ЖК'] + (['КК'] if rr else [])
+    def _row(lbl, cls, vals):
+        return f'<tr><th scope="row"><i class="{cls}">{lbl}</i></th>' + ''.join(f'<td>{v}</td>' for v in vals) + '</tr>'
+    body = ''
     if rg:
-        rows += ('<div class="pl-row"><i class="t-rpl">РПЛ</i>' + _stat(rg, _pl(rg, 'игра', 'игры', 'игр')) + _stat(rm, 'мин')
-                 + _stat(rgl, _pl(rgl, 'гол', 'гола', 'голов')) + _stat(ra, _pl(ra, 'пас', 'паса', 'пасов'))
-                 + (_stat(ry, 'ЖК') if ry else '') + (f'<span class="rc"><b>{rr}</b>КК</span>' if rr else '') + '</div>')
+        body += _row('РПЛ', 't-rpl', [rg, rm] + ([] if gk else [rgl]) + [ra, ry] + ([rr] if rr else []))
     if cg:
-        rows += ('<div class="pl-row"><i class="t-cup">Кубок</i>' + _stat(cg, _pl(cg, 'игра', 'игры', 'игр'))
-                 + _stat(cgl, _pl(cgl, 'гол', 'гола', 'голов')) + _stat(ca, _pl(ca, 'пас', 'паса', 'пасов'))
-                 + (_stat(cy, 'ЖК') if cy else '') + '</div>')
+        body += _row('Кубок', 't-cup', [cg, '—'] + ([] if gk else [cgl]) + [ca, cy] + (['—'] if rr else []))
+    rows = ('<table class="pl-t"><thead><tr><td></td>' + ''.join(f'<th scope="col">{c}</th>' for c in cols)
+            + '</tr></thead><tbody>' + body + '</tbody></table>')
     gl = _goals(p['g']) if p.get('g') else []
     det = ''
     if gl:
@@ -115,18 +117,22 @@ main.sq { display: block; padding-block: 8px 56px; }
 .ld li a:hover { color: var(--accent); }
 .ld li b { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
 .ld .none { color: var(--muted); font-size: 13px; }
-.grp { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin: 30px 0 10px; display: flex; align-items: baseline; gap: 8px; }
-.grp span { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.grp { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4.5vw, 34px); margin: 36px 0 12px; display: flex; align-items: baseline; gap: 8px; }
+.grp span { font-family: var(--font-mono); font-size: 15px; color: var(--muted); }
 .pls { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
 .pl { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; align-items: start; scroll-margin-top: 120px; }
 .pl:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .pl-n { font-family: var(--font-display); font-weight: 900; font-size: 28px; color: var(--accent); text-align: center; line-height: 1.1; }
 .pl h3 { margin: 0; font-size: 16px; }
 .pl-m { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
-.pl-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 11px; margin-top: 4px; font-size: 12px; color: var(--muted); }
-.pl-row b { color: var(--ink); font-size: 15px; margin-right: 3px; font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
-.pl-row .rc b { color: var(--loss); }
-.pl-row i { font-style: normal; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 4px; padding: 1px 5px; min-width: 46px; text-align: center; }
+.pl-t { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.pl-t thead th { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); text-align: center; padding: 0 0 3px; }
+.pl-t thead td { width: 52px; }
+.pl-t td, .pl-t thead th { padding-inline: 3px; }
+.pl-t tbody th { text-align: left; padding: 4px 0; }
+.pl-t td { text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; padding: 4px 0; }
+.pl-t tbody tr + tr { border-top: 1px solid var(--line); }
+.pl-t i { font-style: normal; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-radius: 4px; padding: 1px 5px; min-width: 46px; text-align: center; }
 .t-rpl { background: var(--accent-soft); color: var(--accent); }
 .t-cup { background: var(--signal); color: var(--on-signal); }
 .pl-g { margin-top: 8px; font-size: 13px; }
@@ -142,6 +148,8 @@ main.sq { display: block; padding-block: 8px 56px; }
 @media (max-width: 700px) {
   .lds { grid-template-columns: minmax(0, 1fr); }
   .pls { grid-template-columns: minmax(0, 1fr); }
+  .pl { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; }
+  .pl-n { font-size: 24px; }
 }
 '''
 
@@ -174,7 +182,8 @@ SQUAD_JS = r'''
 squad_main = f'''<main class="wrap sq" id="top">
   <div class="sq-head">
     <h1>Состав «Краснодара» 2026/27</h1>
-    <p>Все, кто выходил на поле в этом сезоне, — с цифрами отдельно по РПЛ и Кубку России. Главный тренер — {COACH}. Нажмите «Голы в сезоне», чтобы увидеть, когда и кому забивал игрок.</p>
+    <p>Игроки, которые выходили на поле в сезоне 2026/27. Статистика каждого приведена отдельно по РПЛ и Кубку России. Главный тренер — {COACH}.</p>
+    <p>Чтобы посмотреть голы игрока по матчам, откройте «Голы в сезоне» в его карточке.</p>
     <span class="sq-upd">Обновлено: {SQUAD_UPDATED}</span>
   </div>
   <section class="lead-box" aria-labelledby="ld-h">
