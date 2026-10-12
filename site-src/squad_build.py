@@ -204,7 +204,7 @@ squad_main = f'''<main class="wrap sq" id="top">
     <div class="lds" id="ldBox"></div>
   </section>
   {_groups}
-  <p class="sq-note">Статистика РПЛ — <a href="https://www.sports.ru/krasnodar/stat/" target="_blank" rel="noopener">Sports.ru</a>; Кубок — протоколы матчей на <a href="https://www.rfs.ru/" target="_blank" rel="noopener">сайте РФС</a>; даты рождения и гражданство — <a href="https://sportmail.ru/team/547/players/" target="_blank" rel="noopener">Спорт Mail</a>. В Кубке учитываются выходы на поле, голы, передачи и карточки в основное и дополнительное время, без серий пенальти.</p>
+  <p class="sq-note">Статистика: <a href="https://www.sports.ru/krasnodar/stat/" target="_blank" rel="noopener">Sports.ru</a> и протоколы <a href="https://www.rfs.ru/" target="_blank" rel="noopener">РФС</a>.</p>
 </main>
 '''
 squad_page = (head('Состав «Краснодара» 2026/27 — Быки News', 'Состав ФК «Краснодар» в сезоне 2026/27: номера, возраст и статистика каждого игрока в РПЛ и Кубке России — игры, голы, передачи.', 'squad.html')
