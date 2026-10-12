@@ -2,7 +2,7 @@
 # Выполняется из build.py после сборки остальных страниц: доступны head, nav_header, footer, SRC, style_end, OUT.
 
 # ===== НАСТРОЙКИ (заполнить, когда появятся коды) =====
-GA_ID = ''            # Google Analytics 4, вид 'G-XXXXXXXXXX'; пусто — аналитика не подключается
+GA_ID = 'G-1XQFQXP4DG'          # Google Analytics 4, вид 'G-XXXXXXXXXX'; пусто — аналитика не подключается
 GOOGLE_VERIFY = ''    # Google Search Console: значение content из <meta name="google-site-verification" ...>
 YANDEX_VERIFY = ''    # Яндекс.Вебмастер: значение content из <meta name="yandex-verification" ...>
 POLICY_DATE = '12 октября 2026 г.'
