@@ -1,0 +1,758 @@
+<title>Быки News</title>
+<style>
+@font-face { font-family: "Unbounded"; src: url("fonts/Unbounded.woff") format("woff"); font-weight: 200 900; font-display: swap; }
+@font-face { font-family: "Golos Text"; src: url("fonts/GolosText.woff") format("woff"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono.woff") format("woff"); font-weight: 100 800; font-display: swap; }
+
+/* Layout: «газон» с разметкой поля — превью ближайшего матча + карточка; ниже матчи (ближайшие / сыгранные), таблица РПЛ, бомбардиры, новости, видео */
+:root {
+  --bg: #F2F5F1; --surface: #FFFFFF; --ink: #111915; --muted: #56645B; --line: #D5DCD4; --soft: #E8EDE7;
+  --accent: #1D6A42; --accent-soft: #DCEBE1;
+  --turf: #0F3B25; --turf-2: #164C31; --on-turf: #EDF5EF; --on-turf-muted: #A9C4B2;
+  --signal: #E3AE1C; --on-signal: #1A1405;
+  --loss: #8A2B0E;
+  --thumb-a: #1B2A22; --thumb-b: #2C4135;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "Golos Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C120F; --surface: #131B17; --ink: #E6ECE7; --muted: #93A399; --line: #24312A; --soft: #1A241F;
+    --accent: #55B983; --accent-soft: #183526;
+    --turf: #0F3622; --turf-2: #15462D; --on-turf: #EDF5EF; --on-turf-muted: #A3C0AD;
+    --signal: #EDBE3E; --on-signal: #1A1405; --loss: #F08A5D;
+    --thumb-a: #18241E; --thumb-b: #24362C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C120F; --surface: #131B17; --ink: #E6ECE7; --muted: #93A399; --line: #24312A; --soft: #1A241F;
+  --accent: #55B983; --accent-soft: #183526;
+  --turf: #0F3622; --turf-2: #15462D; --on-turf: #EDF5EF; --on-turf-muted: #A3C0AD;
+  --signal: #EDBE3E; --on-signal: #1A1405; --loss: #F08A5D;
+  --thumb-a: #18241E; --thumb-b: #24362C;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1180px; margin-inline: auto; padding-inline: 20px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+
+/* header */
+.site-head { background: var(--turf); color: var(--on-turf); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; }
+.site-head .wrap { display: flex; align-items: center; gap: 24px; min-height: 64px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo img { height: 44px; width: auto; flex: none; display: block; }
+.logo b { font-family: var(--font-display); font-weight: 900; font-size: 19px; }
+.logo span { font-family: var(--font-mono); font-size: 11px; color: var(--on-turf-muted); display: block; line-height: 1; margin-top: 3px; }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+.nav a { text-decoration: none; font-weight: 600; font-size: 15px; padding: 8px 12px; border-radius: 999px; color: var(--on-turf); }
+.nav a:hover { background: var(--turf-2); }
+.nav a.cta { background: var(--signal); color: var(--on-signal); }
+.nav a.tg { display: inline-flex; align-items: center; gap: 6px; }
+.nav a.tg svg { width: 16px; height: 16px; fill: currentColor; }
+.nav a.mx { border: 1.5px solid var(--signal); color: var(--signal); font-weight: 700; padding: 6.5px 12px; }
+.nav a.mx:hover { background: var(--signal); color: var(--on-signal); }
+.nav a.tg:hover { background: var(--signal); filter: brightness(1.08); }
+
+/* hero */
+.hero { background: var(--turf); color: var(--on-turf); position: relative; overflow: hidden; }
+.pitch { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pitch * { fill: none; stroke: var(--on-turf); stroke-opacity: .11; stroke-width: 2; }
+.hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; padding-block: 44px 52px; align-items: end; }
+.lead .eyebrow { color: var(--signal); display: inline-flex; gap: 10px; align-items: center; }
+.lead .eyebrow i { width: 28px; height: 2px; background: var(--signal); display: inline-block; }
+.lead h1 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 4.8vw, 56px); line-height: 1.05; letter-spacing: -.015em; margin-top: 16px; }
+.lead h1 em { font-style: normal; color: var(--signal); }
+.lead p { color: var(--on-turf-muted); font-size: 18px; max-width: 58ch; margin: 18px 0 0; }
+.facts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+.fact { border: 1px solid rgba(237,245,239,.22); border-radius: 10px; padding: 8px 12px; font-size: 13px; color: var(--on-turf-muted); }
+.fact b { display: block; font-family: var(--font-display); font-size: 18px; color: var(--on-turf); font-weight: 700; }
+
+.match { background: var(--surface); color: var(--ink); border-radius: 14px; padding: 22px; box-shadow: 0 20px 50px -24px rgba(0,0,0,.55); min-width: 0; }
+.match-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--muted); }
+.teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; margin: 20px 0 16px; text-align: center; }
+.teams .name { font-weight: 700; font-size: 15px; line-height: 1.2; margin-top: 8px; }
+.teams .pos { font-size: 12px; color: var(--muted); }
+.kick { font-family: var(--font-display); font-weight: 700; font-size: 26px; }
+.kick small { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+.countdown { background: var(--soft); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.countdown b { color: var(--accent); }
+.last { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; flex-wrap: wrap; }
+.lastm { display: inline-flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 0; }
+.lastm b { min-width: 0; }
+.lastl { flex-basis: 100%; color: var(--muted); font-size: 12px; margin-bottom: -4px; }
+.pair { display: inline-flex; gap: 3px; flex: none; }
+.last .score { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+
+/* club badge (placeholder for real logo) */
+.club { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; flex: none; overflow: hidden;
+  background: var(--soft); color: var(--muted); font-family: var(--font-mono); font-weight: 700; font-size: 8.5px; letter-spacing: .02em; border: 1px solid var(--line); }
+.club img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.club.has-logo { background: transparent; border-color: transparent; border-radius: 0; }
+.club.big { width: 56px; height: 56px; font-size: 14px; margin-inline: auto; }
+.club.us { background: var(--turf); color: var(--signal); border-color: var(--turf); }
+.club.us.has-logo { background: transparent; border-color: transparent; }
+
+/* results chips: letter carries meaning, colour only supports it */
+.res { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; flex: none; }
+.res.w { background: var(--accent); color: var(--surface); }
+.res.d { background: var(--signal); color: var(--on-signal); }
+.res.l { background: #C62828; color: #fff; }
+:root[data-theme="dark"] .res.l { background: #D9473F; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .res.l { background: #D9473F; } }
+
+/* sections */
+main { padding-block: 52px 72px; display: grid; gap: 64px; }
+.tgbar { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; }
+.tgbar:hover { border-color: var(--accent); }
+.tgi { width: 44px; height: 44px; border-radius: 50%; background: var(--turf); display: grid; place-items: center; }
+.tgi svg { width: 22px; height: 22px; fill: var(--signal); }
+.tgt b { display: block; font-size: 16px; }
+.tgt small { color: var(--muted); font-size: 13px; line-height: 1.35; display: block; }
+.tgb { background: var(--signal); color: var(--on-signal); font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 999px; white-space: nowrap; }
+@media (max-width: 520px) { .tgbar { grid-template-columns: 40px minmax(0, 1fr); } .tgi { width: 40px; height: 40px; } .tgb { grid-column: 1 / -1; text-align: center; } }
+.sec-head { display: flex; align-items: end; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.sec-head h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 3vw, 30px); letter-spacing: -.01em; }
+.sec-head .src { color: var(--muted); font-size: 13px; }
+.allnews { color: var(--accent); font-weight: 600; font-size: 14px; text-decoration: none; }
+.allnews:hover { text-decoration: underline; text-underline-offset: 3px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+.two > * { min-width: 0; }
+.two-wide { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+.sub { font-family: var(--font-display); font-weight: 700; font-size: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.form { display: inline-flex; gap: 4px; align-items: center; font-family: var(--font-body); font-weight: 500; font-size: 13px; color: var(--muted); }
+
+.fx { list-style: none; margin: 0; padding: 0; }
+.fx li { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line); }
+.fx li:last-child { border-bottom: 1px solid var(--line); }
+.fx .d { font-size: 13px; color: var(--muted); line-height: 1.25; }
+.fx .d b { display: block; color: var(--ink); font-size: 14px; }
+.fx .opp { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.fx .opp div { min-width: 0; }
+.fx .opp b { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx .opp small { color: var(--muted); font-size: 12px; }
+.fx .r { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+.fx .t { font-family: var(--font-mono); font-size: 14px; color: var(--ink); }
+.fx .t.tbd { color: var(--muted); font-size: 12px; font-family: var(--font-body); }
+.fx li.next { background: var(--accent-soft); border-radius: 8px; border-top-color: transparent; padding-inline: 8px; margin-inline: -8px; }
+.fx li.next + li { border-top-color: transparent; }
+.fx li.go { cursor: pointer; }
+.fx li.go:hover .opp b { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+.more { margin-top: 12px; font: 600 14px var(--font-body); color: var(--accent); background: none; border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.more:hover { border-color: var(--accent); }
+
+
+/* live feed */
+.news-area { align-items: start; }
+#live { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 80px); }
+.live { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.live li { position: relative; padding: 0 0 18px 18px; }
+.live li::before { content: ""; position: absolute; left: -6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.live li:first-child::before { background: var(--accent); }
+.live a { display: grid; gap: 4px; text-decoration: none; color: inherit; }
+.live .lt { font-size: 12px; color: var(--muted); }
+.live .lt b { color: var(--accent); font-weight: 700; }
+.live .lh { font-weight: 700; font-size: 15px; line-height: 1.35; }
+.live a:hover .lh { color: var(--accent); text-decoration: underline; }
+.live .ls { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.live-note { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+
+/* table */
+.st a.tn { color: inherit; text-decoration: none; }
+.st a.tn:hover { text-decoration: underline; text-underline-offset: 3px; }
+.st a.tn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table.st { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 520px; }
+.st th { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; text-align: center; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+.st th.l, .st td.l { text-align: left; }
+.st td { padding: 8px; text-align: center; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.st tr:last-child td { border-bottom: 0; }
+.st td.pos { width: 44px; font-family: var(--font-mono); font-weight: 700; position: relative; }
+.st td.team { font-weight: 600; white-space: nowrap; }
+.st td.team .tn { display: flex; align-items: center; gap: 10px; }
+.st td.pts { font-family: var(--font-display); font-weight: 700; }
+.st tr.us td { background: var(--accent-soft); }
+.st tr.us td.team { color: var(--accent); }
+.st tr.zone-po td.pos::before, .st tr.zone-rel td.pos::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; border-radius: 2px; }
+.st tr.zone-po td.pos::before { background: var(--signal); }
+.st tr.zone-rel td.pos::before { background: repeating-linear-gradient(180deg, var(--loss) 0 3px, transparent 3px 6px); }
+.st tr.cut td { border-top: 2px dashed var(--line); }
+.legend { display: flex; gap: 8px 20px; flex-wrap: wrap; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 4px; height: 16px; border-radius: 2px; display: inline-block; }
+@media (max-width: 640px) { .st .opt { display: none; } table.st { min-width: 0; } }
+.st td.team { white-space: normal; }
+.st td.team .tn { min-width: 0; }
+
+/* scorers */
+.scorers { display: grid; gap: 14px; }
+.sc { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.sc .rk { font-family: var(--font-display); font-weight: 900; font-size: 22px; color: var(--accent); text-align: center; }
+.sc h3 { font-size: 17px; font-weight: 700; }
+.inj { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--loss); border: 1.5px dashed var(--loss); border-radius: 4px; padding: 1px 5px; vertical-align: 2px; margin-left: 4px; }
+.sc .meta { color: var(--muted); font-size: 13px; }
+.bar { height: 8px; border-radius: 4px; background: var(--soft); margin-top: 8px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.sc .g { text-align: right; }
+.sc .g b { font-family: var(--font-display); font-weight: 900; font-size: 30px; line-height: 1; display: block; }
+.sc .g small { color: var(--muted); font-size: 12px; }
+.note { color: var(--muted); font-size: 13px; margin-top: 10px; }
+
+/* news */
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { border-top: 1px solid var(--line); }
+.feed li:last-child { border-bottom: 1px solid var(--line); }
+.feed article { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 18px; padding: 20px 0; }
+.feed time { color: var(--muted); font-size: 13px; line-height: 1.4; padding-top: 2px; }
+.feed .nb { min-width: 0; display: grid; gap: 8px; justify-items: start; }
+.feed .tag { margin-top: 0; }
+.feed h3 { font-size: 19px; font-weight: 700; line-height: 1.3; }
+.feed p { margin: 0; color: var(--ink); font-size: 16px; line-height: 1.6; max-width: 68ch; }
+.feed p + p { color: var(--muted); }
+.feed .msep { display: none; }
+.feed .src { font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+.feed .src:hover { border-bottom-width: 2px; }
+.tag { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+
+/* video */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font: 600 14px var(--font-body); padding: 8px 14px; border-radius: 999px; cursor: pointer; border: 1.5px solid var(--line); background: transparent; color: var(--ink); }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px 20px; }
+.vcard { text-decoration: none; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.thumb { aspect-ratio: 16 / 9; max-width: 100%; border-radius: 10px; position: relative; overflow: hidden; background: var(--thumb-a); }
+.thumb::before { content: ""; position: absolute; inset: 0; }
+.t-tunnel::before { background: repeating-linear-gradient(90deg, transparent 0 38px, rgba(237,245,239,.06) 38px 40px), radial-gradient(ellipse at 50% 120%, var(--turf-2) 0 45%, transparent 46%), linear-gradient(180deg, var(--thumb-b), var(--thumb-a)); }
+.t-press::before { background: repeating-linear-gradient(135deg, var(--thumb-b) 0 14px, var(--thumb-a) 14px 28px); }
+.t-pitch::before { background: linear-gradient(90deg, transparent 49.6%, rgba(237,245,239,.25) 49.6% 50.4%, transparent 50.4%), radial-gradient(circle at 50% 50%, transparent 0 20%, rgba(237,245,239,.25) 20% 21%, transparent 21%), repeating-linear-gradient(90deg, var(--turf) 0 10%, var(--turf-2) 10% 20%); }
+.t-stand::before { background: repeating-linear-gradient(0deg, var(--thumb-a) 0 9px, var(--thumb-b) 9px 12px); }
+.play { position: absolute; left: 14px; bottom: 14px; width: 44px; height: 44px; border-radius: 50%; background: var(--signal); display: grid; place-items: center; transition: transform .2s ease; }
+.play svg { width: 16px; height: 16px; margin-left: 3px; fill: var(--on-signal); }
+.vcard:hover .play { transform: scale(1.08); }
+.dur { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.72); color: #fff; font-size: 12px; padding: 3px 7px; border-radius: 4px; }
+.vlabel { position: absolute; left: 12px; top: 12px; font-size: 10px; color: #EDF5EF; opacity: .85; }
+.vcard h3 { font-size: 16px; font-weight: 700; line-height: 1.35; }
+.vcard:hover h3 { color: var(--accent); }
+.vcard .vmeta { color: var(--muted); font-size: 13px; }
+
+.foot { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--muted); font-size: 14px; }
+.foot .wrap { display: flex; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; }
+.foot p { margin: 0; max-width: 64ch; }
+.foot .wrap > p + p { flex-basis: 100%; order: 3; font-size: 13px; }
+.foot .contact { display: grid; gap: 6px; }
+.foot a { color: var(--accent); }
+
+@media (max-width: 900px) {
+  #live { position: static; }
+  .hero-grid, .two, .two-wide { grid-template-columns: minmax(0, 1fr); }
+  .hero-grid { gap: 28px; padding-block: 32px 36px; }
+  .nav { margin-left: 0; }
+}
+@media (max-width: 560px) {
+  .wrap { padding-inline: 16px; }
+  .site-head .wrap { gap: 8px 16px; padding-block: 10px; }
+  .nav a { padding: 6px 10px; font-size: 14px; }
+  .lead p { font-size: 16px; }
+  .feed article { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .feed time br { display: none; }
+  .feed .msep { display: inline; }
+  .fx li { grid-template-columns: 46px minmax(0, 1fr) auto; gap: 8px; }
+  .fx .opp { gap: 8px; }
+  .fx .pair .club { width: 22px; height: 22px; }
+  .fx .opp b { white-space: normal; overflow: visible; font-size: 15px; line-height: 1.3; }
+  .fx .r { gap: 6px; }
+  .fx .t.tbd { max-width: 70px; text-align: right; line-height: 1.25; }
+  .teams .pos { font-size: 11px; }
+  .lastm { font-size: 14px; }
+  .st td, .st th { padding-inline: 6px; }
+  .st td.pos { width: 34px; }
+  .st td.team .club { width: 22px; height: 22px; }
+  .sc { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
+  .sc .rk { font-size: 20px; }
+  .sc .g b { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (max-width: 440px) { .site-head .nav { gap: 0; } .site-head .nav a { padding: 7px 7px; font-size: 14px; } .site-head .nav a.tg svg { display: none; } .site-head .nav a.mx { padding: 5.5px 7px; margin-left: 4px; } .site-head .nav a.tg { margin-left: 4px; } }
+</style>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Быки News — на главную">
+      <img src="data:image/png;base64,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" alt="" width="49" height="44">
+      <div><b>БЫКИ NEWS</b></div>
+    </a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="matches.html">Матчи</a>
+      <a href="#table">Таблица</a>
+      <a href="news.html">Новости</a>
+      <a class="cta tg" href="https://t.me/bikinews" target="_blank" rel="noopener" aria-label="Наш канал в Telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 3.2 2.9 10.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5zM8.9 13.2l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7.1-.3 3.3-1.8-4.7z"/></svg>Telegram</a>
+      <a class="mx" href="https://max.ru/channel_bikinews" target="_blank" rel="noopener" aria-label="Наш канал в MAX">MAX</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <svg class="pitch" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect x="40" y="30" width="1120" height="460"/><line x1="600" y1="30" x2="600" y2="490"/>
+    <circle cx="600" cy="260" r="96"/><circle cx="600" cy="260" r="4"/>
+    <rect x="40" y="150" width="150" height="220"/><rect x="1010" y="150" width="150" height="220"/>
+    <path d="M190 210a62 62 0 0 1 0 100"/><path d="M1010 210a62 62 0 0 0 0 100"/>
+  </svg>
+  <div class="wrap hero-grid">
+    <article class="lead">
+      <div class="eyebrow"><i></i>РПЛ · 10 тур · Итог</div>
+      <h1>«Краснодар» — «Зенит» 2:3: <em>камбэка не хватило</em></h1>
+      <p>Быки проиграли впервые в сезоне: к перерыву «Зенит» вёл 2:0 после дубля Глушенкова, Соболев сделал 3:0, но Батчи и Кордоба вернули интригу. В концовке Тормена получил красную карточку, а гол Батчи на 77-й минуте отменили из-за офсайда. «Зенит» обошёл «Краснодар» по дополнительным показателям.</p>
+      <div class="facts">
+        <div class="fact"><b class="mono">21</b>очко за 10 туров</div>
+        <div class="fact"><b class="mono">6–3–1</b>победы, ничьи, поражения</div>
+        <div class="fact"><b class="mono">4</b>место, отставание от лидера — «Динамо» — 1 очко</div>
+      </div>
+    </article>
+
+    <aside class="match" aria-labelledby="match-title">
+      <div class="match-top"><span class="eyebrow" id="match-title">Ближайший матч</span><span class="mono" style="font-size:13px">Кубок России</span></div>
+      <div class="teams">
+        <div><span class="club big us" data-logo="krasnodar">КРД</span><div class="name">Краснодар</div><div class="pos">4 место в РПЛ</div></div>
+        <div class="kick mono">20:45<small>вт, 13 окт</small></div>
+        <div><span class="club big" data-logo="fakel">ФАК</span><div class="name">Факел</div><div class="pos">16 место в РПЛ</div></div>
+      </div>
+      <div class="countdown"><span>Дома, Краснодар</span><span id="cdwrap">до матча <b id="cd">3 дня</b></span></div>
+      <div class="last">
+        <span class="lastl">Прошлый матч · РПЛ, 10 тур</span><span class="lastm"><span class="club us" data-logo="krasnodar">КРД</span><b>Краснодар — Зенит</b><span class="club" data-logo="zenit">ЗЕН</span></span>
+        <span style="display:flex;gap:8px;align-items:center"><span class="score mono">2:3</span><span class="res l" title="Поражение">П</span></span>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<main class="wrap">
+  <a class="tgbar" href="https://t.me/bikinews" target="_blank" rel="noopener">
+    <span class="tgi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21.6 3.2 2.9 10.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5zM8.9 13.2l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7.1-.3 3.3-1.8-4.7z"/></svg></span>
+    <span class="tgt"><b>Мы в Telegram и MAX</b><small>Главные новости о «Краснодаре», итоги матчей и дайджест прессы дважды в день · в MAX: <span class="u">channel_bikinews</span></small></span>
+    <span class="tgb">Подписаться</span>
+  </a>
+
+  <section id="matches" aria-labelledby="m-h">
+    <div class="sec-head"><h2 id="m-h">Матчи сезона 2026/27</h2><a class="src allnews" href="matches.html">Все матчи и статистика →</a></div>
+    <div class="two">
+      <div>
+        <div class="sub">Ближайшие</div>
+        <ul class="fx" id="upcoming"></ul>
+      </div>
+      <div>
+        <div class="sub">Сыгранные <span class="form" id="form" aria-label="Форма в последних пяти турах РПЛ"></span></div>
+        <ul class="fx" id="played"></ul>
+        <button class="more" id="more" type="button" aria-expanded="false">Показать все матчи</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="two two-wide">
+    <section id="table" aria-labelledby="t-h">
+      <div class="sec-head"><h2 id="t-h">Таблица РПЛ</h2><span class="src">после 10 тура · при равенстве очков выше команда с большим числом побед</span></div>
+      <div class="tbl-wrap">
+        <table class="st">
+          <thead><tr><th>#</th><th class="l">Команда</th><th>И</th><th class="opt">В</th><th class="opt">Н</th><th class="opt">П</th><th>Мячи</th><th>О</th></tr></thead>
+          <tbody id="standings"></tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--signal)"></i>13–14: стыковые матчи</span>
+        <span><i style="background:repeating-linear-gradient(180deg,var(--loss) 0 3px,transparent 3px 6px)"></i>15–16: зона вылета</span>
+      </div>
+    </section>
+
+    <section id="scorers" aria-labelledby="s-h">
+      <div class="sec-head"><h2 id="s-h">Бомбардиры</h2><span class="src">РПЛ</span></div>
+      <div class="scorers" id="scorer-list"></div>
+    </section>
+  </div>
+
+  <div class="two two-wide news-area">
+  <section id="news" aria-labelledby="n-h">
+      <div class="sec-head"><h2 id="n-h">Главное</h2><a class="src allnews" href="news.html">Все новости →</a></div>
+      <ul class="feed">
+        <li><article>
+          <time class="mono">12 окт<span class="msep"> · </span><br>09:00</time>
+          <div class="nb"><span class="tag">Кубок</span><h3>Анонс: «Краснодар» — «Факел», вторник, 20:45</h3><p>Уже завтра Быки принимают «Факел» в четвёртом туре группы B Кубка России на «Ozon Арене». В этом сезоне команды встречались дважды: в чемпионате «Краснодар» выиграл дома 3:2, а в Кубке в Воронеже сыграли 1:1 и Быки взяли серию пенальти 4:3.</p><p>Соперник приезжает в кризисе: воронежцы 28 матчей подряд не побеждают в РПЛ, после разгрома от «Локомотива» 0:5 клуб расстался с Олегом Василенко, и команду поведёт исполняющий обязанности Алексей Ребко. Для «Краснодара» это шанс прервать серию из четырёх матчей без побед в основное время перед выездом к «Локомотиву» 17 октября.</p><a class="src" href="https://metaratings.ru/news/rebko-fakel-krasnodar-13-oktyabrya-2026-661179/" target="_blank" rel="noopener">Источник: Metaratings, календарь матчей Быки News ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт</time>
+          <div class="nb"><span class="tag">Клуб</span><h3>Цифры после «Зенита»: 500-й пропущенный мяч и юбилей Мусаева</h3><p>Клуб подвёл статистику субботнего матча. Второй гол «Зенита» стал 500-м, который «Краснодар» пропустил в РПЛ за всю историю. Личные встречи с петербуржцами остаются тяжёлыми: в 32 официальных матчах у Быков 4 победы, 8 ничьих и 20 поражений.</p><p>Есть и приятные цифры: Джон Кордоба забил 66-й мяч в РПЛ, его «гол+пас» за клуб — 112. Жоау Батчи впервые в карьере забил «Зениту» и поднялся на 16-е место среди лучших бомбардиров клуба. Мурад Мусаев провёл 170-й матч в РПЛ во главе «Краснодара» — на его счету 95 побед и ровно 300 забитых мячей. А 21 очко после 10 туров — меньше, чем в двух прошлых сезонах (по 24), но больше, чем годом ранее (20).</p><a class="src" href="https://fckrasnodar.ru/team/news/object/?object_id=154211" target="_blank" rel="noopener">Источник: официальный сайт ФК «Краснодар» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>21:31</time>
+          <div class="nb"><span class="tag">РПЛ</span><h3>«Динамо» обыграло «Рубин» — «Краснодар» после 10 тура четвёртый</h3><p>Московское «Динамо» выиграло в Казани 1:0: единственный мяч на 30-й минуте в свои ворота срезал защитник «Рубина» Жахонгир Урозов. Матч получился нервным — на 37-й минуте удалили Илью Самошникова из «Рубина», на 83-й красную получил Рубенс из «Динамо».</p><p>Итог тура для Быков неприятный: «Динамо» и ЦСКА набрали по 22 очка, у «Зенита» и «Краснодара» по 21. По числу побед «Краснодар» замыкает четвёрку, но отставание от первого места — всего одно очко. Следующий шанс подняться — 17 октября в гостях у «Локомотива».</p><a class="src" href="https://lenta.ru/news/2026/10/11/dinamo-stalo-liderom-rpl/" target="_blank" rel="noopener">Источник: Лента.ру ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>18:52</time>
+          <div class="nb"><span class="tag">РПЛ</span><h3>Глава РПЛ Алаев: «Краснодар» показал характер</h3><p>Президент лиги Александр Алаев назвал матч «Краснодар» — «Зенит» ярким и эмоциональным. По его словам, «Зенит» был объективно сильнее и, казалось, решил все вопросы уже к началу второго тайма.</p><p>Но Быки, отметил Алаев, показали характер и переломили ход игры — до ничьей им не хватило совсем немного.</p><a class="src" href="https://www.euro-football.ru/article/29/1006367147_prezident_rpl_prokommentiroval_rezultat_matcha_zenit__krasnodar" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на Metaratings ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>18:33</time>
+          <div class="nb"><span class="tag">РПЛ</span><h3>ЦСКА разгромил «Родину» и возглавил таблицу — «Краснодар» третий</h3><p>ЦСКА дома обыграл «Родину» 3:0: Данил Круговой открыл счёт на 24-й минуте, Иван Обляков забил на 35-й и 80-й. С 22 очками армейцы вышли на первое место.</p><p>«Краснодар» с 21 очком опустился на третью строчку — за «Зенит», у которого столько же очков. Вечером в Казани играют «Рубин» и московское «Динамо»: при победе динамовцы тоже наберут 22 очка и обойдут Быков.</p><a class="src" href="https://lenta.ru/news/2026/10/11/tsska-stal-liderom-rpl/" target="_blank" rel="noopener">Источник: Лента.ру ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт</time>
+          <div class="nb"><span class="tag">Матч</span><h3>Статистика матча с «Зенитом»: по xG Быки должны были выигрывать</h3><p>Клуб опубликовал цифры субботней игры. По ожидаемым голам «Краснодар» заметно превзошёл соперника — 2,29 против 1,08, владел мячом 55% времени и пасовал точнее (84% против 81%). При этом в створ «Зенит» ударил больше — 7 раз против 6, и трижды забил.</p><p>Лучшим по передачам стал Дуглас Аугусто — 56 точных, из них 30 вперёд и 18 в финальную треть. Жубал сделал 11 перехватов и выиграл 11 единоборств, Джон Кордоба 6 раз бил по воротам, трижды в створ, и забил второй мяч.</p><a class="src" href="https://fckrasnodar.ru/team/news/object/?object_id=154215" target="_blank" rel="noopener">Источник: официальный сайт ФК «Краснодар» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>15:03</time>
+          <div class="nb"><span class="tag">Мнение</span><h3>Пономарёв: «Краснодару» нужны коренные изменения</h3><p>Бывший футболист Владимир Пономарёв считает, что после поражения от «Зенита» команда Мусаева оказалась на распутье. По его мнению, без серьёзных перемен в игре «Краснодар» рискует откатиться на третье-четвёртое место.</p><p>Напомним, сезон Быки начали с шести побед подряд, а затем сыграли три ничьи и проиграли «Зениту». Сейчас у «Краснодара» 21 очко и второе место — столько же у лидирующего «Зенита».</p><a class="src" href="https://www.euro-football.ru/article/29/1006365929_ponomarev_predupredil_krasnodar_s_takoy_igroy_oni_ukatyatsya" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на «РИА Новости» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>14:01</time>
+          <div class="nb"><span class="tag">Состав</span><h3>Агкацев о голе Соболева: «Сам не понял, как мяч залетел»</h3><p>Вратарь «Краснодара» Станислав Агкацев взял на себя третий пропущенный мяч. По его словам, удар Соболева не был особенно сложным: голкипер стоял не на линии, пытался отбить, но неудачно сыграл по мячу.</p><p>Агкацев признал, что этот мяч он должен был отражать. Этот гол сразу после перерыва сделал счёт 0:3 — после него Быки отыграли два мяча, но на ничью времени не хватило.</p><a class="src" href="https://www.euro-football.ru/article/29/1006365441_agkacev_-_o_gole_soboleva_sam_ne_ponyal_kak_myach_zaletel_v_vorota" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на «Спорт-Экспресс» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>13:35</time>
+          <div class="nb"><span class="tag">Кубок</span><h3>«Факел» сменил тренера за два дня до матча с Быками</h3><p>Соперник «Краснодара» по Кубку России расстался с главным тренером Олегом Василенко по обоюдному согласию. Последней каплей стал домашний разгром от «Локомотива» 0:5 — воронежцы не побеждают в чемпионате уже 28 матчей подряд, это повторение антирекорда лиги.</p><p>Во вторник в Краснодаре команду поведёт исполняющий обязанности Алексей Ребко — 40-летний экс-игрок сборной России, который с 2023 года работал в «Факеле» ассистентом, а с 2024-го возглавлял молодёжку. Матч группы B начнётся 13 октября в 20:45 на «Ozon Арене».</p><a class="src" href="https://metaratings.ru/news/rebko-fakel-krasnodar-13-oktyabrya-2026-661179/" target="_blank" rel="noopener">Источник: Metaratings ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>12:07</time>
+          <div class="nb"><span class="tag">Клуб</span><h3>Кривцов в шутку: «Я три года выгонял Сперцяна из команды»</h3><p>Никита Кривцов на YouTube-канале Fonbet с юмором вспомнил уход бывшего капитана Эдуарда Сперцяна в саудовский «Аль-Ахли». По словам полузащитника, он годами подтрунивал над партнёром, что тому пора уступить место другим.</p><p>В том же разговоре Кривцов высказался и о капитанской повязке Кордобы — по его мнению, капитаном «Краснодара» должен быть российский игрок.</p><a class="src" href="https://www.euro-football.ru/article/29/1006365312_krivcov_ya_tri_goda_vyigonyal_spercyana_iz_komandyi" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на YouTube-канал Fonbet ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>10:46</time>
+          <div class="nb"><span class="tag">Состав</span><h3>Оздоев: «Тяжело играть вдесятером. Были шансы сравнять»</h3><p>Полузащитник «Краснодара» Магомед Оздоев назвал главной неприятностью субботнего матча само поражение от «Зенита». По его словам, после удаления Тормены команде было очень тяжело, но моменты, чтобы сравнять счёт, у Быков всё равно были.</p><p>Отчаиваться Оздоев не призывает: амбиции у команды есть всегда, а чемпионат только начался. Следующий шанс исправиться в РПЛ — 17 октября на выезде против «Локомотива».</p><a class="src" href="https://www.euro-football.ru/article/29/1006364716_ozdoev_podvel_itogi_matcha_krasnodar_-_zenit" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на «Чемпионат» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>04:40</time>
+          <div class="nb"><span class="tag">Клуб</span><h3>Кривцов о повязке Кордобы: «В русской команде должен быть русский капитан»</h3><p>Травмированный полузащитник Никита Кривцов, который начинал сезон капитаном «Краснодара», в интервью FONtour высказался о том, что в матче с «Зенитом» повязку надел Джон Кордоба. Кривцов подчеркнул, что не ставит под сомнение ни игровые, ни человеческие качества колумбийца, но считает, что капитаном должен быть российский футболист — например, Станислав Агкацев, которого он назвал одним из лидеров команды.</p><p>Сам Кривцов получил серьёзную травму в кубковом матче с московским «Динамо». Мусаев после игры с «Зенитом» говорил, что вернуться он сможет, скорее всего, в январе.</p><a class="src" href="https://www.euro-football.ru/article/29/1006363631_krivcov_nazval_strannyim_reshenie_doverit_kapitanskuyu_povyazku_kordobe" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на FONtour ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">11 окт<span class="msep"> · </span><br>00:26</time>
+          <div class="nb"><span class="tag">Матч</span><h3>Соболев после победы в Краснодаре: «Спектакль окончен!»</h3><p>Нападающий «Зенита» Александр Соболев, забивший третий мяч в ворота Станислава Агкацева, отреагировал на победу коротким постом в соцсетях: «Спектакль окончен!».</p><p>Перед игрой именно Соболев вместе с Игорем Дивеевым подшучивал в сборной над вратарём Быков, что тот переживает из-за матча 10 тура. Других комментариев нападающий не дал.</p><a class="src" href="https://russian.rt.com/sport/news/1693227-sobolev-krasnodar-futbol-match" target="_blank" rel="noopener">Источник: RT со ссылкой на соцсети Александра Соболева ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт<span class="msep"> · </span><br>23:25</time>
+          <div class="nb"><span class="tag">Мнение</span><h3>Смолов: красную Тормене можно было не показывать</h3><p>Бывший нападающий «Краснодара» Фёдор Смолов считает, что удаление Витора Тормены решило исход концовки. Формально, признал Смолов, у арбитра были основания для красной карточки из-за высоко поднятых шипов, но сам эпизод он грубым не считает.</p><p>Без удаления, по его мнению, интрига сохранилась бы и Быки могли бы отыграть очко. Сам матч Смолов назвал классным.</p><a class="src" href="https://www.euro-football.ru/article/29/1006362212_smolov_mojno_byilo_ne_davat_krasnuyu_kartochku_tormene_sohranit_intrigu" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на соцсети Фёдора Смолова ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт<span class="msep"> · </span><br>22:34</time>
+          <div class="nb"><span class="tag">Клуб</span><h3>Мусаев: «Нельзя так в первом тайме играть»</h3><p>Главный тренер назвал поражение от «Зенита» болезненным и признал, что первый тайм «Краснодар» провёл ниже своих возможностей: не настаивал на владении мячом, играл слишком просто и позволял сопернику атаковать. Все знали, как опасен Глушенков, но защититься от него не получилось. Ко второму тайму у Мусаева претензий нет — инициатива была у Быков, и он долго не менял тех, у кого получалось.</p><p>Про удаление Тормены тренер сказал, что не уверен в решении судьи; после красной карточки давить так же уже не получилось. По составу: Никита Кривцов, скорее всего, вернётся только в январе, а Илья Вахания пропустил основную подготовку из-за сборной. «Команде нужно сплотиться, много чего надо исправлять», — подытожил Мусаев.</p><a class="src" href="https://www.sports.ru/football/1117396011-musaev-o-23-ot-zenita-krasnodar-sygral-nizhe-svoix-vozmozhnostej-v-per.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт</time>
+          <div class="nb"><span class="tag">РПЛ</span><h3>Четыре матча без побед в РПЛ после шести побед на старте</h3><p>Поражение от «Зенита» продлило серию «Краснодара» без побед в чемпионате до четырёх игр. Перед этим были три ничьи подряд: 0:0 с «Оренбургом», 1:1 с «Акроном» и 2:2 с «Крыльями Советов».</p><p>Прервать серию в чемпионате команда сможет 17 октября в гостях у «Локомотива». Но ещё раньше, во вторник, Быки сыграют в Кубке России с «Факелом» — шанс вернуть победное настроение перед выездом в Москву.</p><a class="src" href="https://www.sports.ru/football/1117395936-krasnodar-ne-pobezhdaet-v-rpl-4-matcha-podryad-porazhenie-ot-zenita-i-.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт<span class="msep"> · </span><br>21:35</time>
+          <div class="nb"><span class="tag">РПЛ</span><h3>«Краснодар» опустился на второе место: у лидеров по 21 очку</h3><p>После поражения в центральном матче тура «Краснодар» впервые с начала сезона уступил первую строчку. Очков у Быков столько же, сколько у «Зенита», — по 21, но петербуржцы выше по дополнительным показателям: у них на одну победу больше и лучше разница мячей (+11 против +6).</p><p>Ближайшие матчи дадут шанс быстро отыграться: во вторник «Краснодар» принимает «Факел» в Кубке России, а 17 октября в 11 туре чемпионата едет в гости к «Локомотиву».</p><a class="src" href="https://www.livesport.ru/football/2026/10/10/krasnodar-zenit/" target="_blank" rel="noopener">Источник: Livesport ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт<span class="msep"> · </span><br>21:34</time>
+          <div class="nb"><span class="tag">Матч</span><h3>«Краснодар» проиграл «Зениту» 2:3 и уступил первое место</h3><p>Центральный матч 10 тура на «Ozon Арене» сложился для Быков тяжело. Максим Глушенков забил на 40-й минуте и ещё раз в компенсированное время первого тайма, а сразу после перерыва Александр Соболев головой замкнул передачу Педро — 0:3.</p><p>Хозяева ответили быстро: Жоау Батчи отыграл мяч на 55-й минуте, Джон Кордоба на 71-й сделал 2:3. Ещё один гол Батчи на 77-й отменили из-за офсайда, а на 80-й Витор Тормена получил прямую красную карточку. Это первое поражение «Краснодара» в сезоне, «Зенит» с теми же 21 очками вышел на первое место.</p><a class="src" href="https://kuban24.tv/item/fk-krasnodar-ustupil-zenitu-v-domashnem-matche-10-tura-rpl" target="_blank" rel="noopener">Источник: Кубань 24 ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт<span class="msep"> · </span><br>21:33</time>
+          <div class="nb"><span class="tag">Матч</span><h3>Красная Тормене: VAR заменил жёлтую карточку на удаление</h3><p>На 80-й минуте Инал Танашев сначала показал Витору Тормене жёлтую карточку за фол на Александре Соболеве, но видеоассистенты Евгений Буланов и Антон Фролов пригласили его к монитору. На повторах видно, что защитник «Краснодара» попал сопернику сзади открытыми шипами по голеностопу, — после просмотра арбитр показал прямую красную.</p><p>По оценке «Спорт-Экспресса», оспорить удаление и избежать дисквалификации клубу будет очень сложно. Сколько матчей пропустит Тормена, станет известно после заседания КДК.</p><a class="src" href="https://www.sport-express.net/football/rfpl/news/krasnodar-zenit-bykam-budet-slozhno-osporit-udalenie-tormeny-tot-udaril-soboleva-szadi-shipami-2462005/" target="_blank" rel="noopener">Источник: Спорт-Экспресс ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">10 окт<span class="msep"> · </span><br>20:54</time>
+          <div class="nb"><span class="tag">Матч</span><h3>Кордоба и Батчи вернули интригу, но времени не хватило</h3><p>После 0:3 «Краснодар» не сдался: за 16 минут второго тайма Батчи и Кордоба сократили отставание до минимума, и последние 20 минут прошли у ворот «Зенита».</p><p>Шанс сравнять счёт был: Батчи забил ещё раз, но арбитры зафиксировали положение вне игры. После удаления Тормены хозяева доигрывали вдесятером и дожать соперника не смогли.</p><a class="src" href="https://metaratings.ru/news/kordoba-sokratil-otstavanie-do-minimuma-v-matche-s-zenitom-661058/" target="_blank" rel="noopener">Источник: Metaratings ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">9 окт<span class="msep"> · </span><br>21:25</time>
+          <div class="nb"><span class="tag">Матч</span><h3>«Зенит» назвал игру в Краснодаре «важнейшим матчем премьер-лиги»</h3><p>Петербургский клуб анонсировал субботнюю встречу в своих соцсетях и не стал скрывать, как к ней относится: в Санкт-Петербурге называют её главной игрой тура и всего чемпионата на данный момент.</p><p>Матч 10 тура начнётся 10 октября в 19:30 по московскому времени на «Ozon Арене». «Краснодар» подходит к нему лидером с 21 очком, «Зенит» — пятый с 18. Победа позволит Быкам оторваться от действующего чемпиона, поражение — пустит петербуржцев вплотную к первой строчке.</p><a class="src" href="https://www.euro-football.ru/article/29/1006357144_vajneyshiy_match_premer-ligi_zenit_anonsiroval_igru_s_krasnodarom" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на официальные соцсети «Зенита» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">9 окт<span class="msep"> · </span><br>21:10</time>
+          <div class="nb"><span class="tag">Мнение</span><h3>Владимир Быстров: «Не сказал бы, что это спад»</h3><p>Бывший игрок сборной России не видит ничего тревожного в трёх ничьих подряд у «Краснодара». По его словам, ничья иногда бывает полезной, главное — не проигрывать, а команда по-прежнему возглавляет таблицу.</p><p>Быстров отметил, что травма Никиты Кривцова — заметная потеря, но уверен, что клуб найдёт ему замену внутри состава. Отдельно эксперт сказал, что хотел бы видеть в основе больше воспитанников собственной академии.</p><a class="src" href="https://www.euro-football.ru/article/29/1006357138_byistrov__o_krasnodare_ne_skazal_byi_chto_u_komandyi_spad" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на «Чемпионат» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">9 окт<span class="msep"> · </span><br>20:01</time>
+          <div class="nb"><span class="tag">Состав</span><h3>Оздоев перед встречей с бывшим клубом: исход решит психология</h3><p>Полузащитник «Краснодара» Магомед Оздоев, который много лет отыграл за «Зенит», рассказал, что готовится к субботней игре так же, как к любой другой, и ждёт полный стадион.</p><p>Главным фактором он назвал не тактику, а голову: по его словам, победит тот, кто будет психологически больше готов к матчу. Своё прошлое в Петербурге, уверяет Оздоев, никак не повлияет на его игру.</p><a class="src" href="https://www.euro-football.ru/article/29/1006356738_ozdoev__o_matche_s_zenitom_pobedit_tot_kto_budet_psihologicheski_bolshe_gotov" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на «Чемпионат» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">9 окт<span class="msep"> · </span><br>19:18</time>
+          <div class="nb"><span class="tag">Состав</span><h3>Пальцев: «Хотим победить, будем играть на победу»</h3><p>Фланговый защитник Валентин Пальцев заверил, что команда настроена только на три очка и не собирается играть от обороны против действующего чемпиона.</p><p>На вопрос, считает ли он «Зенит» главным конкурентом в борьбе за золото, Пальцев ответил осторожно: соперником в гонке может оказаться любой клуб лиги, поэтому выделять кого-то одного он не стал.</p><a class="src" href="https://www.euro-football.ru/article/29/1006356676_v_krasnodare_ocenili_nastroy_na_match_s_zenitom" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на Metaratings ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">9 окт<span class="msep"> · </span><br>17:53</time>
+          <div class="nb"><span class="tag">Состав</span><h3>Боселли о «Зените»: «Лучше пусть они переживают»</h3><p>Нападающий Хуан Боселли ответил на вопрос, боится ли «Краснодар» соперника перед центральным матчем тура. По словам уругвайца, в команде никто не нервничает: игроки уверены в своей работе и выйдут на поле, чтобы отдать все силы.</p><p>Переживать, считает Боселли, стоит скорее гостям — именно «Зенит» догоняет лидера, а не наоборот.</p><a class="src" href="https://www.euro-football.ru/article/29/1006356197_luchshe_pust_oni_perejivayut_legioner_krasnodara_vyiskazalsya_pered_igroy_s_zenitom" target="_blank" rel="noopener">Источник: Евро-Футбол со ссылкой на «Чемпионат» ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">9 окт<span class="msep"> · </span><br>12:35</time>
+          <div class="nb"><span class="tag">Клуб</span><h3>Мусаев: «К ним всегда очень сложно готовиться»</h3><p>Главный тренер «Краснодара» Мурад Мусаев признал, что подготовка к «Зениту» всегда даётся тяжело: у соперника много игроков высокого уровня, и под каждого приходится искать отдельное решение.</p><p>Тренер отметил, что несколько футболистов петербуржцев сейчас в отличной форме — забивают и создают моменты. Такие матчи Мусаев сравнивает с шахматной партией и признаётся, что именно ради подобных игр он и работает в «Краснодаре».</p><a class="src" href="https://www.rusfootball.info/rpl_liga/1146808747-k-nim-vsegda-ochen-slozhno-gotovitsya-musaev-o-matche-s-zenitom.html" target="_blank" rel="noopener">Источник: Футбол России ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">8 окт</time>
+          <div class="nb"><span class="tag">Болельщикам</span><h3>Аншлаг на «Зените»: больше 30 тысяч билетов раскупили за день</h3><p>Все билеты на субботний матч разошлись за одни сутки — стадион, который болельщики называют «Колизеем», будет заполнен. При этом соперник для Краснодара традиционно неудобный: в пяти последних матчах на этом поле «Зенит» выиграл четыре раза.</p><p>Кадровых проблем после паузы на сборные у лидеров почти нет. Исключение — Никита Кривцов, лучший бомбардир команды в чемпионате, он остаётся в лазарете. Воробьёв, Вахания и Агкацев вернулись из сборных и готовы к игре.</p><a class="src" href="https://rg.ru/2026/10/08/kolizej-vskipit.html" target="_blank" rel="noopener">Источник: Российская газета ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">8 окт<span class="msep"> · </span><br>12:20</time>
+          <div class="nb"><span class="tag">Клуб</span><h3>Мусаев об эмоциях Кордобы: «Нельзя быть равнодушным»</h3><p>Главный тренер заступился за Джона Кордобу, которого обсуждают из-за бурных эмоций. По словам Мусаева, после ничьих нападающий громко требует от партнёров в раздевалке играть лучше, а на тренировках остро реагирует на неудачи.</p><p>Тренер считает такое поведение нормальной частью футбола и связывает с ним успехи команды в последние годы: Кордоба, по его словам, хочет не просто забить, а выиграть каждый матч.</p><a class="src" href="https://www.sports.ru/football/1117392991-musaev-ob-emocziyax-kordoby-mne-naoborot-nravitsya-eto-i-est-zhizn-fut.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">8 окт<span class="msep"> · </span><br>11:24</time>
+          <div class="nb"><span class="tag">Матч</span><h3>Инал Танашев назначен на матч «Краснодар» — «Зенит»</h3><p>Главным арбитром центральной встречи 10 тура будет Инал Танашев. Ему помогают Дмитрий Сафьян и Рустам Мухтаров, на VAR работают Евгений Буланов и Антон Фролов.</p><p>Тур открылся в пятницу матчем «Ростов» — «Акрон» (1:0). В субботу, кроме игры в Краснодаре, «Крылья Советов» примут «Спартак», в воскресенье ЦСКА сыграет с «Родиной», а «Рубин» — с московским «Динамо».</p><a class="src" href="https://www.sports.ru/football/1117392939-tanashev-rassudit-igru-krasnodara-i-zenita-v-10-m-ture-rpl-novikov-naz.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">6 окт<span class="msep"> · </span><br>18:33</time>
+          <div class="nb"><span class="tag">Болельщикам</span><h3>Спор из-за гостевых билетов: «Зенит» просил больше мест</h3><p>Перед матчем возник конфликт вокруг гостевой квоты. «Зенит» обратился в РФС и РПЛ: по регламенту петербуржцы рассчитывали получить до 3000 мест для своих болельщиков, а «Краснодар» выделил 1000 билетов. Затем гости предложили выкупить квоту на уровне клубов и распространить её самостоятельно.</p><p>Депутат Госдумы Дмитрий Свищев призвал не раздувать историю: все условия прописаны в регламенте, и самодеятельности быть не должно. По его мнению, шум вокруг билетов отчасти работает на интерес к матчу.</p><a class="src" href="https://www.sports.ru/football/1117391577-deputat-svishhev-o-konflikte-zenita-i-krasnodara-iz-za-biletov-ne-nado.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">6 окт</time>
+          <div class="nb"><span class="tag">Сборная</span><h3>Вахания в старте, Агкацев в запасе: Россия сыграла 3:3 с Нигерией</h3><p>В последнем октябрьском матче сборной России в Нижнем Новгороде защитник «Краснодара» Илья Вахания вышел в стартовом составе, а Станислав Агкацев начал игру на скамейке. Встреча с Нигерией получилась результативной и закончилась вничью 3:3.</p><p>Для Вахании это был третий матч за сборную за паузу, поэтому в клуб он вернулся последним из национальных команд. Перед игрой с «Зенитом» Мусаев отдельно говорил, что перелёты и плотный график сборников сказываются на форме игроков.</p><a class="src" href="https://www.sports.ru/football/1117391603-rossiya-nigeriya-startovye-sostavy-komand-na-match-tovarishheskix-matc.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">6 окт<span class="msep"> · </span><br>09:28</time>
+          <div class="nb"><span class="tag">Сборная</span><h3>Агкацев: «Просто вратарей не просят так рисковать»</h3><p>Вратарь «Краснодара» Станислав Агкацев рассказал, чем отличается игра ногами в клубе и в сборной России. В команде Валерия Карпина от вратарей требуют начинать атаки низом и растягивать соперника, и эти требования не менялись с его первого вызова.</p><p>В «Краснодаре» вратари чаще играют длинным пасом. Комбинационный футбол в клубе никуда не делся, подчеркнул Агкацев, просто голкиперу не нужно рисковать у собственных ворот.</p><a class="src" href="https://www.sports.ru/football/1117391125-agkaczev-ob-igre-nogami-v-sbornoj-v-krasnodare-bolshe-dlinnyx-peredach.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">5 окт<span class="msep"> · </span><br>21:35</time>
+          <div class="nb"><span class="tag">Сборная</span><h3>Соболев и Дивеев подшутили над Агкацевым перед матчем с «Зенитом»</h3><p>В лагере сборной России игроки «Зенита» не упустили случая подколоть вратаря «Краснодара». На видео Александр Соболев и Игорь Дивеев шутят, что Станислав Агкацев уже за несколько дней начал переживать из-за игры 10 тура.</p><p>Через пять дней Соболев действительно забил Агкацеву — третий гол «Зенита» в Краснодаре.</p><a class="src" href="https://www.sports.ru/football/1117390496-stasik-uzhe-pered-10-m-perezhivaet-on-dumaet-ya-peregoryu-no-on-uzhe-p.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">5 окт<span class="msep"> · </span><br>14:47</time>
+          <div class="nb"><span class="tag">РПЛ</span><h3>Opta: у «Краснодара» самые высокие шансы на чемпионство</h3><p>Суперкомпьютер Opta обновил прогноз перед 10 туром. «Краснодар» остаётся главным фаворитом — 34,9%, хотя месяц назад его шансы оценивались в 57,8%. Сократить разрыв помогли три ничьи подряд у лидера.</p><p>Следом идут «Зенит» (31,6%), «Спартак» (15,4%) и московское «Динамо» (13,1%). У ЦСКА — 4,8%, у «Балтики» — 0,1%, остальным клубам Opta шансов на титул не даёт.</p><a class="src" href="https://www.sports.ru/betting/1117390524-krasnodar-favorit-rpl-po-versii-opta-zenit-2-j-spartak-3-j-dinamo-4-e-.html" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">3 окт<span class="msep"> · </span><br>18:56</time>
+          <div class="nb"><span class="tag">Матч</span><h3>Спарринг в паузе: «Краснодар» обыграл «Ростов» 3:0</h3><p>В перерыве на сборные Быки провели товарищеский матч в Ростове-на-Дону и уверенно победили. Уже на 5-й минуте Даниил Уткин перехватил мяч и забил с семи метров, на 41-й отличился Жоау Батчи, а сразу после перерыва, на 48-й, счёт довёл до разгромного Джон Кордоба.</p><p>Матч помог тем, кто не уехал в сборные, сохранить игровой ритм перед возобновлением чемпионата и центральной игрой с «Зенитом».</p><a class="src" href="https://kuban24.tv/item/fk-krasnodar-v-tovarishheskom-matche-obygral-rostov-so-schetom-0-3" target="_blank" rel="noopener">Источник: Кубань 24 ↗</a></div>
+        </article></li>
+        <li><article>
+          <time class="mono">3 окт</time>
+          <div class="nb"><span class="tag">Сборная</span><h3>Агкацев отыграл тайм «на ноль» в разгроме Намибии 6:0</h3><p>Сборная России крупно обыграла Намибию на «Екатеринбург Арене». Вратарь «Краснодара» Станислав Агкацев вышел в стартовом составе и провёл первый тайм без пропущенных мячей, после перерыва его сменил Антон Митрюшкин.</p><p>В этом матче на поле появился и защитник Быков Илья Вахания. Голы за сборную забили Садулаев, Пруцев, Тюкавин, Глушенков и Петров, ещё один мяч хозяевам принёс автогол.</p><a class="src" href="https://lenta.ru/sport/2026/10/03/football-rossiya-namibiya/" target="_blank" rel="noopener">Источник: Лента.ру ↗</a></div>
+        </article></li>
+      </ul>
+    <button class="more" id="moreNews" type="button" aria-expanded="false">Показать ещё</button>
+  </section>
+
+  <aside id="live" aria-labelledby="live-h" hidden>
+    <div class="sec-head"><h2 id="live-h">Лента</h2><span class="src" id="liveUpd">обновляется автоматически</span></div>
+    <ol class="live" id="liveList"></ol>
+    <p class="live-note">Заголовки и анонсы спортивных изданий и официального сайта клуба. Полный текст — по ссылке на сайте источника.</p>
+    <p class="live-note"><a class="allnews" href="news.html">Архив новостей →</a></p>
+  </aside>
+  </div>
+
+  <section id="video" aria-labelledby="vid-h" hidden>
+    <div class="sec-head">
+      <h2 id="vid-h">Видео</h2>
+      <div class="chips" role="group" aria-label="Фильтр видео">
+        <button class="chip" id="f-all" data-f="all" aria-pressed="true">Все</button>
+        <button class="chip" id="f-tunnel" data-f="tunnel" aria-pressed="false">Подтрибунка</button>
+        <button class="chip" id="f-press" data-f="press" aria-pressed="false">Пресс-конференции</button>
+        <button class="chip" id="f-goals" data-f="goals" aria-pressed="false">Голы и моменты</button>
+      </div>
+    </div>
+    <div class="vgrid" id="vgrid">
+      <a class="vcard" href="#video" data-cat="tunnel"><div class="thumb t-tunnel"><span class="vlabel eyebrow">Подтрибунка · пример</span><span class="play"><svg viewBox="0 0 16 16"><path d="M2 1l13 7-13 7z"/></svg></span><span class="dur mono">08:42</span></div><h3>Выход из подтрибунного перед матчем с «Зенитом»</h3><span class="vmeta">Появится 10 октября</span></a>
+      <a class="vcard" href="#video" data-cat="goals"><div class="thumb t-pitch"><span class="vlabel eyebrow">Моменты · пример</span><span class="play"><svg viewBox="0 0 16 16"><path d="M2 1l13 7-13 7z"/></svg></span><span class="dur mono">03:15</span></div><h3>Все голы «Краснодара» в первых 9 турах</h3><span class="vmeta">14 голов</span></a>
+      <a class="vcard" href="#video" data-cat="press"><div class="thumb t-press"><span class="vlabel eyebrow">Пресс-конференция · пример</span><span class="play"><svg viewBox="0 0 16 16"><path d="M2 1l13 7-13 7z"/></svg></span><span class="dur mono">14:06</span></div><h3>Мурад Мусаев перед матчем с «Зенитом»</h3><span class="vmeta">Пресс-конференция</span></a>
+      <a class="vcard" href="#video" data-cat="tunnel"><div class="thumb t-stand"><span class="vlabel eyebrow">Подтрибунка · пример</span><span class="play"><svg viewBox="0 0 16 16"><path d="M2 1l13 7-13 7z"/></svg></span><span class="dur mono">05:30</span></div><h3>Раздевалка после победы над «Спартаком» 2:1</h3><span class="vmeta">РПЛ · 3 тур</span></a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><b style="color:var(--ink)">Быки News</b> — неофициальный фан-проект болельщиков. Сайт не связан с ФК «Краснодар»; названия и символика клубов принадлежат их правообладателям. Статистика: Sports.ru, LiveResult.</p>
+    <p>Новости на сайте — пересказ публикаций спортивных СМИ, источник указан под каждой новостью. Права на исходные материалы принадлежат их правообладателям. Сайт не является средством массовой информации.</p>
+    <div class="contact">
+      <p>Новости в Telegram: <a href="https://t.me/bikinews" target="_blank" rel="noopener">@bikinews</a> · в MAX: <a href="https://max.ru/channel_bikinews" target="_blank" rel="noopener">channel_bikinews</a></p>
+      <p>Правообладателям и по всем вопросам: <a href="mailto:i@bikinews.ru">i@bikinews.ru</a></p>
+      <p class="mono">© 2026 bikinews.ru</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // ===== ДАННЫЕ (обновляйте здесь) =====
+  // Логотипы клубов лежат в папке logos/ рядом с index.html, например logos/zenit.svg.
+  // Если файла нет, показывается кружок с сокращением.
+  var LOGO_DIR = 'logos/', LOGO_EXT = '.svg';
+
+  var clubs = {
+    krasnodar: ['Краснодар', 'КРД'], spartak: ['Спартак', 'СПА'], dynamo: ['Динамо', 'ДИН'], cska: ['ЦСКА', 'ЦСК'],
+    zenit: ['Зенит', 'ЗЕН'], rubin: ['Рубин', 'РУБ'], 'dynamo-mkh': ['Динамо Мх', 'ДМХ'], baltika: ['Балтика', 'БАЛ'],
+    krylia: ['Крылья Советов', 'КРЫ'], akhmat: ['Ахмат', 'АХМ'], orenburg: ['Оренбург', 'ОРЕ'], rostov: ['Ростов', 'РОС'],
+    akron: ['Акрон', 'АКР'], lokomotiv: ['Локомотив', 'ЛОК'], rodina: ['Родина', 'РОД'], fakel: ['Факел', 'ФАК']
+  };
+
+  // РПЛ после 10 тура (11 октября): клуб, И, В, Н, П, забито, пропущено, очки
+  var table = [
+    ['dynamo', 10, 7, 1, 2, 15, 8, 22], ['cska', 10, 6, 4, 0, 18, 9, 22], ['zenit', 10, 7, 0, 3, 22, 11, 21],
+    ['krasnodar', 10, 6, 3, 1, 16, 10, 21], ['spartak', 10, 6, 2, 2, 17, 8, 20], ['dynamo-mkh', 10, 4, 0, 6, 15, 20, 12],
+    ['baltika', 10, 3, 3, 4, 14, 12, 12], ['rubin', 10, 2, 6, 2, 12, 12, 12], ['orenburg', 10, 2, 6, 2, 11, 10, 12],
+    ['krylia', 10, 2, 6, 2, 14, 15, 12], ['rostov', 10, 3, 2, 5, 11, 17, 11], ['akhmat', 10, 2, 5, 3, 13, 13, 11],
+    ['lokomotiv', 10, 2, 4, 4, 13, 11, 10], ['akron', 10, 1, 5, 4, 11, 19, 8], ['rodina', 10, 1, 2, 7, 10, 25, 5],
+    ['fakel', 10, 0, 3, 7, 6, 18, 3]
+  ];
+
+  // Ближайшие: дата, день, турнир, соперник, дома?, время (null — уточняется)
+  var upcoming = [
+    ['13 окт', 'вт', 'Кубок России', 'fakel', true, '20:45'],
+    ['17 окт', 'сб', 'РПЛ · 11 тур', 'lokomotiv', false, '19:30'],
+    ['24 окт', 'сб', 'РПЛ · 12 тур', 'baltika', true, null],
+    ['27 окт', 'вт', 'Кубок России', 'dynamo', true, null]
+  ];
+
+  // Сыгранные (свежие сверху): дата, турнир, соперник, дома?, голы Краснодара, голы соперника
+  var played = [
+    ['10 окт', 'РПЛ · 10 тур', 'zenit', true, 2, 3],
+    ['17 сен', 'РПЛ · 9 тур', 'orenburg', false, 0, 0], ['13 сен', 'РПЛ · 8 тур', 'akron', true, 1, 1],
+    ['5 сен', 'РПЛ · 7 тур', 'krylia', false, 2, 2], ['1 сен', 'Кубок России · победа по пенальти 4:3', 'fakel', false, 1, 1],
+    ['29 авг', 'РПЛ · 6 тур', 'rostov', true, 1, 0], ['23 авг', 'РПЛ · 5 тур', 'dynamo-mkh', false, 1, 0],
+    ['19 авг', 'Кубок России', 'dynamo', false, 1, 0], ['15 авг', 'РПЛ · 4 тур', 'akhmat', true, 1, 0],
+    ['9 авг', 'РПЛ · 3 тур', 'spartak', false, 2, 1], ['5 авг', 'Кубок России', 'akhmat', true, 1, 1],
+    ['2 авг', 'РПЛ · 2 тур', 'fakel', true, 3, 2], ['26 июл', 'РПЛ · 1 тур', 'rubin', false, 3, 1]
+  ];
+
+  // Бомбардиры РПЛ: имя, голы, матчи, пометка
+  var scorers = [
+    ['Никита Кривцов', 3, 4, 'травма'], ['Жоау Батчи', 3, 8], ['Жубал', 3, 8]
+  ];
+
+  // Страницы клубов на Sports.ru (новости, состав, календарь)
+  var CLUB_URL = 'https://www.sports.ru/football/club/';
+  var clubUrl = { 'dynamo-mkh': 'dinamo-mx', krylia: 'krylia-sovetov', rodina: 'rodina-moscow' };
+
+  // ===== ОТРИСОВКА =====
+  function pos(slug) { for (var i = 0; i < table.length; i++) if (table[i][0] === slug) return i + 1; return null; }
+  function badge(slug, extra) {
+    var c = clubs[slug];
+    return '<span class="club' + (slug === 'krasnodar' ? ' us' : '') + (extra || '') + '" data-logo="' + slug + '">' + c[1] + '</span>';
+  }
+  function resClass(f, a) { return f > a ? ['w', 'В', 'Победа'] : f === a ? ['d', 'Н', 'Ничья'] : ['l', 'П', 'Поражение']; }
+
+  document.getElementById('upcoming').innerHTML = upcoming.map(function (m, i) {
+    var p = pos(m[3]);
+    return '<li' + (i === 0 ? ' class="next"' : '') + '><div class="d"><b>' + m[0] + '</b>' + m[1] + '</div>' +
+      '<div class="opp"><span class="pair">' + (m[4] ? badge('krasnodar') + badge(m[3]) : badge(m[3]) + badge('krasnodar')) + '</span><div><b>' + clubs[m[3]][0] + '</b><small>' + m[2] + ' · ' + (m[4] ? 'дома' : 'в гостях') + (p ? ' · ' + p + ' место' : '') + '</small></div></div>' +
+      '<div class="t' + (m[5] ? ' mono' : ' tbd') + '">' + (m[5] || 'время уточняется') + '</div></li>';
+  }).join('');
+
+  document.getElementById('played').innerHTML = played.map(function (m) {
+    var r = resClass(m[4], m[5]);
+    var score = m[3] ? m[4] + ':' + m[5] : m[5] + ':' + m[4];
+    return '<li><div class="d"><b>' + m[0] + '</b></div>' +
+      '<div class="opp"><span class="pair">' + (m[3] ? badge('krasnodar') + badge(m[2]) : badge(m[2]) + badge('krasnodar')) + '</span><div><b>' + (m[3] ? 'Краснодар — ' + clubs[m[2]][0] : clubs[m[2]][0] + ' — Краснодар') + '</b><small>' + m[1] + '</small></div></div>' +
+      '<div class="r">' + score + '<span class="res ' + r[0] + '" title="' + r[2] + '">' + r[1] + '</span></div></li>';
+  }).join('');
+
+  // клик по матчу — страница «Матчи» со статистикой
+  var MID = { 'янв': 1, 'фев': 2, 'мар': 3, 'апр': 4, 'мая': 5, 'июн': 6, 'июл': 7, 'авг': 8, 'сен': 9, 'окт': 10, 'ноя': 11, 'дек': 12 };
+  function matchId(s) { var p = s.split(' '), mo = MID[p[1]], y = mo >= 7 ? 2026 : 2027; return 'm-' + y + '-' + (mo < 10 ? '0' : '') + mo + '-' + (+p[0] < 10 ? '0' : '') + (+p[0]); }
+  [['#upcoming li', upcoming], ['#played li', played]].forEach(function (pair) {
+    document.querySelectorAll(pair[0]).forEach(function (li, i) {
+      li.classList.add('go'); li.setAttribute('role', 'link'); li.tabIndex = 0;
+      var go = function () { location.href = 'matches.html#' + matchId(pair[1][i][0]); };
+      li.addEventListener('click', go);
+      li.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(); });
+    });
+  });
+
+  var playedItems = document.querySelectorAll('#played li'), SHOW = 6, moreBtn = document.getElementById('more');
+  function fold(open) {
+    playedItems.forEach(function (li, i) { li.hidden = !open && i >= SHOW; });
+    moreBtn.textContent = open ? 'Свернуть' : 'Показать все матчи (' + playedItems.length + ')';
+    moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  fold(false);
+  moreBtn.addEventListener('click', function () { fold(moreBtn.getAttribute('aria-expanded') !== 'true'); });
+
+  var newsItems = document.querySelectorAll('.feed > li'), NEWS_SHOW = 6, moreNews = document.getElementById('moreNews');
+  function foldNews(open) {
+    newsItems.forEach(function (li, i) { li.hidden = !open && i >= NEWS_SHOW; });
+    moreNews.textContent = open ? 'Свернуть' : 'Показать ещё ' + (newsItems.length - NEWS_SHOW);
+    moreNews.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (moreNews) { foldNews(false); moreNews.addEventListener('click', function () { foldNews(moreNews.getAttribute('aria-expanded') !== 'true'); }); }
+
+  var rpl = played.filter(function (m) { return m[1].indexOf('РПЛ') === 0; }).slice(0, 5).reverse();
+  document.getElementById('form').innerHTML = 'форма ' + rpl.map(function (m) {
+    var r = resClass(m[4], m[5]); return '<span class="res ' + r[0] + '" title="' + r[2] + ', ' + clubs[m[2]][0] + '">' + r[1] + '</span>';
+  }).join('');
+
+  document.getElementById('standings').innerHTML = table.map(function (t, i) {
+    var n = i + 1, cls = [];
+    if (t[0] === 'krasnodar') cls.push('us');
+    if (n === 13 || n === 14) cls.push('zone-po');
+    if (n === 15 || n === 16) cls.push('zone-rel');
+    if (n === 13) cls.push('cut');
+    return '<tr class="' + cls.join(' ') + '"><td class="pos">' + n + '</td><td class="l team"><a class="tn" href="' + CLUB_URL + (clubUrl[t[0]] || t[0]) + '/" target="_blank" rel="noopener" title="Новости клуба на Sports.ru">' + badge(t[0]) + clubs[t[0]][0] + '</a></td>' +
+      '<td>' + t[1] + '</td><td class="opt">' + t[2] + '</td><td class="opt">' + t[3] + '</td><td class="opt">' + t[4] + '</td>' +
+      '<td class="mono">' + t[5] + '–' + t[6] + '</td><td class="pts">' + t[7] + '</td></tr>';
+  }).join('');
+
+  var maxG = Math.max.apply(null, scorers.map(function (s) { return s[1]; }));
+  document.getElementById('scorer-list').innerHTML = scorers.map(function (s, i) {
+    return '<div class="sc"><div class="rk">' + (i + 1) + '</div><div><h3>' + s[0] + (s[3] ? ' <span class="inj">' + s[3] + '</span>' : '') + '</h3>' +
+      '<div class="meta">' + s[2] + ' матч' + (s[2] === 1 ? '' : s[2] < 5 ? 'а' : 'ей') + ' в РПЛ</div>' +
+      '<div class="bar" aria-hidden="true"><i style="width:' + (s[1] / maxG * 100) + '%"></i></div></div>' +
+      '<div class="g"><b class="mono">' + s[1] + '</b><small>гол' + (s[1] === 1 ? '' : s[1] < 5 ? 'а' : 'ов') + '</small></div></div>';
+  }).join('');
+
+
+  // ===== АВТОЛЕНТА (data/news.json обновляет news.php по расписанию) =====
+  var MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  function mskParts(ts) {
+    var f = new Intl.DateTimeFormat('ru-RU', { timeZone: 'Europe/Moscow', year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+    var o = {}; f.formatToParts(new Date(ts * 1000)).forEach(function (p) { o[p.type] = p.value; });
+    return o;
+  }
+  function whenLabel(ts) {
+    var d = mskParts(ts), now = mskParts(Date.now() / 1000);
+    var hm = d.hour + ':' + d.minute;
+    return (d.day === now.day && d.month === now.month) ? hm : (+d.day) + ' ' + MONTHS[+d.month - 1] + ' · ' + hm;
+  }
+  function escHtml(t) { var e = document.createElement('div'); e.textContent = String(t); return e.innerHTML.replace(/"/g, '&quot;'); }
+  function loadLive() {
+    fetch('data/news.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.items || !d.items.length) return;
+      document.getElementById('liveList').innerHTML = d.items.slice(0, 15).map(function (n) {
+        return '<li><a href="' + escHtml(n.url) + '" target="_blank" rel="noopener"><span class="lt mono">' + whenLabel(n.ts) + ' · <b>' + escHtml(n.source) + '</b></span>' +
+          '<span class="lh">' + escHtml(n.title) + '</span>' + (n.text ? '<span class="ls">' + escHtml(n.text) + '</span>' : '') + '</a></li>';
+      }).join('');
+      document.getElementById('liveUpd').textContent = 'обновлено в ' + whenLabel(d.updated);
+      document.getElementById('live').hidden = false;
+    }).catch(function () {});
+  }
+  loadLive();
+  setInterval(loadLive, 10 * 60 * 1000);
+
+  // Подмена кружков на логотипы, если файлы лежат в logos/
+  document.querySelectorAll('[data-logo]').forEach(function (el) {
+    var img = new Image();
+    img.alt = clubs[el.getAttribute('data-logo')][0];
+    img.onload = function () { el.textContent = ''; el.classList.add('has-logo'); el.appendChild(img); };
+    img.src = LOGO_DIR + el.getAttribute('data-logo') + LOGO_EXT;
+  });
+
+  // Фильтр видео
+  var chips = document.querySelectorAll('.chip'), cards = document.querySelectorAll('#vgrid .vcard');
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var f = chip.getAttribute('data-f');
+      chips.forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+      cards.forEach(function (card) { card.hidden = !(f === 'all' || card.getAttribute('data-cat') === f); });
+    });
+  });
+
+  // Обратный отсчёт
+  var kickoff = new Date('2026-10-13T20:45:00+03:00'), el = document.getElementById('cd'), ms = kickoff - new Date();
+  if (ms > 86400000) {
+    var d = Math.floor(ms / 86400000), n = d % 100, n1 = n % 10;
+    el.textContent = d + ' ' + ((n > 10 && n < 20) ? 'дней' : n1 === 1 ? 'день' : (n1 >= 2 && n1 <= 4) ? 'дня' : 'дней');
+  } else if (ms > 0) {
+    var h = Math.floor(ms / 3600000);
+    el.textContent = h >= 1 ? h + ' ч ' + Math.floor(ms % 3600000 / 60000) + ' мин' : Math.ceil(ms / 60000) + ' мин';
+  } else { document.getElementById('cdwrap').textContent = 'матч сыгран — счёт скоро обновим'; }
+})();
+</script>

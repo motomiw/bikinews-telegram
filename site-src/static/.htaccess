@@ -1,0 +1,15 @@
+# Быки News — переадресация на https://bikinews.ru (без www)
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# http -> https. Переадресуем, только если ни один признак не говорит о https,
+# чтобы за прокси хостинга не получилась бесконечная переадресация.
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https [NC]
+RewriteCond %{HTTP:HTTPS} !=on [NC]
+RewriteRule ^(.*)$ https://bikinews.ru/$1 [R=301,L]
+
+# www.bikinews.ru -> bikinews.ru
+RewriteCond %{HTTP_HOST} ^www\.bikinews\.ru$ [NC]
+RewriteRule ^(.*)$ https://bikinews.ru/$1 [R=301,L]
+</IfModule>

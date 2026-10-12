@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /news.php
+Disallow: /data/
+Allow: /
+
+Sitemap: https://bikinews.ru/sitemap.xml
