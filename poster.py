@@ -58,6 +58,15 @@ def main():
 
     gl = get_json('data/glavnoe.json').get('items', [])
     sent = 0
+    if any(str(g.get('id', '')).startswith('g') for g in gl):
+        print('На сайте ещё старая версия glavnoe.json — пересказы пропускаю до обновления сайта')
+        gl = [] if not first else gl
+    if not first and st.get('v') != 2:
+        # переход на постоянные номера новостей: всё, что уже на сайте, считаем опубликованным
+        st['posted'] = [g['id'] for g in gl if g['id'] not in ('n96ac17bf',)]; st['v'] = 2   # новость про «Факел» ещё не выходила
+        print('Обновление формата: отмечено как опубликованное —', len(gl))
+    elif first:
+        st['v'] = 2
     if first:
         st['posted'] = [g['id'] for g in gl]
         print('Первый запуск: отмечено как уже опубликованное —', len(gl))
@@ -66,7 +75,7 @@ def main():
         for g in new[:MAX_PER_RUN]:
             lead = g['paras'][0] if g.get('paras') else ''
             text = (f"<b>{esc(g['title'])}</b>\n\n{esc(lead)}\n\n"
-                    f"👉 <a href=\"{SITE}news.html#{urllib.parse.quote(g['id'])}\">Читать на Быки News</a>\n"
+                    f"👉 Подробнее: {SITE}news.html#{urllib.parse.quote(g['id'])}\n"
                     f"Источник: <a href=\"{esc(g['url'])}\">{esc(g['source'])}</a>")
             if not send(text):
                 break
@@ -85,7 +94,7 @@ def main():
             if items:
                 lines = [f"▪️ <a href=\"{esc(i['url'])}\">{esc(i['title'])}</a> <i>— {esc(i['source'])}</i>" for i in items]
                 text = (f"<b>📰 Что пишут о «Краснодаре» · {now:%d.%m}, {'день' if now.hour == 12 else 'вечер'}</b>\n\n"
-                        + '\n\n'.join(lines) + f"\n\n<a href=\"{SITE}news.html\">Все новости на Быки News</a>")
+                        + '\n\n'.join(lines) + f"\n\n📲 Все новости со ссылками: {SITE}news.html")
                 print('Дайджест:', 'опубликован' if send(text) else 'ошибка')
             st['digest'][slot] = 1
 
