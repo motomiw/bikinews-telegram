@@ -96,7 +96,7 @@ header = header.replace('href="#top"', 'href="./"')
 HEADER_BASE = header
 TG_LINK = re.search(r'<a class="cta tg".*?</a>\s*<a class="mx".*?</a>', SRC, flags=re.S).group(0)
 def nav_header(cur):
-    items = [('./', 'Главная', ''), ('matches.html', 'Матчи', 'matches'), ('./#table', 'Таблица', ''), ('news.html', 'Новости', 'news')]
+    items = [('./', 'Главная', ''), ('matches.html', 'Матчи', 'matches'), ('./#table', 'Таблица', ''), ('squad.html', 'Состав', 'squad'), ('news.html', 'Новости', 'news'), ('club.html', 'Клуб', 'club')]
     nav = '<nav class="nav" aria-label="Разделы">\n' + ''.join(
         f'      <a href="{h}"' + (' aria-current="page"' if k == cur else '') + f'>{t}</a>\n' for h, t, k in items) + '      ' + TG_LINK + '\n    </nav>'
     return re.sub(r'<nav class="nav".*?</nav>', nav, HEADER_BASE, flags=re.S)
@@ -250,6 +250,7 @@ print('index', len(index), 'news', len(news), 'glavnoe', len(items))
 
 exec(open(ROOT / 'matches_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'privacy_build.py', encoding='utf-8').read())
+exec(open(ROOT / 'squad_build.py', encoding='utf-8').read())
 
 # статические файлы (шрифты, логотипы, иконки, robots, sitemap, .htaccess)
 shutil.copytree(ROOT / 'static', OUT, dirs_exist_ok=True)
@@ -259,6 +260,6 @@ import datetime as _d
 _today = _d.date.today().isoformat()
 (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>https://bikinews.ru/{p}</loc><lastmod>{_today}</lastmod><changefreq>{c}</changefreq><priority>{pr}</priority></url>\n'
-              for p, c, pr in [('', 'hourly', '1.0'), ('news.html', 'hourly', '0.9'), ('matches.html', 'daily', '0.9'), ('privacy.html', 'yearly', '0.2')])
+              for p, c, pr in [('', 'hourly', '1.0'), ('news.html', 'hourly', '0.9'), ('matches.html', 'daily', '0.9'), ('squad.html', 'weekly', '0.8'), ('club.html', 'monthly', '0.6'), ('privacy.html', 'yearly', '0.2')])
     + '</urlset>\n', encoding='utf-8')
 print('dist ->', OUT)

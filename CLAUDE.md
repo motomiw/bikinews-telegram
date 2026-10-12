@@ -6,6 +6,7 @@
 - `site-src/bykinews.html` — мастер главной: стили, шапка, блоки, данные матчей/таблицы (JS-массивы `table`, `upcoming`, `played`, `scorers`) и список «Главное» (`<ul class="feed">`).
 - `site-src/build.py` → собирает `dist/` (index.html, news.html, matches.html, data/glavnoe.json, rss.xml, sitemap.xml + `site-src/static/*`).
 - `site-src/matches_build.py` — данные и вёрстка страницы «Матчи» (PLAYED, UPCOMING).
+- `site-src/squad_build.py` — страницы «Состав» (squad.html, данные SQUAD) и «Клуб» (club.html).
 - `.github/workflows/deploy.yml` — при пуше в `site-src/**` собирает и выкладывает на SpaceWeb по FTP (секреты FTP_*).
 - `poster.py` + `.github/workflows/telegram.yml` — каждые 20 мин публикует новые пересказы из data/glavnoe.json в Telegram, дайджест в 12:00 и 20:00 МСК. `state.json` — что уже опубликовано, руками не править.
 - На хостинге отдельно живут `news.php` (сбор ленты по cron), `data/news.json`, `data/archive.json`, `data/tg-config.php` — их в репозитории нет и деплой их не трогает.
@@ -22,3 +23,4 @@
 ## После матча
 - `played`/`upcoming`/`table`/`scorers` в `bykinews.html`, блок героя (счёт, «N место»), карточка ближайшего матча и обратный отсчёт.
 - `PLAYED`/`UPCOMING` в `matches_build.py` (голы с минутами, удаления, статистика).
+- `SQUAD` в `squad_build.py` (страница «Состав»): у каждого игрока `rpl` = (игры, минуты, голы, передачи, ЖК, КК) по Sports.ru (sports.ru/krasnodar/stat/) и `cup` = (игры, голы, передачи, ЖК) по протоколу кубкового матча (rfs.ru). Новичка, впервые вышедшего на поле, добавить (номер, дата рождения, страна); ушедших убрать. Обновить `SQUAD_UPDATED`. Для забивших задан ключ `g` — голы по матчам подтягиваются из PLAYED сами.
