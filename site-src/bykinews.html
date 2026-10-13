@@ -451,7 +451,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
         <ul class="fx" id="upcoming"></ul>
       </div>
       <div>
-        <div class="sub">Сыгранные <span class="form" id="form" aria-label="Форма в последних пяти турах РПЛ"></span></div>
+        <div class="sub">Сыгранные <span class="form" id="form" aria-label="Форма в последних пяти матчах"></span></div>
         <ul class="fx" id="played"></ul>
         <button class="more" id="more" type="button" aria-expanded="false">Показать все матчи</button>
       </div>
@@ -826,7 +826,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   }
   if (moreNews) { foldNews(false); moreNews.addEventListener('click', function () { foldNews(moreNews.getAttribute('aria-expanded') !== 'true'); }); }
 
-  var rpl = played.filter(function (m) { return m[1].indexOf('РПЛ') === 0; }).slice(0, 5).reverse();
+  var rpl = played.slice(0, 5).reverse();
   document.getElementById('form').innerHTML = 'форма ' + rpl.map(function (m) {
     var r = resClass(m[4], m[5]); return '<span class="res ' + r[0] + '" title="' + r[2] + ', ' + clubs[m[2]][0] + '">' + r[1] + '</span>';
   }).join('');
@@ -863,7 +863,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
     var hm = d.hour + ':' + d.minute;
     return (d.day === now.day && d.month === now.month) ? hm : (+d.day) + ' ' + MONTHS[+d.month - 1] + ' · ' + hm;
   }
-  function gapMore(t) { return String(t).replace(/\s*(Читать (?:дальше|далее)\S*)/gi, ' <b>$1</b>'); }
+  function gapMore(t) { return String(t).replace(/([а-яё0-9»)])([А-ЯЁ])/g, '$1. $2').replace(/\s*(Читать (?:дальше|далее)\S*)/gi, ' <b>$1</b>'); }
   function escHtml(t) { var e = document.createElement('div'); e.textContent = String(t); return e.innerHTML.replace(/"/g, '&quot;'); }
   function dedupNews(list) {
     function words(t) { return String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).filter(function (w) { return w.length > 3; }).map(function (w) { return w.slice(0, 6); }); }

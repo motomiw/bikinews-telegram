@@ -211,7 +211,7 @@ NEWS_JS = r'''
     return '<li><article class="np-item"><time class="mono">' + time + '</time><div class="np-body">' +
       '<div class="np-meta"><span class="src-name">' + esc(n.source) + '</span></div>' +
       '<h3><a href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.title) + ' <span class="ext">↗</span></a></h3>' +
-      (n.text ? '<p>' + esc(n.text).replace(/\s*(Читать (?:дальше|далее)\S*)/gi, ' <b>$1</b>') + '</p>' : '') + '</div></article></li>';
+      (n.text ? '<p>' + esc(n.text).replace(/([а-яё0-9»)])([А-ЯЁ])/g, '$1. $2').replace(/\s*(Читать (?:дальше|далее)\S*)/gi, ' <b>$1</b>') + '</p>' : '') + '</div></article></li>';
   }
 
   function render() {
