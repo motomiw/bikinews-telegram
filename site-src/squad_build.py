@@ -240,8 +240,8 @@ main.cl { display: block; padding-block: 8px 56px; }
 .cb ul { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
 .cb p { margin: 0 0 8px; }
 .tline { list-style: none; padding: 0 !important; }
-.tline li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px; }
-.tline li > b { font-family: var(--font-mono); font-size: 13px; color: var(--accent); padding-top: 2px; }
+.tline li { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 14px; align-items: baseline; }
+.tline li > b { font-family: var(--font-display); font-weight: 800; font-size: 19px; color: var(--accent); }
 .cl .btn { display: inline-block; margin-top: 10px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; border-radius: 999px; padding: 8px 14px; font-size: 14px; }
 .cl .muted { color: var(--muted); font-size: 13px; }
 .cl .maps { display: flex; flex-wrap: wrap; gap: 8px; }
