@@ -295,7 +295,7 @@ club_main = f'''<main class="wrap cl" id="top">
       <p class="muted" style="margin-top:8px">* время предварительное</p>
       <a class="btn" href="matches.html">Все матчи →</a></section>
   </div>
-  <p class="cl-note">Источники: <a href="https://www.euro-football.ru/article/29/1005917172_chempionskiy_titul_rpl__pervyiy_trofey_krasnodara_v_klubnoy_istorii" target="_blank" rel="noopener">Евро-Футбол</a> (история, чемпионство), <a href="https://kuban.aif.ru/sport/-krasnodar-v-borbe-za-kubok-rossii-put-k-finalu-sezona-2025-2026" target="_blank" rel="noopener">АиФ-Кубань</a> (финал Кубка 2026), <a href="https://www.livesport.ru/football/2026/05/17/rpl_results/" target="_blank" rel="noopener">Livesport</a> (итоги РПЛ 2025/26), <a href="https://www.vedomosti.ru/sport/football/articles/2024/03/30/1028958-vozvraschenie" target="_blank" rel="noopener">Ведомости</a> (возвращение Мусаева), <a href="https://www.putevka.com/krasnodar/krasnodar/sight/stadion-krasnodar" target="_blank" rel="noopener">Putevka</a> (стадион), <a href="https://fckrasnodar.ru/fan/news/object/?object_id=154135" target="_blank" rel="noopener">официальный сайт клуба</a> (билеты).</p>
+  <p class="cl-note">По данным <a href="https://fckrasnodar.ru/" target="_blank" rel="noopener">официального сайта клуба</a> и спортивных СМИ.</p>
 </main>
 '''
 club_page = (head('Клуб «Краснодар»: история, стадион, билеты — Быки News', 'ФК «Краснодар»: история клуба и трофеи, стадион Ozon Арена — адрес и как добраться, где купить билеты и что нужно для прохода.', 'club.html')
