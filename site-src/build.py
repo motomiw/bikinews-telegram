@@ -94,7 +94,7 @@ _rss.append('</channel></rss>')
 header = SRC[SRC.index('<header class="site-head">'):SRC.index('</header>') + len('</header>')]
 header = header.replace('href="#top"', 'href="./"')
 HEADER_BASE = header
-TG_LINK = re.search(r'<a class="cta tg".*?</a>\s*<a class="mx".*?</a>', SRC, flags=re.S).group(0)
+TG_LINK = re.search(r'<a class="cta tg".*?</a>\s*<a class="mx".*?</a>\s*<button class="a11y-btn".*?</button>', SRC, flags=re.S).group(0)
 def nav_header(cur):
     items = [('./', 'Главная', ''), ('matches.html', 'Матчи', 'matches'), ('./#table', 'Таблица', ''), ('squad.html', 'Состав', 'squad'), ('news.html', 'Новости', 'news'), ('club.html', 'Клуб', 'club')]
     nav = '<nav class="nav" aria-label="Разделы">\n' + ''.join(
