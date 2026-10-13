@@ -188,7 +188,7 @@ SQUAD_JS = r'''
 
 squad_main = f'''<main class="wrap sq" id="top">
   <div class="sq-head">
-    <h1>Состав «Краснодара» 2026/27</h1>
+    <h1>Состав ФК «Краснодар» 2026/27</h1>
     <p>Игроки, которые выходили на поле в сезоне 2026/27. Статистика каждого приведена отдельно по РПЛ и Кубку России. Главный тренер — {COACH}.</p>
     <p>Чтобы посмотреть голы игрока по матчам, откройте «Голы в сезоне» в его карточке.</p>
     <span class="sq-upd">Обновлено: {SQUAD_UPDATED}</span>
@@ -207,8 +207,8 @@ squad_main = f'''<main class="wrap sq" id="top">
   <p class="sq-note">Статистика: <a href="https://www.sports.ru/krasnodar/stat/" target="_blank" rel="noopener">Sports.ru</a> и протоколы <a href="https://www.rfs.ru/" target="_blank" rel="noopener">РФС</a>.</p>
 </main>
 '''
-squad_page = (head('Состав «Краснодара» 2026/27 — Быки News', 'Состав ФК «Краснодар» в сезоне 2026/27: номера, возраст и статистика каждого игрока в РПЛ и Кубке России — игры, голы, передачи.', 'squad.html')
-              + '<title>Состав «Краснодара» 2026/27 — Быки News</title>\n'
+squad_page = (head('Состав ФК «Краснодар» 2026/27: игроки и статистика — Быки News', 'Состав ФК «Краснодар» в сезоне 2026/27: номера, возраст и статистика каждого игрока в РПЛ и Кубке России — игры, голы, передачи.', 'squad.html')
+              + '<title>Состав ФК «Краснодар» 2026/27: игроки и статистика — Быки News</title>\n'
               + SRC[SRC.index('<style>'):style_end].replace('</style>', SQUAD_CSS + '</style>')
               + '\n</head>\n<body>\n' + nav_header('squad') + '\n\n' + squad_main + '\n' + footer + '\n\n<script>' + SQUAD_JS + '</script>\n</body>\n</html>\n')
 (OUT / 'squad.html').write_text(squad_page, encoding='utf-8')
@@ -256,7 +256,7 @@ main.cl { display: block; padding-block: 8px 56px; }
 '''
 club_main = f'''<main class="wrap cl" id="top">
   <div class="cl-head">
-    <h1>Клуб и болельщикам</h1>
+    <h1>ФК «Краснодар»: клуб и болельщикам</h1>
     <p>Коротко о «Краснодаре», стадионе Ozon Арена и о том, как попасть на матч.</p>
   </div>
   <div class="kpis">
@@ -298,8 +298,8 @@ club_main = f'''<main class="wrap cl" id="top">
   <p class="cl-note">По данным <a href="https://fckrasnodar.ru/" target="_blank" rel="noopener">официального сайта клуба</a> и спортивных СМИ.</p>
 </main>
 '''
-club_page = (head('Клуб «Краснодар»: история, стадион, билеты — Быки News', 'ФК «Краснодар»: история клуба и трофеи, стадион Ozon Арена — адрес и как добраться, где купить билеты и что нужно для прохода.', 'club.html')
-             + '<title>Клуб «Краснодар»: история, стадион, билеты — Быки News</title>\n'
+club_page = (head('ФК «Краснодар»: история, стадион Ozon Арена, билеты — Быки News', 'ФК «Краснодар»: история клуба и трофеи, стадион Ozon Арена — адрес и как добраться, где купить билеты и что нужно для прохода.', 'club.html')
+             + '<title>ФК «Краснодар»: история, стадион Ozon Арена, билеты — Быки News</title>\n'
              + SRC[SRC.index('<style>'):style_end].replace('</style>', CLUB_CSS + '</style>')
              + '\n</head>\n<body>\n' + nav_header('club') + '\n\n' + club_main + '\n' + footer + '\n</body>\n</html>\n')
 (OUT / 'club.html').write_text(club_page, encoding='utf-8')

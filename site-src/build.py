@@ -42,7 +42,7 @@ def head(title, desc, path=''):
 
 # ---------- главная ----------
 style_end = SRC.index('</style>') + len('</style>')
-INDEX_TITLE = 'Быки News — новости ФК «Краснодар»'
+INDEX_TITLE = 'ФК «Краснодар»: новости, матчи, таблица РПЛ — Быки News'
 INDEX_DESC = ('Новости ФК «Краснодар» каждый день: итоги и анонсы матчей, слова Мусаева и игроков, '
               'травмы, трансферы, таблица РПЛ и бомбардиры. Неофициальный фан-сайт о Быках.')
 INDEX_LD = ('<script type="application/ld+json">' + json.dumps({
@@ -76,13 +76,22 @@ for n, li in enumerate(re.findall(r'<li><article>(.*?)</article></li>', feed_htm
         'url': html.unescape(a.group(1)),
         'source': html.unescape(re.sub(r'^Источник:\s*|\s*↗$', '', a.group(2)).strip()),
     })
+# у каждого пересказа своя страница: <транслит заголовка>-<id>.html
+_TR = dict(zip('абвгдеёжзийклмнопрстуфхцчшщъыьэюя', ['a','b','v','g','d','e','e','zh','z','i','y','k','l','m','n','o','p','r','s','t','u','f','h','ts','ch','sh','sch','','y','','e','yu','ya']))
+def news_slug(title, nid):
+    t = ''.join(_TR.get(c, c) for c in title.lower())
+    t = re.sub(r'[^a-z0-9]+', '-', t).strip('-')
+    t = t[:60].rsplit('-', 1)[0] if len(t) > 60 else t
+    return (t + '-' if t else '') + nid + '.html'
+for _it in items:
+    _it['page'] = news_slug(_it['title'], _it['id'])
 from email.utils import formatdate as _fd
 _rss = ['<?xml version="1.0" encoding="UTF-8"?>', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>',
         '<title>Быки News — новости ФК «Краснодар»</title>', '<link>https://bikinews.ru/</link>',
         '<atom:link href="https://bikinews.ru/rss.xml" rel="self" type="application/rss+xml"/>',
         '<description>Пересказы главных новостей о «Краснодаре» со ссылкой на источник. Неофициальный фан-проект.</description>', '<language>ru</language>']
 for _it in items[:30]:
-    _link = 'https://bikinews.ru/news.html#' + _it['id']
+    _link = 'https://bikinews.ru/' + _it['page']
     _desc = (_it['paras'][0] if _it['paras'] else '') + ' Источник: ' + _it['source'] + '.'
     _rss.append('<item><title>' + html.escape(_it['title']) + '</title><link>' + _link + '</link><guid isPermaLink="false">bikinews-' + _it['id'] + '</guid>'
                 + '<pubDate>' + _fd(_it['ts']) + '</pubDate><description>' + html.escape(_desc) + '</description></item>')
@@ -196,7 +205,7 @@ NEWS_JS = r'''
     if (n.own) {
       return '<li><article class="np-item own-item" id="' + esc(n.id) + '"><time class="mono">' + time + '</time><div class="np-body">' +
         '<div class="np-meta"><span class="own">Пересказ</span><span>' + esc(n.tag) + '</span></div>' +
-        '<h3>' + esc(n.title) + '</h3>' + n.paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+        '<h3>' + (n.page ? '<a href="' + esc(n.page) + '">' + esc(n.title) + '</a>' : esc(n.title)) + '</h3>' + n.paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
         '<a class="src" href="' + esc(n.url) + '" target="_blank" rel="noopener">Источник: ' + esc(n.source) + ' ↗</a></div></article></li>';
     }
     return '<li><article class="np-item"><time class="mono">' + time + '</time><div class="np-body">' +
@@ -240,7 +249,7 @@ NEWS_JS = r'''
 
 main = '''<main class="wrap np" id="top">
   <div class="np-head">
-    <h1>Новости «Краснодара»</h1>
+    <h1>Новости ФК «Краснодар»</h1>
     <p>Все материалы о Быках в одном месте: наши пересказы главного и свежие публикации спортивных изданий и официального сайта клуба. Полный текст чужих материалов — по ссылке на сайте источника. <span id="npUpd"></span></p>
   </div>
   <div class="np-tools">
@@ -257,8 +266,8 @@ main = '''<main class="wrap np" id="top">
   <button class="more np-more" id="npMore" type="button" hidden>Показать ещё</button>
 </main>
 '''
-news = (head('Новости «Краснодара» — Быки News', 'Все новости ФК «Краснодар» в одной ленте: пересказы Быки News, сайт клуба и спортивные издания.', 'news.html')
-        + '<title>Новости «Краснодара» — Быки News</title>\n'
+news = (head('Новости ФК «Краснодар» сегодня — Быки News', 'Все новости ФК «Краснодар» в одной ленте: пересказы Быки News, сайт клуба и спортивные издания.', 'news.html')
+        + '<title>Новости ФК «Краснодар» сегодня — Быки News</title>\n'
         + SRC[SRC.index('<style>'):style_end].replace('</style>', NEWS_CSS + '</style>')
         + '\n</head>\n<body>\n' + header + '\n\n' + main + '\n' + footer + '\n\n<script>' + NEWS_JS + '</script>\n</body>\n</html>\n')
 (OUT / 'news.html').write_text(news, encoding='utf-8')
@@ -267,6 +276,7 @@ print('index', len(index), 'news', len(news), 'glavnoe', len(items))
 exec(open(ROOT / 'max_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'matches_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'squad_build.py', encoding='utf-8').read())
+exec(open(ROOT / 'news_pages_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'privacy_build.py', encoding='utf-8').read())
 
 # статические файлы (шрифты, логотипы, иконки, robots, sitemap, .htaccess)
@@ -277,6 +287,6 @@ import datetime as _d
 _today = _d.date.today().isoformat()
 (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + ''.join(f'  <url><loc>https://bikinews.ru/{p}</loc><lastmod>{_today}</lastmod><changefreq>{c}</changefreq><priority>{pr}</priority></url>\n'
-              for p, c, pr in [('', 'hourly', '1.0'), ('news.html', 'hourly', '0.9'), ('matches.html', 'daily', '0.9'), ('squad.html', 'weekly', '0.8'), ('club.html', 'monthly', '0.6'), ('privacy.html', 'yearly', '0.2')])
+              for p, c, pr in [('', 'hourly', '1.0'), ('news.html', 'hourly', '0.9'), ('matches.html', 'daily', '0.9'), ('squad.html', 'weekly', '0.8'), ('club.html', 'monthly', '0.6'), ('privacy.html', 'yearly', '0.2')] + [(it['page'], 'monthly', '0.7') for it in items])
     + '</urlset>\n', encoding='utf-8')
 print('dist ->', OUT)

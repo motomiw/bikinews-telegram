@@ -128,7 +128,7 @@ if GA_ID:
                    '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
                    f"gtag('js',new Date());gtag('config','{GA_ID}');</script>\n")
 
-for _page in ['index.html', 'news.html', 'matches.html', 'squad.html', 'club.html', 'privacy.html']:
+for _page in ['index.html', 'news.html', 'matches.html', 'squad.html', 'club.html', 'privacy.html'] + [it['page'] for it in items]:
     _p = OUT / _page
     _h = _p.read_text(encoding='utf-8')
     if head_extra:

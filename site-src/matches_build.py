@@ -278,7 +278,7 @@ MATCH_JS = r'''
 n = len(PLAYED)
 main_m = f'''<main class="wrap mp" id="top">
   <div class="mp-head">
-    <h1>Матчи «Краснодара» 2026/27</h1>
+    <h1>Матчи ФК «Краснодар» 2026/27</h1>
     <p>Все игры сезона в РПЛ и Кубке России. Нажмите на матч, чтобы увидеть голы, удаления и статистику. Время московское.</p>
     <div class="sum">
       <div><b>{n}</b><small>сыграно</small></div>
@@ -299,8 +299,8 @@ main_m = f'''<main class="wrap mp" id="top">
   <p class="mp-note">Время с пометкой «предварительно» может измениться: РПЛ утверждает его за несколько недель до тура. Статистика: FotMob, «Спорт Mail», официальный сайт ФК «Краснодар».</p>
 </main>
 '''
-matches = (head('Матчи «Краснодара» 2026/27 — Быки News', 'Календарь и результаты ФК «Краснодар» в сезоне 2026/27: время матчей, голы и статистика каждой игры.', 'matches.html')
-           + '<title>Матчи «Краснодара» 2026/27 — Быки News</title>\n'
+matches = (head('ФК «Краснодар»: календарь и результаты матчей 2026/27 — Быки News', 'Календарь и результаты ФК «Краснодар» в сезоне 2026/27: время матчей, голы и статистика каждой игры.', 'matches.html')
+           + '<title>ФК «Краснодар»: календарь и результаты матчей 2026/27 — Быки News</title>\n'
            + SRC[SRC.index('<style>'):style_end].replace('</style>', MATCH_CSS + '</style>')
            + '\n</head>\n<body>\n' + nav_header('matches') + '\n\n' + main_m + '\n' + footer + '\n\n<script>' + MATCH_JS + '</script>\n</body>\n</html>\n')
 (OUT / 'matches.html').write_text(matches, encoding='utf-8')

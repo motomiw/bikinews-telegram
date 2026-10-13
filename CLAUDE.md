@@ -7,6 +7,7 @@
 - `site-src/build.py` → собирает `dist/` (index.html, news.html, matches.html, data/glavnoe.json, rss.xml, sitemap.xml + `site-src/static/*`).
 - `site-src/matches_build.py` — данные и вёрстка страницы «Матчи» (PLAYED, UPCOMING).
 - `site-src/squad_build.py` — страницы «Состав» (squad.html, данные SQUAD) и «Клуб» (club.html).
+- `site-src/news_pages_build.py` — у каждого пересказа из «Главного» своя страница `<транслит-заголовка>-<id>.html` (для поисковиков): собирается сама, попадает в sitemap и RSS, на главной и в «Новостях» заголовки ведут на неё.
 - `site-src/max_build.py` — служебная страница bikinews.ru/max.html: свежие пересказы в виде готовых постов для канала в MAX (кнопка «Скопировать пост», ссылки-слова). Собирается сама из «Главного», не индексируется.
 - `.github/workflows/deploy.yml` — при пуше в `site-src/**` собирает и выкладывает на SpaceWeb по FTP (секреты FTP_*).
 - `poster.py` + `.github/workflows/telegram.yml` — каждые 20 мин публикует новые пересказы из data/glavnoe.json в Telegram, дайджест в 12:00 и 20:00 МСК. `state.json` — что уже опубликовано, руками не править.
