@@ -311,6 +311,12 @@ nav.f-col { justify-content: center; justify-items: start; border-inline: 1px so
 @media (max-width: 380px) { .site-head .nav a { font-size: 16px; padding: 7px 8px; } }
 @media (max-width: 560px) { .site-head .nav { flex-wrap: wrap; column-gap: 0; } .site-head .nav a:not(.tg):not(.mx) { font-size: min(16px, 4.1vw); padding: 6px min(9px, 1.4vw); white-space: nowrap; } .site-head .nav a.home { display: none; } }
 @media (max-width: 560px) { .site-head .nav a.tg, .site-head .nav a.mx { font-size: 13px; gap: 5px; padding: 5px 11px; } .site-head .nav a.mx { padding: 3.5px 11px; } .site-head .nav a.tg svg, .site-head .nav a.mx svg { display: block; width: 14px; height: 14px; } }
+/* наведение на пункты меню: ореол и жёлтый текст; у Telegram и MAX — белый текст */
+.site-head .nav a { transition: color .2s ease, background-color .2s ease, box-shadow .25s ease, border-color .2s ease, transform .2s ease; }
+.site-head .nav a:not(.tg):not(.mx):hover, .site-head .nav a:not(.tg):not(.mx):focus-visible { color: var(--signal); background: var(--turf-2); box-shadow: 0 0 0 3px rgba(227,174,28,.18), 0 0 14px rgba(227,174,28,.22); }
+.site-head .nav a.tg:hover, .site-head .nav a.tg:focus-visible { color: #fff; background: #8A6508; filter: none; box-shadow: 0 0 0 3px rgba(227,174,28,.25), 0 0 16px rgba(227,174,28,.35); transform: translateY(-1px); }
+.site-head .nav a.mx:hover, .site-head .nav a.mx:focus-visible { color: #fff; background: transparent; border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.12), 0 0 14px rgba(255,255,255,.18); transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .site-head .nav a { transform: none !important; } }
 </style>
 
 <header class="site-head">
