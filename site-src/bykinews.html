@@ -851,10 +851,23 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   }
   function gapMore(t) { return String(t).replace(/\s*(Читать (?:дальше|далее)\S*)/gi, ' <b>$1</b>'); }
   function escHtml(t) { var e = document.createElement('div'); e.textContent = String(t); return e.innerHTML.replace(/"/g, '&quot;'); }
+  function dedupNews(list) {
+    function words(t) { return String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).filter(function (w) { return w.length > 3; }).map(function (w) { return w.slice(0, 6); }); }
+    var kept = [];
+    list.forEach(function (n) {
+      var a = words(n.title), dup = kept.some(function (k) {
+        if (Math.abs(k.n.ts - n.ts) > 12 * 3600) return false;
+        var b = k.w, common = a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
+        return a.length && b.length && common / Math.min(a.length, b.length) >= 0.7;
+      });
+      if (!dup) kept.push({ n: n, w: a });
+    });
+    return kept.map(function (k) { return k.n; });
+  }
   function loadLive() {
     fetch('data/news.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d || !d.items || !d.items.length) return;
-      document.getElementById('liveList').innerHTML = d.items.slice(0, 15).map(function (n) {
+      document.getElementById('liveList').innerHTML = dedupNews(d.items.slice().sort(function (a, b) { return a.ts - b.ts; })).reverse().slice(0, 15).map(function (n) {
         return '<li><a href="' + escHtml(n.url) + '" target="_blank" rel="noopener"><span class="lt mono">' + whenLabel(n.ts) + ' · <b>' + escHtml(n.source) + '</b></span>' +
           '<span class="lh">' + escHtml(n.title) + '</span>' + (n.text ? '<span class="ls">' + gapMore(escHtml(n.text)) + '</span>' : '') + '</a></li>';
       }).join('');

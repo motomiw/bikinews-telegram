@@ -152,6 +152,19 @@ NEWS_JS = r'''
     var o = {}; f.formatToParts(new Date(ts * 1000)).forEach(function (p) { o[p.type] = p.value; }); return o;
   }
   function esc(t) { var e = document.createElement('div'); e.textContent = String(t == null ? '' : t); return e.innerHTML.replace(/"/g, '&quot;'); }
+  function dedupNews(list) {
+    function words(t) { return String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).filter(function (w) { return w.length > 3; }).map(function (w) { return w.slice(0, 6); }); }
+    var kept = [];
+    list.forEach(function (n) {
+      var a = words(n.title), dup = kept.some(function (k) {
+        if (Math.abs(k.n.ts - n.ts) > 12 * 3600) return false;
+        var b = k.w, common = a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
+        return a.length && b.length && common / Math.min(a.length, b.length) >= 0.7;
+      });
+      if (!dup) kept.push({ n: n, w: a });
+    });
+    return kept.map(function (k) { return k.n; });
+  }
   function kind(n) { return n.own ? 'own' : (n.source.indexOf('ФК') === 0 ? 'club' : 'media'); }
   function getJSON(u) { return fetch(u + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
 
@@ -161,6 +174,9 @@ NEWS_JS = r'''
     [res[1], res[2]].forEach(function (d) {
       (d && d.items || []).forEach(function (n) { if (!seen[n.url]) { seen[n.url] = 1; all.push(n); } });
     });
+    var own = all.filter(function (n) { return n.own; }), ext = all.filter(function (n) { return !n.own; });
+    ext.sort(function (a, b) { return a.ts - b.ts; });
+    all = own.concat(dedupNews(ext));
     all.sort(function (a, b) { return b.ts - a.ts; });
     var upd = Math.max(res[1] ? res[1].updated || 0 : 0, res[2] ? res[2].updated || 0 : 0);
     if (upd) { var u = msk(upd); document.getElementById('npUpd').textContent = 'Лента изданий обновлена ' + (+u.day) + ' ' + MONTHS_G[+u.month - 1] + ' в ' + u.hour + ':' + u.minute + '.'; }
