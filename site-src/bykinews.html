@@ -757,8 +757,13 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   ];
 
   // Страницы клубов на Sports.ru (новости, состав, календарь)
-  var CLUB_URL = 'https://www.sports.ru/football/club/';
-  var clubUrl = { 'dynamo-mkh': 'dinamo-mx', krylia: 'krylia-sovetov', rodina: 'rodina-moscow' };
+  // Официальные сайты клубов
+  var clubUrl = {
+    dynamo: 'https://fcdynamo.ru/', cska: 'https://pfc-cska.com/', zenit: 'https://fc-zenit.ru/', krasnodar: 'https://fckrasnodar.ru/',
+    spartak: 'https://spartak.com/', 'dynamo-mkh': 'https://dinamo-mx.ru/', baltika: 'https://www.fc-baltika.ru/', rubin: 'https://www.rubin-kazan.ru/',
+    orenburg: 'https://fcorenburg.ru/', krylia: 'https://pfcks.ru/', rostov: 'https://www.fc-rostov.ru/', akhmat: 'https://fc-akhmat.ru/',
+    lokomotiv: 'https://www.fclm.ru/', akron: 'https://fcakron.ru/', rodina: 'https://fcrodina.com/', fakel: 'https://fakelfc.ru/'
+  };
 
   // ===== ОТРИСОВКА =====
   function pos(slug) { for (var i = 0; i < table.length; i++) if (table[i][0] === slug) return i + 1; return null; }
@@ -823,7 +828,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
     if (n === 13 || n === 14) cls.push('zone-po');
     if (n === 15 || n === 16) cls.push('zone-rel');
     if (n === 13) cls.push('cut');
-    return '<tr class="' + cls.join(' ') + '"><td class="pos">' + n + '</td><td class="l team"><a class="tn" href="' + CLUB_URL + (clubUrl[t[0]] || t[0]) + '/" target="_blank" rel="noopener" title="Новости клуба на Sports.ru">' + badge(t[0]) + clubs[t[0]][0] + '</a></td>' +
+    return '<tr class="' + cls.join(' ') + '"><td class="pos">' + n + '</td><td class="l team"><a class="tn" href="' + (clubUrl[t[0]] || '#') + '" target="_blank" rel="noopener" title="Официальный сайт клуба">' + badge(t[0]) + clubs[t[0]][0] + '</a></td>' +
       '<td>' + t[1] + '</td><td class="opt">' + t[2] + '</td><td class="opt">' + t[3] + '</td><td class="opt">' + t[4] + '</td>' +
       '<td class="mono">' + t[5] + '–' + t[6] + '</td><td class="pts">' + t[7] + '</td></tr>';
   }).join('');
