@@ -898,10 +898,14 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
     });
     return kept.map(function (k) { return k.n; });
   }
+  // Только новости о «Краснодаре»: news.php тащит и чужие (голы «Зенита» и т. п.).
+  // Пропускаем материал, если «Краснодар», Быки, тренер или игрок клуба есть в заголовке, либо это сайт клуба.
+  var KRD_RE = /краснодар|(^|[^а-яё])бык(и|ов|ам|ами|ах)?([^а-яё]|$)|мусаев|галицк|ozon арен|озон арен|кордоб|агкацев|батчи|жубал|оласа|тормен|вахани|пальцев|хмарин|черников|аугусто|боселли|кривцов|уткин|оздоев|воробь[её]в|корякин|буркин|садчиков/i;
+  function aboutKrd(n) { return String(n.source || '').indexOf('ФК') === 0 || KRD_RE.test(String(n.title || '').replace(/ё/g, 'е').replace(/воробьев/g, 'воробьёв')); }
   function loadLive() {
     fetch('data/news.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d || !d.items || !d.items.length) return;
-      document.getElementById('liveList').innerHTML = dedupNews(d.items.slice().sort(function (a, b) { return a.ts - b.ts; })).reverse().slice(0, 15).map(function (n) {
+      document.getElementById('liveList').innerHTML = dedupNews(d.items.filter(aboutKrd).sort(function (a, b) { return a.ts - b.ts; })).reverse().slice(0, 15).map(function (n) {
         return '<li><a href="' + escHtml(n.url) + '" target="_blank" rel="noopener"><span class="lt mono">' + whenLabel(n.ts) + ' · <b>' + escHtml(n.source) + '</b></span>' +
           '<span class="lh">' + escHtml(n.title) + '</span>' + (n.text ? '<span class="ls">' + gapMore(escHtml(n.text)) + '</span>' : '') + '</a></li>';
       }).join('');
