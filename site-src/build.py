@@ -177,7 +177,13 @@ NEWS_JS = r'''
   // Только новости о «Краснодаре»: news.php тащит и чужие (голы «Зенита» и т. п.).
   // Пропускаем материал, если «Краснодар», Быки, тренер или игрок клуба есть в заголовке, либо это сайт клуба.
   var KRD_RE = /краснодар|(^|[^а-яё])бык(и|ов|ам|ами|ах)?([^а-яё]|$)|мусаев|галицк|ozon арен|озон арен|кордоб|агкацев|батчи|жубал|оласа|тормен|вахани|пальцев|хмарин|черников|аугусто|боселли|кривцов|уткин|оздоев|воробь[её]в|корякин|буркин|садчиков/i;
-  function aboutKrd(n) { return String(n.source || '').indexOf('ФК') === 0 || KRD_RE.test(String(n.title || '').replace(/ё/g, 'е').replace(/воробьев/g, 'воробьёв')); }
+  function aboutKrd(n) {
+    if (String(n.source || '').indexOf('ФК') === 0) return true;
+    var t = String(n.title || '').toLowerCase().replace(/ё/g, 'е').replace(/воробьев/g, 'воробьёв');
+    // «Мусаев» без других признаков «Краснодара» в материале о «Зените» — это игрок «Зенита», не наш тренер
+    if (/зенит/.test(t) && !KRD_RE.test(t.replace(/мусаев[а-я]*/g, ''))) return false;
+    return KRD_RE.test(t);
+  }
   function kind(n) { return n.own ? 'own' : (n.source.indexOf('ФК') === 0 ? 'club' : 'media'); }
   function getJSON(u) { return fetch(u + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
 
