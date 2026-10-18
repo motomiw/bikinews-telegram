@@ -80,9 +80,13 @@ def main():
         new = sorted([g for g in gl if g['id'] not in st['posted']], key=lambda g: g['ts'])
         for g in new[:MAX_PER_RUN]:
             lead = g['paras'][0] if g.get('paras') else ''
-            text = (f"<b>{esc(g['title'])}</b>\n\n{esc(lead)}\n\n"
-                    f"👉 Подробнее: {SITE}news.html#{urllib.parse.quote(g['id'])}\n"
-                    f"Источник: <a href=\"{esc(g['url'])}\">{esc(g['source'])}</a>")
+            if g['url'].startswith(SITE):   # своя статья Быки News — ведём прямо на неё
+                text = (f"<b>{esc(g['title'])}</b>\n\n" + '\n\n'.join(esc(p) for p in g.get('paras', [])) +
+                        f"\n\n👉 <a href=\"{esc(g['url'])}\">Читать статью полностью</a>")
+            else:
+                text = (f"<b>{esc(g['title'])}</b>\n\n{esc(lead)}\n\n"
+                        f"👉 Подробнее: {SITE}news.html#{urllib.parse.quote(g['id'])}\n"
+                        f"Источник: <a href=\"{esc(g['url'])}\">{esc(g['source'])}</a>")
             if not send(text):
                 break
             st['posted'].append(g['id']); sent += 1

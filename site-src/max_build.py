@@ -11,8 +11,8 @@ def _when(it):
 _cards = []
 for it in items[:25]:
     body = (f'<p><b>⚽ {_e(it["title"])}</b></p>' + ''.join(f'<p>{_e(p)}</p>' for p in it['paras'])
-            + f'<p>👉 <a href="https://bikinews.ru/{it["page"]}">Подробнее на сайте</a><br>'
-            + f'📰 Источник: <a href="{_e(it["url"])}">{_e(it["source"])}</a><br>'
+            + f'<p>👉 <a href="https://bikinews.ru/{it["page"]}">' + ('Читать статью полностью' if it.get('article') else 'Подробнее на сайте') + '</a><br>'
+            + ('' if it.get('article') else f'📰 Источник: <a href="{_e(it["url"])}">{_e(it["source"])}</a><br>')
             + '📲 <a href="https://bikinews.ru/news.html">Все новости Быки News</a></p>')
     _cards.append(f'<article class="mp"><div class="mp-top"><span>{_when(it)} · {_e(it["tag"])}</span>'
                   f'<button type="button" class="cp">Скопировать пост</button></div><div class="post">{body}</div></article>')

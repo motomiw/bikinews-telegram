@@ -85,6 +85,8 @@ def news_slug(title, nid):
     return (t + '-' if t else '') + nid + '.html'
 for _it in items:
     _it['page'] = news_slug(_it['title'], _it['id'])
+    if _it['url'].startswith('https://bikinews.ru/'):   # своя статья (article_build.py): заголовок ведёт прямо на неё
+        _it['page'] = _it['url'][len('https://bikinews.ru/'):]; _it['article'] = True
 from email.utils import formatdate as _fd
 _rss = ['<?xml version="1.0" encoding="UTF-8"?>', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>',
         '<title>Быки News — новости ФК «Краснодар»</title>', '<link>https://bikinews.ru/</link>',
@@ -287,6 +289,7 @@ exec(open(ROOT / 'max_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'matches_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'squad_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'news_pages_build.py', encoding='utf-8').read())
+exec(open(ROOT / 'article_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'privacy_build.py', encoding='utf-8').read())
 
 # статические файлы (шрифты, логотипы, иконки, robots, sitemap, .htaccess)

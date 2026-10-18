@@ -36,6 +36,8 @@ def _date(it, with_time=True):
 
 _style = SRC[SRC.index('<style>'):style_end].replace('</style>', NP_CSS + '</style>')
 for _i, it in enumerate(items):
+    if it.get('article'):   # своя статья — страницу собирает article_build.py
+        continue
     title = it['title']
     desc = (it['paras'][0] if it['paras'] else title)
     desc = desc if len(desc) <= 160 else desc[:157].rsplit(' ', 1)[0] + '…'
