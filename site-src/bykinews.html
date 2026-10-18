@@ -428,10 +428,10 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
       <div class="match-top"><span class="eyebrow" id="match-title">Ближайший матч</span><span class="mono" style="font-size:13px">РПЛ · 12 тур</span></div>
       <div class="teams">
         <div><span class="club big us" data-logo="krasnodar">КРД</span><div class="name">Краснодар</div><div class="pos">5 место в РПЛ</div></div>
-        <div class="kick mono">19:30*<small>сб, 24 окт</small></div>
+        <div class="kick mono">19:30<small>сб, 24 окт</small></div>
         <div><span class="club big" data-logo="baltika">БАЛ</span><div class="name">Балтика</div><div class="pos">7 место в РПЛ</div></div>
       </div>
-      <div class="countdown"><span>Дома, Краснодар · *время предварительное</span><span id="cdwrap">до матча <b id="cd">3 дня</b></span></div>
+      <div class="countdown"><span>Дома, «Ozon Арена» · начало по Москве</span><span id="cdwrap">до матча <b id="cd">3 дня</b></span></div>
       <div class="last">
         <span class="lastl">Прошлый матч · РПЛ, 11 тур</span><span class="lastm"><span class="club" data-logo="lokomotiv">ЛОК</span><b>Локомотив — Краснодар</b><span class="club us" data-logo="krasnodar">КРД</span></span>
         <span style="display:flex;gap:8px;align-items:center"><span class="score mono">3:3</span><span class="res d" title="Ничья">Н</span></span>
@@ -802,9 +802,9 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 
   // Ближайшие: дата, день, турнир, соперник, дома?, время (null — уточняется)
   var upcoming = [
-    ['24 окт', 'сб', 'РПЛ · 12 тур', 'baltika', true, null],
-    ['27 окт', 'вт', 'Кубок России', 'dynamo', true, null],
-    ['31 окт', 'сб', 'РПЛ · 13 тур', 'rodina', false, null]
+    ['24 окт', 'сб', 'РПЛ · 12 тур', 'baltika', true, '19:30'],
+    ['27 окт', 'вт', 'Кубок России', 'dynamo', true, '20:30'],
+    ['31 окт', 'сб', 'РПЛ · 13 тур', 'rodina', false, '19:45']
   ];
 
   // Сыгранные (свежие сверху): дата, турнир, соперник, дома?, голы Краснодара, голы соперника
