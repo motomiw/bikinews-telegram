@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "ru.bikinews.app",
+    "sha256_cert_fingerprints": ["62:15:91:96:79:56:71:2E:8B:3E:52:15:D0:86:93:1F:E2:EA:0E:D7:2A:70:FF:EB:36:46:76:83:9C:9F:33:FE"]
+  }
+}]

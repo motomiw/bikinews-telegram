@@ -37,7 +37,12 @@ def head(title, desc, path=''):
             f'<meta name="description" content="{desc}">\n'
             f'<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,{FAV}">\n'
             '<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<link rel="alternate" type="application/rss+xml" title="Быки News" href="https://bikinews.ru/rss.xml">\n'
-            '<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>\n')
+            '<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}'
+            'html.app .site-head .nav>a,html.app .site-head .nav::before{display:none!important}'
+            'html.app .site-head .wrap{flex-wrap:nowrap!important;justify-content:space-between!important;min-height:56px;padding-block:6px!important}'
+            'html.app .site-head .logo{flex-basis:auto!important}html.app .site-head .nav{margin-left:auto;flex-basis:auto!important}</style>\n'
+            # в приложении Быки News для Android разделы — в нижней панели приложения, ссылки шапки прячем
+            '<script>if(/BikinewsApp\\//.test(navigator.userAgent))document.documentElement.classList.add("app")</script>\n')
 
 
 # ---------- главная ----------

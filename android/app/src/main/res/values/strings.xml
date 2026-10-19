@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Быки News</string>
+    <string name="tab_home">Главная</string>
+    <string name="tab_news">Новости</string>
+    <string name="tab_matches">Матчи</string>
+    <string name="tab_table">Таблица</string>
+    <string name="tab_more">Ещё</string>
+    <string name="more_squad">Состав</string>
+    <string name="more_club">Клуб и стадион</string>
+    <string name="more_tg">Канал в Telegram</string>
+    <string name="more_max">Канал в MAX</string>
+    <string name="more_share">Поделиться страницей</string>
+    <string name="more_privacy">Политика конфиденциальности</string>
+    <string name="more_about">О приложении</string>
+    <string name="offline_title">Нет соединения</string>
+    <string name="offline_text">Проверьте интернет и попробуйте ещё раз. Страницы, которые вы уже открывали, доступны и без сети.</string>
+    <string name="offline_retry">Повторить</string>
+    <string name="about_title">Быки News</string>
+    <string name="about_text">Неофициальное фан-приложение о ФК «Краснодар». Не связано с клубом и не представляет его.\n\nНовости — наши пересказы своими словами, под каждой есть ссылка на первоисточник. Таблица, матчи и состав обновляются каждый день.\n\nПриложение не требует регистрации и само не собирает персональные данные. Подробности — в политике конфиденциальности на bikinews.ru.\n\nСвязь: i@bikinews.ru\nВерсия %1$s</string>
+    <string name="about_ok">Понятно</string>
+    <string name="about_mail">Написать нам</string>
+    <string name="share_via">Поделиться</string>
+    <string name="no_app">Не нашлось приложения, чтобы открыть ссылку</string>
+</resources>

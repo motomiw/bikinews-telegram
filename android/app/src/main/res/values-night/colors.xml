@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="turf">#0F3622</color>
+    <color name="bg">#0C120F</color>
+    <color name="surface">#131B17</color>
+    <color name="ink">#E6ECE7</color>
+    <color name="muted">#93A399</color>
+    <color name="line">#24312A</color>
+    <color name="accent">#55B983</color>
+    <color name="accent_soft">#183526</color>
+    <color name="signal">#EDBE3E</color>
+</resources>
