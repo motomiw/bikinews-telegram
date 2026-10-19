@@ -57,7 +57,14 @@ sh('pm', 'set-app-links-user-selection', '--user', '0', '--package', PKG, 'true'
 sh('cmd', 'uimode', 'night', 'no')
 sh('am', 'start', '-W', '-n', PKG + '/.MainActivity')
 time.sleep(10)
-tap_node('text', 'Понятно')            # уведомление о cookie
+# уведомление о cookie: ищем кнопку «Понятно», иначе жмём по её обычному месту
+for _ in range(4):
+    if tap_node('text', 'Понятно'):
+        break
+    time.sleep(3)
+else:
+    sh('input', 'tap', '540', '2040')
+time.sleep(2)
 shot('01-home', 3)
 sh('input', 'swipe', '540', '1600', '540', '500', '400')
 shot('02-home-feed', 2)
