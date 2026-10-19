@@ -11,6 +11,7 @@
 - `site-src/max_build.py` — служебная страница bikinews.ru/max.html: свежие пересказы в виде готовых постов для канала в MAX (кнопка «Скопировать пост», ссылки-слова). Собирается сама из «Главного», не индексируется.
 - `.github/workflows/deploy.yml` — при пуше в `site-src/**` собирает и выкладывает на SpaceWeb по FTP (секреты FTP_*).
 - `poster.py` + `.github/workflows/telegram.yml` — каждые 20 мин публикует новые пересказы из data/glavnoe.json в Telegram, дайджест в 12:00 и 20:00 МСК. `state.json` — что уже опубликовано, руками не править.
+- `android/` — приложение «Быки News» для Android (пакет ru.bikinews.app, Java, WebView + нативная нижняя панель). `.github/workflows/android.yml` собирает подписанные APK/AAB (секреты ANDROID_KEYSTORE_B64, ANDROID_KEYSTORE_PASSWORD; versionCode = номер запуска), `android-check.yml` гоняет приложение на эмуляторе и кладёт скриншоты в ветку `android-screens`. Сайт в приложении узнаётся по `BikinewsApp/` в user-agent (класс `html.app` — прячет ссылки шапки). `site-src/static/.well-known/assetlinks.json` — отпечаток ключа подписи, не менять. Новости в приложении обновляются вместе с сайтом, новую версию выпускать не нужно.
 - На хостинге отдельно живут `news.php` (сбор ленты по cron), `data/news.json`, `data/archive.json`, `data/tg-config.php` — их в репозитории нет и деплой их не трогает.
 
 ## Как добавить новость в «Главное»
