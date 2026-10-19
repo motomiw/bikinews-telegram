@@ -4,7 +4,7 @@
 # ===== НАСТРОЙКИ (заполнить, когда появятся коды) =====
 GA_ID = 'G-1XQFQXP4DG'          # Google Analytics 4, вид 'G-XXXXXXXXXX'; пусто — аналитика не подключается
 GOOGLE_VERIFY = ''    # Google Search Console: значение content из <meta name="google-site-verification" ...>
-YANDEX_VERIFY = ''    # Яндекс.Вебмастер: значение content из <meta name="yandex-verification" ...>
+YANDEX_VERIFY = '0f3fa5f2f3f50b3c'    # Яндекс.Вебмастер: значение content из <meta name="yandex-verification" ...>
 POLICY_DATE = '19 октября 2026 г.'
 
 PRIVACY_CSS = r'''
