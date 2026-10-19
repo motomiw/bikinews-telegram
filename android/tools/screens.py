@@ -29,11 +29,23 @@ def nodes():
 
 def tap_node(attr, value, xml=None):
     xml = xml or nodes()
-    m = re.search(r'<node[^>]*' + attr + r'="' + re.escape(value) + r'"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml)
+    ms = re.findall(r'<node[^>]*' + attr + r'="' + re.escape(value) + r'"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml)
+    m = ms[-1] if ms else None   # последний — верхний слой (меню, диалог)
     if not m:
         print('not found', attr, value, flush=True)
         log.write('NOT FOUND ' + value + '\n')
         return False
+    x1, y1, x2, y2 = map(int, m)
+    sh('input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
+    return True
+
+
+def tab(label, xml=None):
+    """Кнопка нижней панели приложения (не одноимённая ссылка на странице)."""
+    xml = xml or nodes()
+    m = re.search(r'<node[^>]*class="android.widget.LinearLayout"[^>]*content-desc="' + re.escape(label) + r'"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml)
+    if not m:
+        print('tab not found', label, flush=True); log.write('TAB NOT FOUND ' + label + '\n'); return False
     x1, y1, x2, y2 = map(int, m.groups())
     sh('input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
     return True
@@ -41,6 +53,7 @@ def tap_node(attr, value, xml=None):
 
 sh('settings', 'put', 'global', 'window_animation_scale', '0')
 sh('settings', 'put', 'global', 'transition_animation_scale', '0')
+sh('pm', 'set-app-links-user-selection', '--user', '0', '--package', PKG, 'true', 'all')
 sh('cmd', 'uimode', 'night', 'no')
 sh('am', 'start', '-W', '-n', PKG + '/.MainActivity')
 time.sleep(10)
@@ -48,26 +61,26 @@ tap_node('text', 'Понятно')            # уведомление о cookie
 shot('01-home', 3)
 sh('input', 'swipe', '540', '1600', '540', '500', '400')
 shot('02-home-feed', 2)
-tap_node('content-desc', 'Новости'); shot('03-news', 6)
-tap_node('content-desc', 'Матчи'); shot('04-matches', 6)
-tap_node('content-desc', 'Таблица'); shot('05-table', 7)
-tap_node('content-desc', 'Ещё'); shot('06-more-menu', 2)
+tab('Новости'); shot('03-news', 6)
+tab('Матчи'); shot('04-matches', 6)
+tab('Таблица'); shot('05-table', 7)
+tab('Ещё'); shot('06-more-menu', 2)
 tap_node('text', 'Состав'); shot('07-squad', 7)
-tap_node('content-desc', 'Ещё'); time.sleep(1); tap_node('text', 'О приложении'); shot('08-about', 2)
+tab('Ещё'); time.sleep(1); tap_node('text', 'О приложении'); shot('08-about', 2)
 sh('input', 'keyevent', 'KEYCODE_BACK')
-tap_node('content-desc', 'Главная'); time.sleep(5)
+tab('Главная'); time.sleep(5)
 sh('cmd', 'uimode', 'night', 'yes'); shot('09-home-dark', 8)
-tap_node('content-desc', 'Матчи'); shot('10-matches-dark', 6)
+tab('Матчи'); shot('10-matches-dark', 6)
 sh('cmd', 'uimode', 'night', 'no'); time.sleep(3)
 # без сети
 sh('svc', 'wifi', 'disable'); sh('svc', 'data', 'disable'); time.sleep(3)
-tap_node('content-desc', 'Новости'); shot('11-offline-cached', 6)
+tab('Новости'); shot('11-offline-cached', 6)
 sh('am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://bikinews.ru/club.html')
 shot('12-offline-new', 6)
 sh('svc', 'wifi', 'enable'); sh('svc', 'data', 'enable'); time.sleep(5)
 tap_node('text', 'Повторить'); shot('13-back-online', 7)
 # ссылка из Telegram открывается в приложении
-sh('am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://bikinews.ru/news.html')
+sh('am', 'start', '-a', 'android.intent.action.VIEW', '-d', 'https://bikinews.ru/squad.html')
 shot('14-deeplink', 6)
 sh('dumpsys', 'package', 'domain-preferred-apps')
 open(os.path.join(OUT, 'domains.txt'), 'w').write(sh('pm', 'get-app-links', PKG))
