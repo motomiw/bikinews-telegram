@@ -157,10 +157,11 @@ AR_CSS = r'''
 _ae = lambda s: _ha.escape(str(s), quote=True)
 _ar_style = SRC[SRC.index('<style>'):style_end].replace('</style>', NP_CSS + AR_CSS + '</style>')
 for _a in ARTICLES:
+    _og = make_og(_a['slug'], _a['title'], _a['tag'], _a['date_txt'])
     _ld = _ja.dumps({'@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': _a['title'][:110],
                      'description': _a['desc'], 'datePublished': _a['date_iso'], 'dateModified': _a['date_iso'],
                      'inLanguage': 'ru', 'mainEntityOfPage': 'https://bikinews.ru/' + _a['slug'],
-                     'image': ['https://bikinews.ru/og-image.jpg'],
+                     'image': ['https://bikinews.ru/' + _og],
                      'author': {'@type': 'Organization', 'name': 'Быки News', 'url': 'https://bikinews.ru/'},
                      'publisher': {'@type': 'Organization', 'name': 'Быки News', 'url': 'https://bikinews.ru/'},
                      'about': 'ФК «Краснодар»'}, ensure_ascii=False)
@@ -174,7 +175,7 @@ for _a in ARTICLES:
   <p><a class="na-all" href="news.html">Все новости «Краснодара» →</a></p>
 </main>
 '''
-    _page = (head(_ae(_a['title']) + ' | Быки News', _ae(_a['desc']), _a['slug'])
+    _page = (head(_ae(_a['title']) + ' | Быки News', _ae(_a['desc']), _a['slug'], _og)
              .replace('<meta property="og:type" content="website">', '<meta property="og:type" content="article">')
              + f'<title>{_ae(_a["title"])} | Быки News</title>\n'
              + f'<script type="application/ld+json">{_ld}</script>\n'

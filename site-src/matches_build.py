@@ -257,6 +257,10 @@ main.mp { display: block; padding-block: 8px 56px; }
 .bar .bk { background: var(--accent); }
 .bar .bo { background: var(--line); }
 .mp-note { color: var(--muted); font-size: 13px; margin-top: 18px; }
+.mp-cal { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
+.mp-cal a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 2px solid var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; background: var(--card, transparent); }
+.mp-cal a:hover, .mp-cal a:focus-visible { background: var(--signal); color: var(--on-signal); border-color: var(--signal); }
+.mp-cal small { color: var(--muted); font-size: 13px; }
 @media (max-width: 700px) {
   .cols { grid-template-columns: minmax(0, 1fr); }
   .mt summary { grid-template-columns: 54px minmax(0, 1fr) auto 12px; gap: 8px; padding-inline: 2px; }
@@ -287,6 +291,11 @@ main_m = f'''<main class="wrap mp" id="top">
   <div class="mp-head">
     <h1>Матчи ФК «Краснодар» 2026/27</h1>
     <p>Все игры сезона в РПЛ и Кубке России. Нажмите на матч, чтобы увидеть голы, удаления и статистику. Время московское.</p>
+    <div class="mp-cal" role="group" aria-label="Календарь матчей">
+      <a href="matches.ics" download="krasnodar-matches.ics">📅 Добавить матчи в календарь</a>
+      <a href="webcal://bikinews.ru/matches.ics">Подписаться</a>
+      <small>Время и новые матчи обновляются сами</small>
+    </div>
     <div class="sum">
       <div><b>{n}</b><small>сыграно</small></div>
       <div><b>{W}–{D}–{L}</b><small>В–Н–П в осн. время</small></div>
@@ -312,3 +321,56 @@ matches = (head('ФК «Краснодар»: календарь и резуль
            + '\n</head>\n<body>\n' + nav_header('matches') + '\n\n' + main_m + '\n' + footer + '\n\n<script>' + MATCH_JS + '</script>\n</body>\n</html>\n')
 (OUT / 'matches.html').write_text(matches, encoding='utf-8')
 print('matches', len(matches), 'played', n, 'W-D-L', W, D, L, GF, GA)
+
+
+# ---- Календарь matches.ics: ближайшие матчи, время московское (UTC+3, без перехода) ----
+def _ics_esc(t):
+    return t.replace('\\', '\\\\').replace(';', '\\;').replace(',', '\\,').replace('\n', '\\n')
+
+
+def _ics_fold(line):
+    b = line.encode('utf-8')
+    if len(b) <= 74:
+        return line
+    out, cur = [], b''
+    for ch in line:
+        cb = ch.encode('utf-8')
+        if len(cur) + len(cb) > (74 if not out else 73):
+            out.append(cur.decode('utf-8')); cur = b''
+        cur += cb
+    out.append(cur.decode('utf-8'))
+    return '\r\n '.join(out)
+
+
+_stamp = _dt.datetime.now(_dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+_ev = []
+for _d, _t, _comp, _rnd, _opp, _home in UPCOMING:
+    _a, _b = ('krasnodar', _opp) if _home else (_opp, 'krasnodar')
+    _day = _dt.date.fromisoformat(_d)
+    _title = f"{CLUBN[_a]} — {CLUBN[_b]}"
+    _lines = ['BEGIN:VEVENT', f'UID:krasnodar-{_d}-{_opp}@bikinews.ru', f'DTSTAMP:{_stamp}']
+    _desc = f"{'РПЛ' if _comp == 'РПЛ' else 'Кубок России'} · {_rnd}."
+    if _t:
+        _h, _m = map(int, _t.rstrip('*').split(':'))
+        _start = _dt.datetime(_day.year, _day.month, _day.day, _h, _m) - _dt.timedelta(hours=3)
+        _end = _start + _dt.timedelta(hours=2)
+        _lines += [f'DTSTART:{_start:%Y%m%dT%H%M%SZ}', f'DTEND:{_end:%Y%m%dT%H%M%SZ}']
+        _desc += ' Начало по московскому времени.'
+        _title_full = _title
+    else:
+        _lines += [f'DTSTART;VALUE=DATE:{_day:%Y%m%d}', f'DTEND;VALUE=DATE:{(_day + _dt.timedelta(days=1)):%Y%m%d}']
+        _desc += ' Время начала пока не назначено.'
+        _title_full = _title + ' (время уточняется)'
+    _lines.append('SUMMARY:' + _ics_esc(_title_full))
+    if _home:
+        _lines.append('LOCATION:' + _ics_esc(HOME_STADIUM))
+    _lines += ['DESCRIPTION:' + _ics_esc(_desc + ' Подробности: https://bikinews.ru/matches.html'),
+               'URL:https://bikinews.ru/matches.html', 'TRANSP:TRANSPARENT']
+    if _t:
+        _lines += ['BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + _ics_esc(_title), 'TRIGGER:-PT1H', 'END:VALARM']
+    _lines.append('END:VEVENT')
+    _ev.append('\r\n'.join(_ics_fold(l) for l in _lines))
+_cal = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Быки News//bikinews.ru//RU', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+        'X-WR-CALNAME:ФК «Краснодар» — матчи', 'X-WR-TIMEZONE:Europe/Moscow', 'REFRESH-INTERVAL;VALUE=DURATION:PT12H',
+        'X-PUBLISHED-TTL:PT12H']
+(OUT / 'matches.ics').write_bytes(('\r\n'.join(_ics_fold(l) for l in _cal) + '\r\n' + '\r\n'.join(_ev) + '\r\nEND:VCALENDAR\r\n').encode('utf-8'))

@@ -42,10 +42,11 @@ for _i, it in enumerate(items):
     desc = (it['paras'][0] if it['paras'] else title)
     desc = desc if len(desc) <= 160 else desc[:157].rsplit(' ', 1)[0] + '…'
     iso = _dn.datetime.fromtimestamp(it['ts'], _MSK).isoformat()
+    og = make_og(it['page'], title, it['tag'], _date(it, False))
     ld = _jn.dumps({'@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': title[:110],
                     'datePublished': iso, 'dateModified': iso, 'inLanguage': 'ru',
                     'mainEntityOfPage': 'https://bikinews.ru/' + it['page'],
-                    'image': ['https://bikinews.ru/og-image.jpg'],
+                    'image': ['https://bikinews.ru/' + og],
                     'author': {'@type': 'Organization', 'name': 'Быки News', 'url': 'https://bikinews.ru/'},
                     'publisher': {'@type': 'Organization', 'name': 'Быки News', 'url': 'https://bikinews.ru/'},
                     'isBasedOn': it['url'], 'about': 'ФК «Краснодар»'}, ensure_ascii=False)
@@ -63,7 +64,7 @@ for _i, it in enumerate(items):
     <a class="na-all" href="news.html">Все новости →</a></section>
 </main>
 '''
-    page = (head(_e(title) + ' — ФК «Краснодар» | Быки News', _e(desc), it['page'])
+    page = (head(_e(title) + ' — ФК «Краснодар» | Быки News', _e(desc), it['page'], og)
             .replace('<meta property="og:type" content="website">', '<meta property="og:type" content="article">')
             + f'<title>{_e(title)} — ФК «Краснодар» | Быки News</title>\n'
             + f'<script type="application/ld+json">{ld}</script>\n'

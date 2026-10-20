@@ -18,7 +18,7 @@ FAV = base64.b64encode((ROOT / 'assets/favicon-32.png').read_bytes()).decode()
 YEAR = 2026
 
 
-def head(title, desc, path=''):
+def head(title, desc, path='', img='og-image.jpg'):
     url = 'https://bikinews.ru/' + path
     og = ('<meta property="og:type" content="website">\n'
           '<meta property="og:site_name" content="Быки News">\n'
@@ -26,11 +26,11 @@ def head(title, desc, path=''):
           f'<meta property="og:url" content="{url}">\n'
           f'<meta property="og:title" content="{title}">\n'
           f'<meta property="og:description" content="{desc}">\n'
-          '<meta property="og:image" content="https://bikinews.ru/og-image.jpg">\n'
+          f'<meta property="og:image" content="https://bikinews.ru/{img}">\n'
           '<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
           '<meta property="og:image:alt" content="Быки News — новости ФК «Краснодар»">\n'
           '<meta name="twitter:card" content="summary_large_image">\n'
-          '<meta name="twitter:image" content="https://bikinews.ru/og-image.jpg">\n'
+          f'<meta name="twitter:image" content="https://bikinews.ru/{img}">\n'
           f'<link rel="canonical" href="{url}">\n')
     return ('<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n' + og +
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
@@ -293,6 +293,7 @@ print('index', len(index), 'news', len(news), 'glavnoe', len(items))
 exec(open(ROOT / 'max_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'matches_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'squad_build.py', encoding='utf-8').read())
+exec(open(ROOT / 'og_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'news_pages_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'article_build.py', encoding='utf-8').read())
 exec(open(ROOT / 'privacy_build.py', encoding='utf-8').read())

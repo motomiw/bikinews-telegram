@@ -128,6 +128,7 @@ main { padding-block: 52px 72px; display: grid; gap: 64px; }
 .sec-head .src { color: var(--muted); font-size: 13px; }
 .allnews { color: var(--accent); font-weight: 600; font-size: 14px; text-decoration: none; }
 .allnews:hover { text-decoration: underline; text-underline-offset: 3px; }
+.calink { display: inline-block; margin-top: 10px; }
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
 .two > * { min-width: 0; }
 .two-wide { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
@@ -432,6 +433,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
         <div><span class="club big" data-logo="baltika">БАЛ</span><div class="name">Балтика</div><div class="pos">7 место в РПЛ</div></div>
       </div>
       <div class="countdown"><span>Дома, «Ozon Арена» · начало по Москве</span><span id="cdwrap">до матча <b id="cd">3 дня</b></span></div>
+      <a class="allnews calink" href="matches.ics" download="krasnodar-matches.ics">📅 Все матчи — в календарь телефона</a>
       <div class="last">
         <span class="lastl">Прошлый матч · РПЛ, 11 тур</span><span class="lastm"><span class="club" data-logo="lokomotiv">ЛОК</span><b>Локомотив — Краснодар</b><span class="club us" data-logo="krasnodar">КРД</span></span>
         <span style="display:flex;gap:8px;align-items:center"><span class="score mono">3:3</span><span class="res d" title="Ничья">Н</span></span>

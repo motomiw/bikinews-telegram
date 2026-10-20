@@ -13,3 +13,6 @@ RewriteRule ^(.*)$ https://bikinews.ru/$1 [R=301,L]
 RewriteCond %{HTTP_HOST} ^www\.bikinews\.ru$ [NC]
 RewriteRule ^(.*)$ https://bikinews.ru/$1 [R=301,L]
 </IfModule>
+
+# календарь матчей
+AddType text/calendar .ics

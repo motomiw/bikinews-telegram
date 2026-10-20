@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Pillow для картинок-превью
+        run: pip install pillow
       - name: Сборка сайта
         run: python site-src/build.py
       - name: Проверка настроек FTP
