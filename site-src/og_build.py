@@ -69,7 +69,7 @@ def make_og(page, title, tag, date_txt):
         f_s = ImageFont.truetype(str(_FONTS / 'GolosText.woff'), 30)
         f_b = ImageFont.truetype(str(_FONTS / 'Unbounded.woff'), 28)
         d.text((64, H - 52), 'Быки News', font=f_b, fill=_YEL, anchor='lm')
-        d.text((64 + d.textlength('Быки News', font=f_b) + 26, H - 52), 'bikinews.ru · новости ФК «Краснодар»', font=f_s, fill=_MUTED, anchor='lm')
+        d.text((64 + d.textlength('Быки News', font=f_b) + 26, H - 52), 'новости ФК «Краснодар»', font=f_s, fill=_MUTED, anchor='lm')
         im.save(OUT / name, 'JPEG', quality=80, optimize=True, subsampling=2)
         _og_n += 1
         return name
