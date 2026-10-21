@@ -42,6 +42,18 @@ def esc(t):
     return html.escape(str(t or ''), quote=True)
 
 
+def item_text(g):
+    """Текст поста: ссылки — словами (гиперссылки), а не голым адресом."""
+    lead = g['paras'][0] if g.get('paras') else ''
+    if g['url'].startswith(SITE):   # своя статья Быки News — ведём прямо на неё
+        return (f"<b>{esc(g['title'])}</b>\n\n" + '\n\n'.join(esc(p) for p in g.get('paras', [])) +
+                f"\n\n👉 <a href=\"{esc(g['url'])}\">Читать статью полностью</a>")
+    page = SITE + g['page'] if g.get('page') else f"{SITE}news.html#{urllib.parse.quote(g['id'])}"
+    return (f"<b>{esc(g['title'])}</b>\n\n{esc(lead)}\n\n"
+            f"👉 <a href=\"{esc(page)}\">Подробнее на сайте</a>\n"
+            f"Источник: <a href=\"{esc(g['url'])}\">{esc(g['source'])}</a>")
+
+
 def main():
     if not TOKEN or not CHAT:
         sys.exit('Не заданы секреты TG_TOKEN и TG_CHAT')
@@ -79,14 +91,7 @@ def main():
     else:
         new = sorted([g for g in gl if g['id'] not in st['posted']], key=lambda g: g['ts'])
         for g in new[:MAX_PER_RUN]:
-            lead = g['paras'][0] if g.get('paras') else ''
-            if g['url'].startswith(SITE):   # своя статья Быки News — ведём прямо на неё
-                text = (f"<b>{esc(g['title'])}</b>\n\n" + '\n\n'.join(esc(p) for p in g.get('paras', [])) +
-                        f"\n\n👉 <a href=\"{esc(g['url'])}\">Читать статью полностью</a>")
-            else:
-                text = (f"<b>{esc(g['title'])}</b>\n\n{esc(lead)}\n\n"
-                        f"👉 Подробнее: {SITE}news.html#{urllib.parse.quote(g['id'])}\n"
-                        f"Источник: <a href=\"{esc(g['url'])}\">{esc(g['source'])}</a>")
+            text = item_text(g)
             if not send(text):
                 break
             st['posted'].append(g['id']); sent += 1
@@ -104,7 +109,7 @@ def main():
             if items:
                 lines = [f"▪️ <a href=\"{esc(i['url'])}\">{esc(i['title'])}</a> <i>— {esc(i['source'])}</i>" for i in items]
                 text = (f"<b>📰 Что пишут о «Краснодаре» · {now:%d.%m}, {'день' if now.hour == 12 else 'вечер'}</b>\n\n"
-                        + '\n\n'.join(lines) + f"\n\n📲 Все новости со ссылками: {SITE}news.html")
+                        + '\n\n'.join(lines) + f"\n\n📲 <a href=\"{SITE}news.html\">Все новости со ссылками</a>")
                 print('Дайджест:', 'опубликован' if send(text) else 'ошибка')
             st['digest'][slot] = 1
 
