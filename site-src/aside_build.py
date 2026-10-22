@@ -20,6 +20,11 @@ ASIDE_CSS = r'''
 .sd-link { display: inline-block; margin-top: 12px; font-weight: 700; font-size: 14px; color: var(--accent); }
 .sd-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .sd-tbl th { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--muted); text-align: right; padding: 0 0 6px; }
+.sd-tbl th:first-child { padding-left: 6px; }
+.sd-tbl th:last-child, .sd-tbl td:last-child { padding-right: 6px; }
+.sd-tbl td:first-child { padding-left: 6px; }
+.sd-tbl th:nth-child(3), .sd-tbl td:nth-child(3) { width: 34px; }
+.sd-tbl th:nth-child(4), .sd-tbl td:nth-child(4) { width: 38px; }
 .sd-tbl th:nth-child(-n+2) { text-align: left; }
 .sd-tbl td { padding: 7px 0; border-top: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
 .sd-tbl td:first-child { width: 26px; text-align: left; color: var(--muted); }
@@ -27,8 +32,7 @@ ASIDE_CSS = r'''
 .sd-tbl td:nth-child(2) span { display: inline-flex; align-items: center; gap: 8px; }
 .sd-tbl img { width: 20px; height: 20px; }
 .sd-tbl tr.us td { font-weight: 800; background: var(--accent-soft); }
-.sd-tbl tr.us td:first-child { padding-left: 6px; color: var(--ink); }
-.sd-tbl tr.us td:last-child { padding-right: 6px; }
+.sd-tbl tr.us td:first-child { color: var(--ink); }
 @media (max-width: 960px) { .na-grid { grid-template-columns: minmax(0, 72ch); gap: 8px; } .na-side { position: static; padding-top: 28px; } }
 '''
 
