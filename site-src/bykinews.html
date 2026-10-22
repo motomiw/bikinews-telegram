@@ -406,6 +406,16 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .site-head .nav a.tg:hover::after, .site-head .nav a.tg:focus-visible::after, .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { animation: ring .7s cubic-bezier(.22, 1, .36, 1) both; }
   @keyframes ring { from { --a: 0deg; } to { --a: 360deg; } }
 }
+
+/* логотипы клубов: лёгкий «прыжок» при наведении на логотип или на всю строку */
+.club.has-logo { overflow: visible; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root { --spring: cubic-bezier(.34, 1.56, .64, 1); }
+  .club img, img.lg, .sd-tbl img { transition: transform .38s var(--spring), filter .3s ease; transform-origin: 50% 65%; will-change: transform; }
+  .club:hover img, .st tr:hover .club img, .sd-tbl tr:hover img, .fx li:hover .club img, .mt summary:hover .lg, img.lg:hover, .teams > *:hover .club img, .pair:hover .club img {
+    transform: translateY(-2px) scale(1.18) rotate(-6deg); filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .28)); }
+  .club.big:hover img, .teams > *:hover .club.big img { transform: translateY(-3px) scale(1.1) rotate(-4deg); filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .3)); }
+}
 </style>
 
 <header class="site-head">
