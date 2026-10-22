@@ -203,7 +203,7 @@ AR_CSS = r'''
 '''
 
 _ae = lambda s: _ha.escape(str(s), quote=True)
-_ar_style = SRC[SRC.index('<style>'):style_end].replace('</style>', NP_CSS + AR_CSS + '</style>')
+_ar_style = SRC[SRC.index('<style>'):style_end].replace('</style>', NP_CSS + ASIDE_CSS + AR_CSS + '</style>')
 for _a in ARTICLES:
     _og = make_og(_a['slug'], _a['title'], _a['tag'], _a['date_txt'])
     _ld = _ja.dumps({'@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': _a['title'][:110],
@@ -215,12 +215,14 @@ for _a in ARTICLES:
                      'about': 'ФК «Краснодар»'}, ensure_ascii=False)
     _main = f'''<main class="wrap na" id="top">
   <nav class="na-crumbs" aria-label="Навигация"><a href="./">Главная</a><span>›</span><a href="news.html">Новости ФК «Краснодар»</a></nav>
+  <div class="na-grid"><div class="na-main">
   <article class="na-art ar-art">
     <div class="na-meta"><span class="tag">{_ae(_a["tag"])}</span><time datetime="{_a["date_iso"]}">{_ae(_a["date_txt"])}</time><span>· {_ae(_a["read"])} чтения</span></div>
     <h1>{_ae(_a["title"])}</h1>
     {_a["body"]}
   </article>
   <p><a class="na-all" href="news.html">Все новости «Краснодара» →</a></p>
+  </div>{aside_html()}</div>
 </main>
 '''
     _page = (head(_ae(_a['title']) + ' | Быки News', _ae(_a['desc']), _a['slug'], _og)

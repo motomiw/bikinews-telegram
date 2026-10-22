@@ -292,7 +292,7 @@ main_m = f'''<main class="wrap mp" id="top">
     <h1>Матчи ФК «Краснодар» 2026/27</h1>
     <p>Все игры сезона в РПЛ и Кубке России. Нажмите на матч, чтобы увидеть голы, удаления и статистику. Время московское.</p>
     <div class="mp-cal" role="group" aria-label="Календарь матчей">
-      <a href="matches.ics" download="krasnodar-matches.ics">📅 Добавить матчи в календарь</a>
+      <a href="matches.ics" download="krasnodar-matches.ics"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg> Добавить матчи в календарь</a>
       <a href="webcal://bikinews.ru/matches.ics">Подписаться</a>
       <small>Время и новые матчи обновляются сами</small>
     </div>

@@ -93,7 +93,7 @@ privacy = (head('Политика конфиденциальности — Бы�
 # ---------- уведомление о cookie + счётчики: на все страницы ----------
 COOKIE_HTML = r'''
 <div class="ckb" id="ckb" role="region" aria-label="Уведомление о cookie" hidden>
-  <p>Мы используем cookie и сервисы веб-аналитики, чтобы понимать, что читают на сайте. Продолжая пользоваться сайтом, вы соглашаетесь с этим. <a href="privacy.html">Подробнее</a></p>
+  <p>Мы используем cookie и аналитику. Продолжая, вы соглашаетесь. <a href="privacy.html">Подробнее</a></p>
   <button type="button" id="ckbOk">Понятно</button>
 </div>
 <style>
@@ -104,7 +104,7 @@ COOKIE_HTML = r'''
 .ckb a { color: var(--accent); }
 .ckb button { flex: none; font: inherit; font-weight: 700; padding: 9px 16px; border-radius: 10px; border: 0; cursor: pointer;
   background: var(--accent); color: #fff; }
-@media (max-width: 520px) { .ckb { flex-direction: column; align-items: stretch; left: 12px; right: 12px; bottom: 12px; } }
+@media (max-width: 520px) { .ckb { left: 8px; right: 8px; bottom: 8px; padding: 10px 12px; font-size: 13px; gap: 10px; border-radius: 12px; } .ckb button { padding: 9px 14px; } }
 </style>
 <script>
 (function () {

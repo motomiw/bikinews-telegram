@@ -34,7 +34,7 @@ def _date(it, with_time=True):
     s = f'{d.day} {_MONG[d.month - 1]} {d.year}'
     return s + (f', {d:%H:%M}' if with_time and not it.get('notime') else '')
 
-_style = SRC[SRC.index('<style>'):style_end].replace('</style>', NP_CSS + '</style>')
+_style = SRC[SRC.index('<style>'):style_end].replace('</style>', NP_CSS + ASIDE_CSS + '</style>')
 for _i, it in enumerate(items):
     if it.get('article'):   # своя статья — страницу собирает article_build.py
         continue
@@ -54,6 +54,7 @@ for _i, it in enumerate(items):
     more = ''.join(f'<li><time>{_e(_date(o, False))}</time><a href="{_e(o["page"])}">{_e(o["title"])}</a></li>' for o in others)
     page_main = f'''<main class="wrap na" id="top">
   <nav class="na-crumbs" aria-label="Навигация"><a href="./">Главная</a><span>›</span><a href="news.html">Новости ФК «Краснодар»</a></nav>
+  <div class="na-grid"><div class="na-main">
   <article class="na-art">
     <div class="na-meta"><span class="tag">{_e(it["tag"])}</span><time datetime="{iso}">{_e(_date(it))}</time></div>
     <h1>{_e(title)}</h1>
@@ -62,6 +63,7 @@ for _i, it in enumerate(items):
   </article>
   <section class="na-more" aria-labelledby="more-h"><h2 id="more-h">Другие новости «Краснодара»</h2><ul>{more}</ul>
     <a class="na-all" href="news.html">Все новости →</a></section>
+  </div>{aside_html()}</div>
 </main>
 '''
     page = (head(_e(title) + ' — ФК «Краснодар» | Быки News', _e(desc), it['page'], og)
