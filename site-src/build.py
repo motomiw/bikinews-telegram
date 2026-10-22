@@ -126,6 +126,14 @@ main.np { display: block; padding-block: 8px 56px; }
 .np-head { padding-block: 28px 4px; display: grid; gap: 10px; }
 .np-head h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 5vw, 44px); letter-spacing: -.01em; line-height: 1.1; }
 .np-head p { margin: 0; color: var(--muted); max-width: 70ch; }
+.np-head .np-lead { color: var(--ink); font-size: clamp(17px, 2.2vw, 20px); line-height: 1.5; max-width: 62ch; }
+.np-kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 8px 0 0; }
+.np-kinds > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.np-kinds dt { font-weight: 700; font-size: 15px; margin: 0 0 4px; }
+.np-kinds dd { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.np-head .np-upd { font-size: 13px; }
+.np-head .np-upd:has(#npUpd:empty) { display: none; }
+@media (max-width: 720px) { .np-kinds { grid-template-columns: minmax(0, 1fr); gap: 6px; } .np-kinds > div { padding: 10px 14px; } .np-kinds dd { font-size: 13px; } }
 .np-tools { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding-block: 16px 8px; position: sticky; top: 64px; z-index: 5; background: var(--bg); }
 .np-search { flex: 1 1 220px; max-width: 360px; font: 16px var(--font-body); color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 9px 16px; }
 .np-search:focus { outline: none; border-color: var(--accent); }
@@ -221,7 +229,7 @@ NEWS_JS = r'''
     var d = msk(n.ts), time = n.notime ? '' : d.hour + ':' + d.minute;
     if (n.own) {
       return '<li><article class="np-item own-item" id="' + esc(n.id) + '"><time class="mono">' + time + '</time><div class="np-body">' +
-        '<div class="np-meta"><span class="own">Пересказ</span><span>' + esc(n.tag) + '</span></div>' +
+        '<div class="np-meta"><span class="own">Быки News</span><span>' + esc(n.tag) + '</span></div>' +
         '<h3>' + (n.page ? '<a href="' + esc(n.page) + '">' + esc(n.title) + '</a>' : esc(n.title)) + '</h3>' + n.paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
         '<a class="src" href="' + esc(n.url) + '" target="_blank" rel="noopener">Источник: ' + esc(n.source) + ' ↗</a></div></article></li>';
     }
@@ -267,12 +275,18 @@ NEWS_JS = r'''
 main = '''<main class="wrap np" id="top">
   <div class="np-head">
     <h1>Новости ФК «Краснодар»</h1>
-    <p>Все материалы о Быках в одном месте: наши пересказы главного и свежие публикации спортивных изданий и официального сайта клуба. Полный текст чужих материалов — по ссылке на сайте источника. <span id="npUpd"></span></p>
+    <p class="np-lead">Всё, что происходит вокруг клуба: матчи и турнирная борьба, состав и травмы, слова тренера и игроков. Коротко, понятным языком и всегда со ссылкой на первоисточник.</p>
+    <dl class="np-kinds">
+      <div><dt>От редакции</dt><dd>Главное за день в двух абзацах, своими словами и со ссылкой на источник.</dd></div>
+      <div><dt>Сайт клуба</dt><dd>Официальные сообщения ФК «Краснодар» без изменений.</dd></div>
+      <div><dt>Издания</dt><dd>Заголовки профильных СМИ. Полный текст — на сайте источника.</dd></div>
+    </dl>
+    <p class="np-upd"><span id="npUpd"></span></p>
   </div>
   <div class="np-tools">
     <div class="chips" role="group" aria-label="Какие новости показать">
       <button class="chip" type="button" data-f="all" aria-pressed="true">Все</button>
-      <button class="chip" type="button" data-f="own" aria-pressed="false">Наши пересказы</button>
+      <button class="chip" type="button" data-f="own" aria-pressed="false">От редакции</button>
       <button class="chip" type="button" data-f="club" aria-pressed="false">Сайт клуба</button>
       <button class="chip" type="button" data-f="media" aria-pressed="false">Издания</button>
     </div>
@@ -283,7 +297,7 @@ main = '''<main class="wrap np" id="top">
   <button class="more np-more" id="npMore" type="button" hidden>Показать ещё</button>
 </main>
 '''
-news = (head('Новости ФК «Краснодар» сегодня — Быки News', 'Все новости ФК «Краснодар» в одной ленте: пересказы Быки News, сайт клуба и спортивные издания.', 'news.html')
+news = (head('Новости ФК «Краснодар» сегодня — Быки News', 'Новости ФК «Краснодар» за день в одной ленте: матчи, состав, слова тренера и игроков. Пересказы Быки News, сообщения клуба и заголовки спортивных изданий со ссылками на источники.', 'news.html')
         + '<title>Новости ФК «Краснодар» сегодня — Быки News</title>\n'
         + SRC[SRC.index('<style>'):style_end].replace('</style>', NEWS_CSS + '</style>')
         + '\n</head>\n<body>\n' + header + '\n\n' + main + '\n' + footer + '\n\n<script>' + NEWS_JS + '</script>\n</body>\n</html>\n')
