@@ -415,6 +415,10 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .club:hover img, .st tr:hover .club img, .sd-tbl tr:hover img, .fx li:hover .club img, .mt summary:hover .lg, img.lg:hover, .teams > *:hover .club img, .pair:hover .club img {
     transform: translateY(-2px) scale(1.18) rotate(-6deg); filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .28)); }
   .club.big:hover img, .teams > *:hover .club.big img { transform: translateY(-3px) scale(1.1) rotate(-4deg); filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .3)); }
+  /* два логотипа в паре наклоняются в разные стороны: первый влево, второй вправо */
+  .fx li:hover .pair .club:nth-child(2) img, .pair:hover .club:nth-child(2) img, .pair .club:nth-child(2):hover img,
+  .mt summary:hover .pair .lg:nth-child(2), .pair .lg:nth-child(2):hover { transform: translateY(-2px) scale(1.18) rotate(6deg); }
+  .teams > :last-child:hover .club.big img { transform: translateY(-3px) scale(1.1) rotate(4deg); }
 }
 </style>
 
