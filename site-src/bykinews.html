@@ -446,8 +446,8 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 .logo:focus-visible .logo-sub .ls-a i { transform: translateY(-110%); }
 .logo:focus-visible .logo-sub .ls-b i { transform: none; }
 @media (hover: hover) {
-  .logo .logo-sub:hover .ls-a i { transform: translateY(-110%); }
-  .logo .logo-sub:hover .ls-b i { transform: none; }
+  .logo:hover .logo-sub .ls-a i { transform: translateY(-110%); }
+  .logo:hover .logo-sub .ls-b i { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .logo .logo-sub i { transition: none; } }
 </style>
