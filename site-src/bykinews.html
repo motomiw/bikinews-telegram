@@ -115,14 +115,25 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 
 /* sections */
 main { padding-block: 52px 72px; display: grid; gap: 64px; }
-.tgbar { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; }
-.tgbar:hover { border-color: var(--accent); }
-.tgi { width: 44px; height: 44px; border-radius: 50%; background: var(--turf); display: grid; place-items: center; }
-.tgi svg { width: 22px; height: 22px; fill: var(--signal); }
+.tgbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px 16px; align-items: center; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.tgduo { display: flex; }
+.tgi { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; border: 3px solid var(--surface); box-sizing: content-box; transition: transform .3s var(--spring, ease); }
+.tgi + .tgi { margin-left: -14px; }
+.tgi.t { background: #2AABEE; }
+.tgi.m { background: linear-gradient(135deg, #2F8CFF, #9B4DFF); }
+.tgi svg { width: 24px; height: 24px; fill: currentColor; }
+.tgbar:hover .tgi.t { transform: translateX(-3px) rotate(-6deg); }
+.tgbar:hover .tgi.m { transform: translateX(3px) rotate(6deg); }
 .tgt b { display: block; font-size: 16px; }
-.tgt small { color: var(--muted); font-size: 13px; line-height: 1.35; display: block; }
-.tgb { background: var(--signal); color: var(--on-signal); font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 999px; white-space: nowrap; }
-@media (max-width: 520px) { .tgbar { grid-template-columns: 40px minmax(0, 1fr); } .tgi { width: 40px; height: 40px; } .tgb { grid-column: 1 / -1; text-align: center; } }
+.tgt small { color: var(--muted); font-size: 14px; line-height: 1.4; display: block; margin-top: 2px; }
+.tgbtns { display: flex; gap: 8px; }
+.tgb { display: inline-flex; align-items: center; gap: 8px; color: #fff; font-weight: 700; font-size: 15px; padding: 9px 16px; border-radius: 999px; white-space: nowrap; text-decoration: none; }
+.tgb svg { width: 16px; height: 16px; fill: currentColor; }
+.tgb.t { background: #157AB1; }
+.tgb.m { background: linear-gradient(135deg, #2F6FE0, #7B3FE0); }
+.tgb:hover, .tgb:focus-visible { filter: brightness(1.12); box-shadow: 0 0 0 3px rgba(42, 171, 238, .25); }
+.tgb.m:hover, .tgb.m:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 255, .28); }
+@media (max-width: 560px) { .tgbar { grid-template-columns: auto minmax(0, 1fr); } .tgbtns { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; } .tgb { justify-content: center; } .tgi { width: 38px; height: 38px; } }
 .sec-head { display: flex; align-items: end; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .sec-head h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 3vw, 30px); letter-spacing: -.01em; }
 .sec-head .src { color: var(--muted); font-size: 13px; }
@@ -372,8 +383,8 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   /* отклик на нажатие */
-  .lead .read, .tgbar, .more, .chip, .allnews, .a11y-btn, .mp-cal a, .site-head .nav a, .cookie button, #ck button { transition: transform .12s var(--ease-out), color .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .25s ease; }
-  .lead .read:active, .tgbar:active, .more:active, .chip:active, .a11y-btn:active, .mp-cal a:active, .site-head .nav a:active, .cookie button:active, #ck button:active { transform: scale(.97); }
+  .lead .read, .tgb, .more, .chip, .allnews, .a11y-btn, .mp-cal a, .site-head .nav a, .cookie button, #ck button { transition: transform .12s var(--ease-out), color .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .25s ease; }
+  .lead .read:active, .tgb:active, .more:active, .chip:active, .a11y-btn:active, .mp-cal a:active, .site-head .nav a:active, .cookie button:active, #ck button:active { transform: scale(.97); }
   .play { transition: transform .2s var(--ease-out); }
   .chev { transition: transform .2s var(--ease-out); }
   /* вход главного экрана: один раз при загрузке */
@@ -514,11 +525,11 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 </section>
 
 <main class="wrap">
-  <a class="tgbar" href="https://t.me/bikinews" target="_blank" rel="noopener">
-    <span class="tgi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21.6 3.2 2.9 10.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5zM8.9 13.2l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7.1-.3 3.3-1.8-4.7z"/></svg></span>
-    <span class="tgt"><b>Мы в Telegram и MAX</b><small>Главные новости о «Краснодаре», итоги матчей и дайджест прессы дважды в день · в MAX: <span class="u">channel_bikinews</span></small></span>
-    <span class="tgb">Подписаться</span>
-  </a>
+  <div class="tgbar">
+    <span class="tgduo" aria-hidden="true"><span class="tgi t"><svg viewBox="0 0 24 24"><path d="M21.6 3.2 2.9 10.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5zM8.9 13.2l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7.1-.3 3.3-1.8-4.7z"/></svg></span><span class="tgi m"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M4 11A9 9 0 1 1 7.6 18.2C6.6 19.6 5.6 20.5 4.5 20.7C3.9 20.8 4.1 19.6 4.1 17.2C4.1 15 4 13 4 11ZM13 6.4A4.6 4.6 0 1 0 13 15.6A4.6 4.6 0 1 0 13 6.4Z"/></svg></span></span>
+    <span class="tgt"><b>Мы в Telegram и MAX</b><small>Главные новости о «Краснодаре», итоги матчей и дайджест прессы дважды в день</small></span>
+    <span class="tgbtns"><a class="tgb t" href="https://t.me/bikinews" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21.6 3.2 2.9 10.4c-1.3.5-1.3 1.2-.2 1.6l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5zM8.9 13.2l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7.1-.3 3.3-1.8-4.7z"/></svg>Telegram</a><a class="tgb m" href="https://max.ru/channel_bikinews" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M4 11A9 9 0 1 1 7.6 18.2C6.6 19.6 5.6 20.5 4.5 20.7C3.9 20.8 4.1 19.6 4.1 17.2C4.1 15 4 13 4 11ZM13 6.4A4.6 4.6 0 1 0 13 15.6A4.6 4.6 0 1 0 13 6.4Z"/></svg>MAX</a></span>
+  </div>
 
   <section id="matches" aria-labelledby="m-h">
     <div class="sec-head"><h2 id="m-h">Матчи сезона 2026/27</h2><a class="src allnews" href="matches.html">Все матчи и статистика →</a></div>
