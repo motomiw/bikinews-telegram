@@ -1060,18 +1060,41 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   }
   function gapMore(t) { return String(t).replace(/([а-яё0-9»)])([А-ЯЁ])/g, '$1. $2').replace(/\s*(Читать (?:дальше|далее)\S*)/gi, ' <b>$1</b>'); }
   function escHtml(t) { var e = document.createElement('div'); e.textContent = String(t); return e.innerHTML.replace(/"/g, '&quot;'); }
-  function dedupNews(list) {
-    function words(t) { return String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).filter(function (w) { return w.length > 3; }).map(function (w) { return w.slice(0, 6); }); }
-    var kept = [];
-    list.forEach(function (n) {
-      var a = words(n.title), dup = kept.some(function (k) {
-        if (Math.abs(k.n.ts - n.ts) > 12 * 3600) return false;
-        var b = k.w, common = a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
-        return a.length && b.length && common / Math.min(a.length, b.length) >= 0.7;
-      });
-      if (!dup) kept.push({ n: n, w: a });
+  // Один сюжет, пересказанный разными изданиями и разными словами («голкипер стал мастером спорта» / «вратарь получил звание»):
+  // сравниваем смысловые слова (основы по 5 букв и числа) в заголовках и в текстах. Правило то же, что на странице «Новости».
+  var STOP = { красн: 1, матч: 1, клуб: 1, команд: 1, рпл: 1, сезон: 1, тур: 1, игра: 1, игры: 1, после: 1, перед: 1, быков: 1, быки: 1, быкам: 1, сообщ: 1, стало: 1, этом: 1, этого: 1, также: 1, котор: 1, чтобы: 1, читат: 1, дальш: 1, прес: 1 };
+  function toks(t) {
+    var out = [];
+    String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).forEach(function (w) {
+      if (!w) return;
+      var k = /^[0-9]+$/.test(w) ? (w.length >= 2 ? w : '') : (w.length > 3 ? w.slice(0, 5) : '');
+      if (k && !STOP[k] && out.indexOf(k) === -1) out.push(k);
     });
-    return kept.map(function (k) { return k.n; });
+    return out;
+  }
+  function body(n) { return n.title + ' ' + (n.text || ''); }
+  function sameStory(n, m) {
+    var dt = Math.abs(n.ts - m.ts);
+    if (dt > 24 * 3600) return false;
+    var a = toks(n.title), b = toks(m.title);
+    if (!a.length || !b.length) return false;
+    var c = a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
+    if (c >= 3 && c / Math.min(a.length, b.length) >= 0.6) return true;
+    var bb = toks(body(m)), aa = toks(body(n));
+    var ca = a.filter(function (w) { return bb.indexOf(w) !== -1; }).length;
+    var cb = b.filter(function (w) { return aa.indexOf(w) !== -1; }).length;
+    if ((ca >= 4 && ca / a.length >= 0.6) || (cb >= 4 && cb / b.length >= 0.6)) return true;
+    if (dt <= 12 * 3600) {
+      var shared = aa.filter(function (w) { return bb.indexOf(w) !== -1; }).length;
+      if (shared >= 5 && shared / Math.min(aa.length, bb.length) >= 0.35) return true;
+    }
+    return false;
+  }
+  // список идёт от старых к новым: из пары одинаковых остаётся более ранняя запись
+  function dedupNews(list) {
+    var kept = [];
+    list.forEach(function (n) { if (!kept.some(function (k) { return sameStory(n, k); })) kept.push(n); });
+    return kept;
   }
   // Только новости о «Краснодаре»: news.php тащит и чужие (голы «Зенита» и т. п.).
   // Пропускаем материал, если «Краснодар», Быки, тренер или игрок клуба есть в заголовке, либо это сайт клуба.

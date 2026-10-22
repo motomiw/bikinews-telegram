@@ -177,7 +177,7 @@ NEWS_JS = r'''
   }
   function esc(t) { var e = document.createElement('div'); e.textContent = String(t == null ? '' : t); return e.innerHTML.replace(/"/g, '&quot;'); }
   // один и тот же сюжет, пересказанный разными словами: сравниваем смысловые слова (основы по 5 букв и числа)
-  var STOP = { красн: 1, матч: 1, клуб: 1, команд: 1, рпл: 1, сезон: 1, тур: 1, игра: 1, игры: 1, после: 1, перед: 1, быков: 1, быки: 1, быкам: 1, сообщ: 1, стало: 1 };
+  var STOP = { красн: 1, матч: 1, клуб: 1, команд: 1, рпл: 1, сезон: 1, тур: 1, игра: 1, игры: 1, после: 1, перед: 1, быков: 1, быки: 1, быкам: 1, сообщ: 1, стало: 1, этом: 1, этого: 1, также: 1, котор: 1, чтобы: 1, читат: 1, дальш: 1, прес: 1 };
   function toks(t) {
     var out = [];
     String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).forEach(function (w) {
@@ -199,7 +199,13 @@ NEWS_JS = r'''
     var bb = toks(body(m)), aa = toks(body(n));
     var ca = a.filter(function (w) { return bb.indexOf(w) !== -1; }).length;
     var cb = b.filter(function (w) { return aa.indexOf(w) !== -1; }).length;
-    return (ca >= 4 && ca / a.length >= 0.6) || (cb >= 4 && cb / b.length >= 0.6);
+    if ((ca >= 4 && ca / a.length >= 0.6) || (cb >= 4 && cb / b.length >= 0.6)) return true;
+    // одно событие разными словами («голкипер стал мастером спорта» / «вратарь получил звание»): много общих смысловых слов в заголовках и текстах
+    if (Math.abs(n.ts - m.ts) <= 12 * 3600) {
+      var shared = aa.filter(function (w) { return bb.indexOf(w) !== -1; }).length;
+      if (shared >= 5 && shared / Math.min(aa.length, bb.length) >= 0.35) return true;
+    }
+    return false;
   }
   function dedupNews(list) {
     var kept = [];
