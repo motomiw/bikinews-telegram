@@ -366,6 +366,28 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .site-head .nav a.tg svg, .site-head .nav a.mx svg, .site-head .nav .a11y-btn svg { display: block; width: 20px; height: 20px; }
   .site-head .nav a:not(.tg):not(.mx) { order: 4; flex: 1 1 0; text-align: center; font-size: 16px; padding: 10px 4px; white-space: nowrap; }
 }
+
+/* движение: коротко, ease-out, только transform и opacity; новости читают, а не смотрят */
+:root { --ease-out: cubic-bezier(.22, 1, .36, 1); }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+  /* отклик на нажатие */
+  .lead .read, .tgbar, .more, .chip, .allnews, .a11y-btn, .mp-cal a, .site-head .nav a, .cookie button, #ck button { transition: transform .12s var(--ease-out), color .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .25s ease; }
+  .lead .read:active, .tgbar:active, .more:active, .chip:active, .a11y-btn:active, .mp-cal a:active, .site-head .nav a:active, .cookie button:active, #ck button:active { transform: scale(.97); }
+  .play { transition: transform .2s var(--ease-out); }
+  .chev { transition: transform .2s var(--ease-out); }
+  /* вход главного экрана: один раз при загрузке */
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .lead > h1, .lead > p, .lead > .read, .lead > .facts, aside.match { animation: rise .5s var(--ease-out) both; }
+  .lead > p { animation-delay: .06s; }
+  .lead > .read { animation-delay: .12s; }
+  .lead > .facts { animation-delay: .18s; }
+  aside.match { animation-delay: .12s; }
+  /* пункт «Прямо сейчас» мягко мигает у свежей новости */
+  @keyframes beat { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  .live li:first-child::before { animation: beat 2.4s ease-in-out infinite; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto !important; } }
 </style>
 
 <header class="site-head">
