@@ -388,6 +388,24 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .live li:first-child::before { animation: beat 2.4s ease-in-out infinite; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto !important; } }
+
+/* Telegram и MAX: при наведении контур «обрисовывается» цветом приложения */
+@property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.site-head .nav a.tg, .site-head .nav a.mx { position: relative; }
+.site-head .nav a.tg::after, .site-head .nav a.mx::after { content: ''; position: absolute; inset: -2px; border: 2.5px solid transparent; border-radius: inherit; pointer-events: none; opacity: 0;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0); }
+.site-head .nav a.tg::after { background: conic-gradient(from -90deg at 50% 50%, #2AABEE var(--a), transparent 0) border-box; }
+.site-head .nav a.mx::after { background: conic-gradient(from -90deg at 50% 50%, #2F8CFF 0deg, #9B4DFF var(--a), transparent 0) border-box; }
+.site-head .nav a.tg:hover, .site-head .nav a.tg:focus-visible { background: var(--turf-2); color: #fff; box-shadow: 0 0 18px rgba(42,171,238,.35); filter: none; }
+.site-head .nav a.tg:hover svg, .site-head .nav a.tg:focus-visible svg { fill: #2AABEE; }
+.site-head .nav a.mx:hover, .site-head .nav a.mx:focus-visible { background: var(--turf-2); color: #fff; border-color: transparent; box-shadow: 0 0 18px rgba(139,92,255,.35); }
+.site-head .nav a.mx:hover svg, .site-head .nav a.mx:focus-visible svg { fill: #8E8CFF; }
+.site-head .nav a.tg:hover::after, .site-head .nav a.tg:focus-visible::after, .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { opacity: 1; --a: 360deg; }
+@media (prefers-reduced-motion: no-preference) { .site-head .nav a.tg:active, .site-head .nav a.mx:active { transform: scale(.97); } }
+@media (prefers-reduced-motion: no-preference) {
+  .site-head .nav a.tg:hover::after, .site-head .nav a.tg:focus-visible::after, .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { animation: ring .7s cubic-bezier(.22, 1, .36, 1) both; }
+  @keyframes ring { from { --a: 0deg; } to { --a: 360deg; } }
+}
 </style>
 
 <header class="site-head">
