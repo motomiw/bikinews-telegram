@@ -176,18 +176,37 @@ NEWS_JS = r'''
     var o = {}; f.formatToParts(new Date(ts * 1000)).forEach(function (p) { o[p.type] = p.value; }); return o;
   }
   function esc(t) { var e = document.createElement('div'); e.textContent = String(t == null ? '' : t); return e.innerHTML.replace(/"/g, '&quot;'); }
+  // один и тот же сюжет, пересказанный разными словами: сравниваем смысловые слова (основы по 5 букв и числа)
+  var STOP = { красн: 1, матч: 1, клуб: 1, команд: 1, рпл: 1, сезон: 1, тур: 1, игра: 1, игры: 1, после: 1, перед: 1, быков: 1, быки: 1, быкам: 1, сообщ: 1, стало: 1 };
+  function toks(t) {
+    var out = [];
+    String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).forEach(function (w) {
+      if (!w) return;
+      var k = /^[0-9]+$/.test(w) ? (w.length >= 2 ? w : '') : (w.length > 3 ? w.slice(0, 5) : '');
+      if (k && !STOP[k] && out.indexOf(k) === -1) out.push(k);
+    });
+    return out;
+  }
+  function body(n) { return n.title + ' ' + (n.paras ? n.paras.join(' ') : (n.text || '')); }
+  function sameStory(n, m) {
+    if (Math.abs(n.ts - m.ts) > 24 * 3600) return false;
+    var a = toks(n.title), b = toks(m.title);
+    if (!a.length || !b.length) return false;
+    // заголовки почти совпадают
+    var c = a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
+    if (c >= 3 && c / Math.min(a.length, b.length) >= 0.6) return true;
+    // заголовок одного укладывается в текст другого (например, наш пересказ и заметка издания)
+    var bb = toks(body(m)), aa = toks(body(n));
+    var ca = a.filter(function (w) { return bb.indexOf(w) !== -1; }).length;
+    var cb = b.filter(function (w) { return aa.indexOf(w) !== -1; }).length;
+    return (ca >= 4 && ca / a.length >= 0.6) || (cb >= 4 && cb / b.length >= 0.6);
+  }
   function dedupNews(list) {
-    function words(t) { return String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9 ]+/g, ' ').split(/\s+/).filter(function (w) { return w.length > 3; }).map(function (w) { return w.slice(0, 6); }); }
     var kept = [];
     list.forEach(function (n) {
-      var a = words(n.title), dup = kept.some(function (k) {
-        if (Math.abs(k.n.ts - n.ts) > 12 * 3600) return false;
-        var b = k.w, common = a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
-        return a.length && b.length && common / Math.min(a.length, b.length) >= 0.7;
-      });
-      if (!dup) kept.push({ n: n, w: a });
+      if (!kept.some(function (k) { return sameStory(n, k); })) kept.push(n);
     });
-    return kept.map(function (k) { return k.n; });
+    return kept;
   }
   // Только новости о «Краснодаре»: news.php тащит и чужие (голы «Зенита» и т. п.).
   // Пропускаем материал, если «Краснодар», Быки, тренер или игрок клуба есть в заголовке, либо это сайт клуба.
@@ -210,7 +229,9 @@ NEWS_JS = r'''
     });
     var own = all.filter(function (n) { return n.own; }), ext = all.filter(function (n) { return !n.own; });
     ext.sort(function (a, b) { return a.ts - b.ts; });
-    all = own.concat(dedupNews(ext));
+    // у издания и у нас один сюжет — оставляем наш пересказ, заметку издания не дублируем
+    ext = dedupNews(ext).filter(function (n) { return !own.some(function (o) { return sameStory(n, o); }); });
+    all = own.concat(ext);
     all.sort(function (a, b) { return b.ts - a.ts; });
     var upd = Math.max(res[1] ? res[1].updated || 0 : 0, res[2] ? res[2].updated || 0 : 0);
     if (upd) { var u = msk(upd); document.getElementById('npUpd').textContent = 'Лента изданий обновлена ' + (+u.day) + ' ' + MONTHS_G[+u.month - 1] + ' в ' + u.hour + ':' + u.minute + '.'; }
