@@ -416,7 +416,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 .site-head .nav a.tg::after, .site-head .nav a.mx::after { content: ''; position: absolute; inset: -2px; border: 2.5px solid transparent; border-radius: inherit; pointer-events: none; opacity: 0;
   -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0); }
 .site-head .nav a.tg::after { background: conic-gradient(from -90deg at 50% 50%, #2AABEE var(--a), transparent 0) border-box; }
-.site-head .nav a.mx::after { background: conic-gradient(from -90deg at 50% 50%, #2F8CFF 0deg, #9B4DFF var(--a), transparent 0) border-box; }
+.site-head .nav a.mx::after { background: conic-gradient(from -90deg at 50% 50%, #2F8CFF, #9B4DFF, #2F8CFF) border-box; transition: opacity .25s ease; }
 .site-head .nav a.tg:hover, .site-head .nav a.tg:focus-visible { background: var(--turf-2); color: #fff; box-shadow: 0 0 18px rgba(42,171,238,.35); filter: none; }
 .site-head .nav a.tg:hover svg, .site-head .nav a.tg:focus-visible svg { fill: #2AABEE; }
 .site-head .nav a.mx:hover, .site-head .nav a.mx:focus-visible { background: var(--turf-2); color: #fff; border-color: transparent; box-shadow: 0 0 18px rgba(139,92,255,.35); }
@@ -426,6 +426,16 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 @media (prefers-reduced-motion: no-preference) {
   .site-head .nav a.tg:hover::after, .site-head .nav a.tg:focus-visible::after, .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { animation: ring .7s cubic-bezier(.22, 1, .36, 1) both; }
   @keyframes ring { from { --a: 0deg; } to { --a: 360deg; } }
+}
+/* MAX: линия бежит по контуру от голубого к фиолетовому, хвост за ней гаснет; бегает по кругу, пока курсор на кнопке.
+   --h — положение головы, --L — длина хвоста (в начале растёт от нуля, поэтому место старта обесцвечивается по мере движения линии) */
+@property --h { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --L { syntax: '<angle>'; inherits: false; initial-value: 1deg; }
+@media (prefers-reduced-motion: no-preference) {
+  .site-head .nav a.mx::after { background: conic-gradient(from calc(var(--h) - var(--L) - 90deg) at 50% 50%, transparent 0deg, #2F8CFF calc(var(--L) * .35), #9B4DFF calc(var(--L) * .96), transparent var(--L)) border-box; }
+  .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { animation: mxgrow .55s linear both, mxrun 1.5s linear infinite; }
+  @keyframes mxgrow { from { --L: 1deg; } to { --L: 130deg; } }
+  @keyframes mxrun { from { --h: 0deg; } to { --h: 360deg; } }
 }
 
 /* логотипы клубов: лёгкий «прыжок» при наведении на логотип или на всю строку */
