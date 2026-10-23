@@ -50,8 +50,8 @@ def head(title, desc, path='', img='og-image.jpg'):
 # ---------- главная ----------
 style_end = SRC.index('</style>') + len('</style>')
 INDEX_TITLE = 'ФК «Краснодар»: новости, матчи, таблица РПЛ — Быки News'
-INDEX_DESC = ('Быки News (bikinews.ru) — неофициальный фан-сайт ФК «Краснодар»: новости каждый день, '
-              'итоги и анонсы матчей, слова Мусаева и игроков, таблица РПЛ, состав и бомбардиры.')
+INDEX_DESC = ('Новости ФК «Краснодар» каждый день: анонсы и итоги матчей, заявления Мусаева и игроков, '
+              'таблица РПЛ, состав, бомбардиры и календарь сезона 2026/27.')
 INDEX_LD = ('<script type="application/ld+json">' + json.dumps({
     '@context': 'https://schema.org', '@type': 'WebSite', 'name': 'Быки News',
     'alternateName': 'bikinews.ru', 'url': 'https://bikinews.ru/', 'inLanguage': 'ru',
@@ -98,7 +98,7 @@ from email.utils import formatdate as _fd
 _rss = ['<?xml version="1.0" encoding="UTF-8"?>', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>',
         '<title>Быки News — новости ФК «Краснодар»</title>', '<link>https://bikinews.ru/</link>',
         '<atom:link href="https://bikinews.ru/rss.xml" rel="self" type="application/rss+xml"/>',
-        '<description>Пересказы главных новостей о «Краснодаре» со ссылкой на источник. Неофициальный фан-проект.</description>', '<language>ru</language>']
+        '<description>Главные новости ФК «Краснодар» каждый день — Быки News.</description>', '<language>ru</language>']
 for _it in items[:30]:
     _link = 'https://bikinews.ru/' + _it['page']
     _desc = (_it['paras'][0] if _it['paras'] else '') + ' Источник: ' + _it['source'] + '.'
@@ -326,7 +326,7 @@ main = '''<main class="wrap np" id="top">
   <button class="more np-more" id="npMore" type="button" hidden>Показать ещё</button>
 </main>
 '''
-news = (head('Новости ФК «Краснодар» сегодня — Быки News', 'Новости ФК «Краснодар» на bikinews.ru: матчи, состав, слова тренера и игроков. Пересказы Быки News, сообщения клуба и заголовки спортивных изданий со ссылками на источники.', 'news.html')
+news = (head('Новости ФК «Краснодар» сегодня — Быки News', 'Свежие новости ФК «Краснодар»: матчи и составы, травмы и трансферы, заявления тренера и игроков, решения РПЛ и КДК. Лента обновляется каждый день.', 'news.html')
         + '<title>Новости ФК «Краснодар» сегодня — Быки News</title>\n'
         + SRC[SRC.index('<style>'):style_end].replace('</style>', NEWS_CSS + '</style>')
         + '\n</head>\n<body>\n' + header + '\n\n' + main + '\n' + footer + '\n\n<script>' + NEWS_JS + '</script>\n</body>\n</html>\n')
