@@ -2,7 +2,7 @@
 # Выполняется из build.py после сборки остальных страниц: доступны head, nav_header, footer, SRC, style_end, OUT.
 
 # ===== НАСТРОЙКИ (заполнить, когда появятся коды) =====
-YM_ID = ''              # номер счётчика Яндекс.Метрики (8 цифр). Пусто — аналитики и баннера cookie на сайте нет.
+YM_ID = '113747465'              # номер счётчика Яндекс.Метрики. Пусто — аналитики и баннера cookie на сайте нет.
                         # Google Analytics отключён 23.10.2026 (передача данных в США); счётчик включается только после согласия
 GOOGLE_VERIFY = ''    # Google Search Console: значение content из <meta name="google-site-verification" ...>
 YANDEX_VERIFY = '0f3fa5f2f3f50b3c'    # Яндекс.Вебмастер: значение content из <meta name="yandex-verification" ...>
