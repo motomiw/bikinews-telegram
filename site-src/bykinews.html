@@ -117,14 +117,15 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 /* sections */
 main { padding-block: 52px 72px; display: grid; gap: 64px; }
 .tgbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px 16px; align-items: center; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
-.tgduo { display: flex; }
-.tgi { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; border: 3px solid var(--surface); box-sizing: content-box; transition: transform .3s var(--spring, ease); }
-.tgi + .tgi { margin-left: -14px; }
+.tgduo { --s: 56px; --ov: 22px; --sp: 14px; display: flex; flex: none; width: calc(var(--s) * 2 + 12px + var(--sp)); }
+.tgi { width: var(--s); height: var(--s); border-radius: 50%; display: grid; place-items: center; color: #fff; border: 3px solid var(--surface); box-sizing: content-box; transition: transform .45s var(--spring, cubic-bezier(.34,1.56,.64,1)); }
+.tgi + .tgi { margin-left: calc(var(--ov) * -1); }
 .tgi.t { background: #2AABEE; }
 .tgi.m { background: linear-gradient(135deg, #2F8CFF, #9B4DFF); }
-.tgi svg { width: 24px; height: 24px; fill: currentColor; }
-.tgbar:hover .tgi.t { transform: translateX(-3px) rotate(-6deg); }
-.tgbar:hover .tgi.m { transform: translateX(3px) rotate(6deg); }
+.tgi svg { width: 30px; height: 30px; fill: currentColor; }
+/* при наведении значки разъезжаются: Telegram чуть влево, MAX вправо */
+.tgbar:hover .tgi.t { transform: translateX(-6px) rotate(-12deg) scale(1.08); }
+.tgbar:hover .tgi.m { transform: translateX(calc(var(--ov) + var(--sp))) rotate(12deg) scale(1.08); }
 .tgt b { display: block; font-size: 16px; }
 .tgt small { color: var(--muted); font-size: 14px; line-height: 1.4; display: block; margin-top: 2px; }
 .tgbtns { display: flex; gap: 8px; }
@@ -134,7 +135,9 @@ main { padding-block: 52px 72px; display: grid; gap: 64px; }
 .tgb.m { background: linear-gradient(135deg, #2F6FE0, #7B3FE0); }
 .tgb:hover, .tgb:focus-visible { filter: brightness(1.12); box-shadow: 0 0 0 3px rgba(42, 171, 238, .25); }
 .tgb.m:hover, .tgb.m:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 255, .28); }
-@media (max-width: 560px) { .tgbar { grid-template-columns: auto minmax(0, 1fr); } .tgbtns { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; } .tgb { justify-content: center; } .tgi { width: 38px; height: 38px; } }
+@media (max-width: 560px) { .tgbar { grid-template-columns: auto minmax(0, 1fr); } .tgbtns { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; } .tgb { justify-content: center; } .tgduo { --s: 44px; --ov: 16px; --sp: 10px; } .tgi svg { width: 24px; height: 24px; } }
+@media (hover: none) { .tgbar:hover .tgi.t, .tgbar:hover .tgi.m { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tgi { transition: none; } .tgbar:hover .tgi.t, .tgbar:hover .tgi.m { transform: none; } }
 .sec-head { display: flex; align-items: end; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .sec-head h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 3vw, 30px); letter-spacing: -.01em; }
 .sec-head .src { color: var(--muted); font-size: 13px; }
