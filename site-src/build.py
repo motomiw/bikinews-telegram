@@ -50,7 +50,7 @@ def head(title, desc, path='', img='og-image.jpg'):
 # ---------- главная ----------
 style_end = SRC.index('</style>') + len('</style>')
 INDEX_TITLE = 'ФК «Краснодар»: новости, матчи, таблица РПЛ — Быки News'
-INDEX_DESC = ('Новости ФК «Краснодар» каждый день: анонсы и итоги матчей, заявления Мусаева и игроков, '
+INDEX_DESC = ('Новости ФК «Краснодар» каждый день: анонсы и итоги матчей, заявления тренера и игроков, '
               'таблица РПЛ, состав, бомбардиры и календарь сезона 2026/27.')
 INDEX_LD = ('<script type="application/ld+json">' + json.dumps({
     '@context': 'https://schema.org', '@type': 'WebSite', 'name': 'Быки News',
