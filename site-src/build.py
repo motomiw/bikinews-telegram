@@ -35,8 +35,10 @@ def head(title, desc, path='', img='og-image.jpg'):
     return ('<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n' + og +
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             f'<meta name="description" content="{desc}">\n'
-            f'<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,{FAV}">\n'
-            '<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<link rel="alternate" type="application/rss+xml" title="Быки News" href="https://bikinews.ru/rss.xml">\n'
+            # значок — обычными файлами из корня (Яндекс не берёт data:-ссылки, поэтому в выдаче был «глобус»)
+            '<link rel="icon" href="/favicon.ico" sizes="any">\n'
+            '<link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon.png">\n'
+            '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n<link rel="alternate" type="application/rss+xml" title="Быки News" href="https://bikinews.ru/rss.xml">\n'
             '<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}'
             'html.app .site-head .nav>a,html.app .site-head .nav::before{display:none!important}'
             'html.app .site-head .wrap{flex-wrap:nowrap!important;justify-content:space-between!important;min-height:56px;padding-block:6px!important}'

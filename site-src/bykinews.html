@@ -344,6 +344,20 @@ nav.f-col { justify-content: center; justify-items: start; border-inline: 1px so
 .site-head .logo img { transition: transform .25s ease, filter .25s ease; }
 .site-head .logo:hover b i, .site-head .logo:focus-visible b i { color: var(--signal); text-shadow: 0 0 12px rgba(227,174,28,.45); transform: translateY(-2px); }
 .site-head .logo:hover img, .site-head .logo:focus-visible img { transform: scale(1.06); filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, .95)) drop-shadow(0 0 10px rgba(227, 174, 28, .6)); }
+/* бык в логотипе при наведении роет землю копытом: приподнимается и топает, два раза, пауза */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .site-head .logo img { transform-origin: 40% 92%; }
+  @keyframes paw {
+    0%   { rotate: 0deg;  translate: 0 0; }
+    14%  { rotate: -9deg; translate: -1px -3px; }
+    26%  { rotate: 2deg;  translate: 0 1.5px; }
+    34%  { rotate: 0deg;  translate: 0 0; }
+    48%  { rotate: -9deg; translate: -1px -3px; }
+    60%  { rotate: 2deg;  translate: 0 1.5px; }
+    68%, 100% { rotate: 0deg; translate: 0 0; }
+  }
+  .site-head .logo:hover img, .site-head .logo:focus-visible img { animation: paw 1.3s ease-in-out infinite; }
+}
 /* версия для слабовидящих */
 .a11y-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; border: 1.5px solid var(--on-turf-muted); background: transparent; color: var(--on-turf); cursor: pointer; margin-left: 4px; transition: border-color .2s ease, color .2s ease, box-shadow .25s ease; }
 .site-head .nav .a11y-btn { order: 4; }
@@ -428,13 +442,13 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   @keyframes ring { from { --a: 0deg; } to { --a: 360deg; } }
 }
 /* MAX: линия бежит по контуру от голубого к фиолетовому, хвост за ней гаснет; бегает по кругу, пока курсор на кнопке.
-   --h — положение головы, --L — длина хвоста (в начале растёт от нуля, поэтому место старта обесцвечивается по мере движения линии) */
+   --h — положение головы, --L — длина хвоста: растёт до 280° (~78% круга), поэтому место старта начинает гаснуть, только когда линия прошла почти весь путь */
 @property --h { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @property --L { syntax: '<angle>'; inherits: false; initial-value: 1deg; }
 @media (prefers-reduced-motion: no-preference) {
   .site-head .nav a.mx::after { background: conic-gradient(from calc(var(--h) - var(--L) - 90deg) at 50% 50%, transparent 0deg, #2F8CFF calc(var(--L) * .35), #9B4DFF calc(var(--L) * .96), transparent var(--L)) border-box; }
-  .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { animation: mxgrow .55s linear both, mxrun 1.5s linear infinite; }
-  @keyframes mxgrow { from { --L: 1deg; } to { --L: 130deg; } }
+  .site-head .nav a.mx:hover::after, .site-head .nav a.mx:focus-visible::after { animation: mxgrow 1.4s linear both, mxrun 1.8s linear infinite; }
+  @keyframes mxgrow { from { --L: 1deg; } to { --L: 280deg; } }
   @keyframes mxrun { from { --h: 0deg; } to { --h: 360deg; } }
 }
 
@@ -925,7 +939,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 </main>
 
 <footer class="foot">
-<!--noindex-->
+<!--noindex--><noindex>
   <div class="wrap">
     <div class="f-top">
       <div class="f-brand">
@@ -953,7 +967,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
       <p>Сайт не связан с ФК «Краснодар» и не является СМИ. Новости — пересказ публикаций со ссылкой на источник; права на материалы и символику клубов принадлежат их владельцам. По обращению правообладателя материалы будут удалены.</p>
     </div>
   </div>
-<!--/noindex-->
+</noindex><!--/noindex-->
 </footer>
 
 <script>
