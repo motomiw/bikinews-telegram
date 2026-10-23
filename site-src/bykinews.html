@@ -72,7 +72,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; padding-block: 44px 52px; align-items: end; }
 .lead .eyebrow { color: var(--signal); display: inline-flex; gap: 10px; align-items: center; }
 .lead .eyebrow i { width: 28px; height: 2px; background: var(--signal); display: inline-block; }
-.lead h1 { font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 4.8vw, 56px); line-height: 1.05; letter-spacing: -.015em; margin-top: 16px; }
+.lead h1 { width: fit-content; max-width: 100%; transform-origin: left center; font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 4.8vw, 56px); line-height: 1.05; letter-spacing: -.015em; margin-top: 16px; }
 .lead h1 em { font-style: normal; color: var(--signal); }
 .lead p { color: var(--on-turf-muted); font-size: 18px; max-width: 58ch; margin: 18px 0 0; }
 .lead .read { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; background: var(--signal); color: var(--on-signal); font-weight: 800; text-decoration: none; border-radius: 999px; padding: 11px 20px; }
@@ -400,6 +400,9 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .lead > p { animation-delay: .06s; }
   .lead > .read { animation-delay: .12s; }
   .lead > .facts { animation-delay: .18s; }
+  /* заголовок главного экрана при наведении «бьётся, как сердце»: два удара, пауза; пик +3,5% */
+  @keyframes heart { 0%, 100% { scale: 1; } 12% { scale: 1.035; } 24% { scale: 1; } 38% { scale: 1.035; } 55% { scale: 1; } }
+  @media (hover: hover) { .lead > h1:hover { animation: rise .5s var(--ease-out) both, heart 1.2s ease-in-out infinite; } }
   aside.match { animation-delay: .12s; }
   /* пункт «Прямо сейчас» мягко мигает у свежей новости */
   @keyframes beat { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
