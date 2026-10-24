@@ -16,3 +16,14 @@ RewriteRule ^(.*)$ https://bikinews.ru/$1 [R=301,L]
 
 # календарь матчей
 AddType text/calendar .ics
+
+# Кэш: страницы и данные браузер и приложение каждый раз сверяют с сервером (иначе после обновления сайта показывается старая версия),
+# шрифты и картинки берут из кэша неделю
+<IfModule mod_headers.c>
+<FilesMatch "\.(html|json|xml|ics|txt)$">
+Header set Cache-Control "no-cache"
+</FilesMatch>
+<FilesMatch "\.(woff2?|png|jpe?g|webp|svg|ico)$">
+Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+</IfModule>
