@@ -513,6 +513,9 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .teams > :last-child:hover .club.big img { transform: translateY(-3px) scale(1.1) rotate(4deg); }
 }
 
+/* на компьютере и планшете кнопок Telegram и MAX в шапке нет (на сайте они есть в блоке перед новостями и в подвале); на телефоне — круглые значки */
+@media (min-width: 561px) { .site-head .nav a.tg, .site-head .nav a.mx { display: none !important; } }
+
 /* на телефоне значки Telegram и MAX в шапке — с цветным фоном и белым знаком, как в блоке «Мы в Telegram и MAX»; значок для слабовидящих — жёлтый, как мяч на логотипе, с тёмно-зелёным глазом */
 @media (max-width: 560px) {
   .site-head .nav a.tg, .site-head .nav a.tg:hover, .site-head .nav a.tg:focus-visible { background: #2AABEE; border: 0; color: #fff; box-shadow: none; filter: none; }
