@@ -66,7 +66,7 @@ h1, h2, h3 { text-wrap: balance; margin: 0; }
 .nav a.tg:hover { background: var(--signal); filter: brightness(1.08); }
 
 /* hero */
-.hero { background: var(--turf); color: var(--on-turf); position: relative; overflow: hidden; }
+.hero { background: var(--turf); color: var(--on-turf); position: relative; overflow: hidden; overflow: clip; }
 .pitch { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .pitch * { fill: none; stroke: var(--on-turf); stroke-opacity: .11; stroke-width: 2; }
 .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; padding-block: 44px 52px; align-items: end; }
@@ -202,7 +202,10 @@ table.st { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 5
 .st td:not(.team), .st th { white-space: nowrap; }
 /* версия для слабовидящих: крупный шрифт не должен ломать таблицу — плотнее отступы, длинные названия переносятся */
 html.a11y .st td, html.a11y .st th { padding: 8px 5px; }
+/* крупный шрифт не должен давать прокрутку страницы вбок */
+html.a11y, html.a11y body { overflow-x: clip; }
 html.a11y .st td.team { white-space: normal; }
+@media (max-width: 560px) { html.a11y .tgbtns { grid-template-columns: minmax(0, 1fr); } html.a11y .tgb { min-width: 0; } }
 html.a11y .st td.team .tn { gap: 6px; }
 @media (max-width: 560px) { html.a11y .st td.team img, html.a11y .st td.team .club { display: none; } html.a11y .st td.pos { width: 30px; } }
 .st td.team .tn { display: flex; align-items: center; gap: 10px; }
@@ -389,10 +392,10 @@ html.app nav.f-col { display: none; }
 .a11y-bar button[aria-pressed="true"] { background: var(--bg); color: var(--ink); }
 .a11y-bar .a11y-off { margin-left: 8px; }
 html.a11y-s1 main, html.a11y-s1 .foot { zoom: 1.2; width: calc(100% / 1.2); }
-html.a11y-s2 main, html.a11y-s2 .foot { zoom: 1.4; width: calc(100% / 1.4); }
+html.a11y-s2 main, html.a11y-s2 .foot { zoom: 1.5; width: calc(100% / 1.5); }
 html.a11y-bw:root { --bg: #FFFFFF; --surface: #FFFFFF; --ink: #000000; --muted: #000000; --line: #000000; --soft: #E6E6E6; --accent: #000000; --accent-soft: #E6E6E6; --turf: #000000; --turf-2: #333333; --on-turf: #FFFFFF; --on-turf-muted: #FFFFFF; --signal: #FFD400; --on-signal: #000000; --loss: #000000; --thumb-a: #000000; --thumb-b: #333333; color-scheme: light; }
 html.a11y-wb:root { --bg: #000000; --surface: #000000; --ink: #FFFFFF; --muted: #FFFFFF; --line: #FFFFFF; --soft: #222222; --accent: #FFD400; --accent-soft: #333333; --turf: #000000; --turf-2: #333333; --on-turf: #FFFFFF; --on-turf-muted: #FFFFFF; --signal: #FFD400; --on-signal: #000000; --loss: #FFD400; --thumb-a: #111111; --thumb-b: #333333; color-scheme: dark; }
-@media (max-width: 560px) { html.a11y-s1 main, html.a11y-s1 .foot { zoom: 1.12; width: calc(100% / 1.12); } html.a11y-s2 main, html.a11y-s2 .foot { zoom: 1.25; width: calc(100% / 1.25); } }
+@media (max-width: 560px) { html.a11y-s1 main, html.a11y-s1 .foot { zoom: 1.15; width: calc(100% / 1.15); } html.a11y-s2 main, html.a11y-s2 .foot { zoom: 1.35; width: calc(100% / 1.35); } }
 html.a11y h1, html.a11y h2 { overflow-wrap: anywhere; hyphens: auto; }
 html.a11y main p, html.a11y main p a, html.a11y main li > a { overflow-wrap: anywhere; }
 html.a11y .pl-t td, html.a11y .pl-t th { overflow-wrap: normal; white-space: nowrap; }
