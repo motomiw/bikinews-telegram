@@ -46,7 +46,9 @@ def head(title, desc, path='', img='og-image.jpg'):
             # приложение само отодвигает страницу под строку состояния, поэтому отступ env(safe-area-inset-top) в нём не нужен: иначе шапка «висит» ниже верха
             'html.app .site-head{top:0!important}html.app #live{top:80px!important}'
             # в приложении крупные заголовки чуть мельче — так аккуратнее и читаемее
-            'html.app .sec-head h2{font-size:20px}html.app .lead h1{font-size:clamp(24px,7.4vw,30px);margin-top:12px}html.app .tgt b{font-size:15px}html.app .tgt small{font-size:13px}</style>\n'
+            'html.app .sec-head h2{font-size:20px}html.app .lead h1{font-size:clamp(24px,7.4vw,30px);margin-top:12px}html.app .tgt b{font-size:15px}html.app .tgt small{font-size:13px}'
+            # всё содержимое страниц в приложении чуть мельче (в режимах для слабовидящих масштаб свой)
+            'html.app:not(.a11y) main,html.app:not(.a11y) .foot{zoom:.9}</style>\n'
             # в приложении Быки News для Android разделы — в нижней панели приложения, ссылки шапки прячем
             '<script>if(/BikinewsApp\\//.test(navigator.userAgent))document.documentElement.classList.add("app")</script>\n')
 
