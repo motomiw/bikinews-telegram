@@ -12,7 +12,7 @@ PRIVACY_CSS = r'''
 /* политика конфиденциальности */
 .nav a[aria-current="page"] { background: var(--turf-2); }
 .doc { display: block; padding-block: 28px 48px; max-width: 760px; }
-.doc h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4.5vw, 40px); letter-spacing: -.01em; line-height: 1.12; margin: 0 0 8px; }
+.doc h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(20px, 5.6vw, 40px); overflow-wrap: break-word; hyphens: auto; letter-spacing: -.01em; line-height: 1.12; margin: 0 0 8px; }
 .doc .upd { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
 .doc h2 { font-family: var(--font-display); font-weight: 700; font-size: 19px; margin: 32px 0 10px; }
 .doc p, .doc li { line-height: 1.6; }
