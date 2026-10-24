@@ -309,6 +309,8 @@ html.a11y .st td.team .tn { gap: 6px; }
   .f-soc a[href*="max.ru"]::after { background: conic-gradient(from calc(var(--h) - var(--L) - 90deg) at 50% 50%, transparent 0deg, #2F8CFF calc(var(--L) * .35), #9B4DFF calc(var(--L) * .96), transparent var(--L)) border-box; }
 }
 html.a11y .f-soc a::after { display: none; }
+html.a11y .f-soc a[href*="t.me"], html.a11y .f-soc a[href*="max.ru"], html.a11y .f-soc a[href*="t.me"]:hover, html.a11y .f-soc a[href*="max.ru"]:hover,
+html.a11y .f-soc a[href*="t.me"]:focus-visible, html.a11y .f-soc a[href*="max.ru"]:focus-visible { background: transparent; color: var(--on-turf); box-shadow: inset 0 0 0 2px currentColor; filter: none; }
 .f-col { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .f-col h2 { font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--signal); margin: 0 0 2px; }
 .f-col span { font-size: 14px; }
@@ -420,6 +422,7 @@ html.a11y-wb:root { --bg: #000000; --surface: #000000; --ink: #FFFFFF; --muted: 
 @media (max-width: 560px) { html.a11y-s2 .fx li { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "d t" "opp opp"; gap: 6px 10px; } html.a11y-s2 .fx .d { grid-area: d; display: flex; gap: 6px; align-items: baseline; } html.a11y-s2 .fx .d b { display: inline; } html.a11y-s2 .fx .opp { grid-area: opp; } html.a11y-s2 .fx .t, html.a11y-s2 .fx .r { grid-area: t; justify-self: end; max-width: none; text-align: right; } html.a11y-s2 .fx li.next { margin-inline: -6px; padding-inline: 6px; } }
 @media (max-width: 380px) { html.a11y-s1 .fx li { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "d t" "opp opp"; gap: 6px 10px; } html.a11y-s1 .fx .d { grid-area: d; display: flex; gap: 6px; align-items: baseline; } html.a11y-s1 .fx .d b { display: inline; } html.a11y-s1 .fx .opp { grid-area: opp; } html.a11y-s1 .fx .t, html.a11y-s1 .fx .r { grid-area: t; justify-self: end; max-width: none; text-align: right; } }
 @media (max-width: 560px) { html.a11y-s1 main, html.a11y-s1 .foot { zoom: 1.05; } html.a11y-s2 main, html.a11y-s2 .foot { zoom: 1.2; } }
+@media (max-width: 560px) { html.a11y-s1 .hero { zoom: 1.05; } html.a11y-s2 .hero { zoom: 1.2; } }
 html.a11y h1, html.a11y h2 { overflow-wrap: anywhere; hyphens: auto; }
 html.a11y main p, html.a11y main p a, html.a11y main li > a { overflow-wrap: anywhere; }
 html.a11y .pl-t td, html.a11y .pl-t th { overflow-wrap: normal; white-space: nowrap; }
@@ -647,7 +650,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   </svg>
   <div class="wrap hero-grid">
     <article class="lead">
-      <h1>Гол на 93-й минуте: <em>1:1 с «Балтикой»</em></h1>
+      <h1>Гол на <span style="white-space:nowrap">93-й</span> минуте: <em>1:1 с «Балтикой»</em></h1>
       <p>Быки вели с 30-й минуты после гола Джона Кордобы, но в добавленное время Лорис Муйоколо отыграл мяч для калининградцев. «Краснодар» набрал 23 очка и идёт четвёртым, в двух очках от лидирующего «Динамо». Ближайшая игра — во вторник дома с «Динамо» в Кубке России.</p>
       <a class="read" href="kordoba-vyvel-bykov-vpered-muyokolo-spas-baltiku-na-93-y-nbc190813.html">Читать, как прошёл матч →</a>
       <div class="facts">
