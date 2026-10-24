@@ -61,6 +61,7 @@ def item_text(g):
 def push(g):
     """Пуш в приложение через RuStore (тема «news»). Любая ошибка только пишется в журнал: Telegram от неё не страдает."""
     if not RS_TOKEN or not RS_PROJECT:
+        print('::notice::RuStore Push не отправлен: в секретах репозитория нет RUSTORE_PUSH_TOKEN')
         return
     lead = (g['paras'][0] if g.get('paras') else '').strip()
     if len(lead) > 220:
@@ -75,11 +76,11 @@ def push(g):
                                  headers={'Content-Type': 'application/json'})
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
-            print('RuStore Push:', r.status)
+            print(f'::notice::RuStore Push отправлен: {r.status}')
     except urllib.error.HTTPError as e:
-        print('RuStore Push: ошибка', e.code, e.read()[:200].decode('utf-8', 'replace'))
+        print('::warning::RuStore Push: ошибка', e.code, e.read()[:200].decode('utf-8', 'replace').replace('\n', ' '))
     except Exception as e:
-        print('RuStore Push: ошибка', e)
+        print('::warning::RuStore Push: ошибка', e)
 
 
 def main():
