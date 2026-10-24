@@ -1,0 +1,174 @@
+$ settings put global window_animation_scale 0
+
+$ settings put global transition_animation_scale 0
+
+$ pm set-app-links-user-selection --user 0 --package ru.bikinews.app true all
+
+$ cmd uimode night no
+Night mode: no
+
+$ pm grant ru.bikinews.app android.permission.POST_NOTIFICATIONS
+
+$ am start -W -n ru.bikinews.app/.MainActivity
+Starting: Intent { cmp=ru.bikinews.app/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: ru.bikinews.app/.MainActivity
+TotalTime: 5260
+WaitTime: 5360
+Complete
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+NOT FOUND Отказаться
+NOT FOUND Понятно
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 788 2062
+
+$ input swipe 540 1600 540 500 400
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 324 2250
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 540 2250
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 756 2250
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 972 2250
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 673 1233
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 972 2250
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 673 1989
+
+$ input keyevent KEYCODE_BACK
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 108 2250
+
+$ cmd uimode night yes
+Night mode: yes
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 540 2250
+
+$ cmd uimode night no
+Night mode: no
+
+$ svc wifi disable
+
+$ svc data disable
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 324 2250
+
+$ am start -a android.intent.action.VIEW -d https://bikinews.ru/club.html
+Starting: Intent { act=android.intent.action.VIEW dat=https://bikinews.ru/... }
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+
+$ svc wifi enable
+
+$ svc data enable
+
+$ uiautomator dump /sdcard/u.xml
+UI hierchary dumped to: /sdcard/u.xml
+
+$ input tap 540 1397
+
+$ am start -a android.intent.action.VIEW -d https://bikinews.ru/squad.html
+Starting: Intent { act=android.intent.action.VIEW dat=https://bikinews.ru/... }
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+
+$ dumpsys package domain-preferred-apps
+b25e-f34a4fce7406
+    Signatures: [D2:2C:C5:00:29:9F:B2:28:73:A0:1A:01:0D:E1:C8:2F:BE:4D:06:11:19:B9:48:14:DD:30:1D:AB:50:CB:76:78]
+    Domain verification state:
+      www.google.com: system_configured
+      calendar.google.com: system_configured
+      client-side-encryption.google.com: system_configured
+      krahsc.google.com: system_configured
+    User all:
+      Verification link handling allowed: true
+      Selection state:
+        Disabled:
+          www.google.com
+          calendar.google.com
+          client-side-encryption.google.com
+          krahsc.google.com
+  com.google.android.apps.wallpaper:
+    ID: 5dfb3a03-1fd2-4746-ad87-3b1224d81824
+    Signatures: [70:20:E2:53:48:51:41:C5:00:8B:7A:0E:A7:C2:64:C3:5C:EB:8A:C2:2D:52:DF:46:AD:9B:40:C3:70:2B:3F:3F]
+    Domain verification state:
+      g.co: system_configured
+    User all:
+      Verification link handling allowed: true
+      Selection state:
+        Disabled:
+          g.co
+  ru.bikinews.app:
+    ID: b5126356-5176-491b-b8ed-7faebb4955e4
+    Signatures: [44:A8:56:23:22:1C:22:F9:ED:67:A4:08:3C:60:9F:BF:69:8B:2C:B6:34:89:FA:56:E9:DA:E4:F7:B9:44:17:29]
+    Domain verification state:
+      bikinews.ru: 1024
+      www.bikinews.ru: 1024
+    User 0:
+      Verification link handling allowed: true
+      Selection state:
+        Enabled:
+          bikinews.ru
+          www.bikinews.ru
+  com.google.android.apps.youtube.music:
+    ID: 7f6ae5f0-7d51-4424-8182-6fa73a1698aa
+    Signatures: [CA:7C:DF:89:09:2B:2C:18:5F:D3:41:35:C2:7A:F8:90:36:48:90:06:3D:88:47:47:80:DF:65:A5:68:5C:D3:11]
+    Domain verification state:
+      music.youtube.com: system_configured
+    User all:
+      Verification link handling allowed: true
+      Selection state:
+        Disabled:
+          music.youtube.com
+  com.google.android.inputmethod.latin 0acc5fa9-5015-4c79-9700-4de4d65262cb:
+    User all:
+      Verification link handling allowed: true
+      Selection state:
+        Disabled:
+          deeplink.com.google.android.inputmethod.latin
+
+$ pm get-app-links ru.bikinews.app
+  ru.bikinews.app:
+    ID: b5126356-5176-491b-b8ed-7faebb4955e4
+    Signatures: [44:A8:56:23:22:1C:22:F9:ED:67:A4:08:3C:60:9F:BF:69:8B:2C:B6:34:89:FA:56:E9:DA:E4:F7:B9:44:17:29]
+    Domain verification state:
+      bikinews.ru: 1024
+      www.bikinews.ru: 1024
+

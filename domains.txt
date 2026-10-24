@@ -1,0 +1,6 @@
+  ru.bikinews.app:
+    ID: b5126356-5176-491b-b8ed-7faebb4955e4
+    Signatures: [44:A8:56:23:22:1C:22:F9:ED:67:A4:08:3C:60:9F:BF:69:8B:2C:B6:34:89:FA:56:E9:DA:E4:F7:B9:44:17:29]
+    Domain verification state:
+      bikinews.ru: 1024
+      www.bikinews.ru: 1024
