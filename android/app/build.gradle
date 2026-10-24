@@ -52,4 +52,6 @@ android {
 
 dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    // RuStore Push: уведомления о новых новостях приходят сразу, даже когда приложение закрыто
+    implementation 'ru.rustore.sdk:pushclient:7.5.0'
 }

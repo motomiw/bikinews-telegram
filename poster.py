@@ -12,6 +12,10 @@ SITE = os.environ.get('SITE_URL', 'https://bikinews.ru/')
 API = os.environ.get('TG_API', 'https://api.telegram.org')
 TOKEN = os.environ.get('TG_TOKEN', '').strip()
 CHAT = os.environ.get('TG_CHAT', '').strip()
+# RuStore Push: уведомления в приложении «Быки News». Токен — секрет репозитория RUSTORE_PUSH_TOKEN, без него пуши не отправляются.
+RS_TOKEN = os.environ.get('RUSTORE_PUSH_TOKEN', '').strip()
+RS_PROJECT = os.environ.get('RUSTORE_PROJECT_ID', '').strip()
+RS_TOPIC = 'news'
 STATE = 'state.json'
 MAX_PER_RUN = 3
 MSK = datetime.timezone(datetime.timedelta(hours=3))
@@ -52,6 +56,30 @@ def item_text(g):
     return (f"<b>{esc(g['title'])}</b>\n\n{esc(lead)}\n\n"
             f"👉 <a href=\"{esc(page)}\">Подробнее на сайте</a>\n"
             f"Источник: <a href=\"{esc(g['url'])}\">{esc(g['source'])}</a>")
+
+
+def push(g):
+    """Пуш в приложение через RuStore (тема «news»). Любая ошибка только пишется в журнал: Telegram от неё не страдает."""
+    if not RS_TOKEN or not RS_PROJECT:
+        return
+    lead = (g['paras'][0] if g.get('paras') else '').strip()
+    if len(lead) > 220:
+        lead = lead[:220].rsplit(' ', 1)[0].rstrip(',;:—- ') + '…'
+    page = g.get('page') or f"news.html#{urllib.parse.quote(g['id'])}"
+    body = {'providers': {'rustore': {'project_id': RS_PROJECT, 'auth_token': RS_TOKEN}},
+            'topic': RS_TOPIC,
+            'message': {'data': {'id': str(g['id']), 'title': str(g['title']), 'text': lead,
+                                 'tag': str(g.get('tag') or ''), 'ts': str(int(g.get('ts') or 0)), 'page': page}}}
+    req = urllib.request.Request('https://vkpns-universal.rustore.ru/v1/send/topic',
+                                 data=json.dumps(body, ensure_ascii=False).encode('utf-8'),
+                                 headers={'Content-Type': 'application/json'})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            print('RuStore Push:', r.status)
+    except urllib.error.HTTPError as e:
+        print('RuStore Push: ошибка', e.code, e.read()[:200].decode('utf-8', 'replace'))
+    except Exception as e:
+        print('RuStore Push: ошибка', e)
 
 
 def main():
@@ -95,6 +123,7 @@ def main():
             if not send(text):
                 break
             st['posted'].append(g['id']); sent += 1
+            push(g)
         print('Опубликовано пересказов:', sent)
 
     now = datetime.datetime.now(MSK)

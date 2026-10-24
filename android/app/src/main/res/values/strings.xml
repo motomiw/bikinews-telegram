@@ -21,6 +21,7 @@
     <string name="about_ok">Понятно</string>
     <string name="about_mail">Написать нам</string>
     <string name="share_via">Поделиться</string>
+    <string name="rustore_project_id" translatable="false">yjFEIHAngjHe3cf8bohYyeSRzDcc7gqf</string>
     <string name="notif_channel">Новости</string>
     <string name="notif_channel_desc">Новые материалы о «Краснодаре» на Быки News</string>
     <string name="more_notify_off">Выключить уведомления о новостях</string>

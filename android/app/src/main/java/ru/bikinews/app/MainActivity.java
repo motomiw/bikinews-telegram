@@ -79,6 +79,7 @@ public class MainActivity extends Activity {
         buildTabs();
         setupWeb();
         NewsJob.schedule(this);
+        PushSetup.sync(this);
         askNotifyPermission();
 
         swipe.setColorSchemeColors(getColor(R.color.accent));
@@ -286,6 +287,7 @@ public class MainActivity extends Activity {
     void toggleNotify() {
         boolean on = !NewsJob.enabled(this);
         NewsJob.setEnabled(this, on);
+        PushSetup.sync(this);
         if (on && Build.VERSION.SDK_INT >= 33
                 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
             if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)

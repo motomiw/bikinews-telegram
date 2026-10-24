@@ -97,35 +97,55 @@ public class NewsJob extends JobService {
         }
         p.edit().putString(KEY_SEEN, ids.toString()).apply();
         if (saved == null || fresh.isEmpty() || !enabled(ctx)) return;   // первый запуск — только запоминаем ленту
-        if (Build.VERSION.SDK_INT >= 33 && ctx.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
-
-        NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        ensureChannel(ctx, nm);
         int shown = 0;
         for (JSONObject it : fresh) {
             if (shown++ >= MAX_SHOW) break;
-            String page = it.optString("page");
-            String url = MainActivity.SITE + page;
             String text = "";
             JSONArray paras = it.optJSONArray("paras");
             if (paras != null && paras.length() > 0) text = paras.optString(0);
-            Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url), ctx, MainActivity.class);
-            open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pi = PendingIntent.getActivity(ctx, it.optString("id").hashCode(), open,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(ctx, CHANNEL) : new Notification.Builder(ctx);
-            b.setSmallIcon(R.drawable.ic_stat_bull)
-                    .setColor(ctx.getColor(R.color.accent))
-                    .setContentTitle(it.optString("title"))
-                    .setContentText(text)
-                    .setStyle(new Notification.BigTextStyle().bigText(text))
-                    .setSubText(it.optString("tag"))
-                    .setContentIntent(pi)
-                    .setAutoCancel(true)
-                    .setWhen(it.optLong("ts", System.currentTimeMillis() / 1000) * 1000L)
-                    .setShowWhen(true);
-            nm.notify(it.optString("id").hashCode(), b.build());
+            notifyNews(ctx, it.optString("id"), it.optString("title"), text, it.optString("tag"),
+                    it.optLong("ts", 0), it.optString("page"));
         }
+    }
+
+    /** Показывает уведомление о новости. Идентификатор уведомления — от id новости: повтор заменяет прежнее, а не дублирует. */
+    static void notifyNews(Context ctx, String id, String title, String text, String tag, long ts, String page) {
+        if (Build.VERSION.SDK_INT >= 33 && ctx.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
+        NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+        ensureChannel(ctx, nm);
+        String url = MainActivity.SITE + (page == null ? "" : page);
+        String body = text == null ? "" : text;
+        Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url), ctx, MainActivity.class);
+        open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pi = PendingIntent.getActivity(ctx, id.hashCode(), open,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(ctx, CHANNEL) : new Notification.Builder(ctx);
+        b.setSmallIcon(R.drawable.ic_stat_bull)
+                .setColor(ctx.getColor(R.color.accent))
+                .setContentTitle(title)
+                .setContentText(body)
+                .setStyle(new Notification.BigTextStyle().bigText(body))
+                .setSubText(tag == null ? "" : tag)
+                .setContentIntent(pi)
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
+                .setWhen((ts > 0 ? ts : System.currentTimeMillis() / 1000) * 1000L)
+                .setShowWhen(true);
+        nm.notify(id.hashCode(), b.build());
+    }
+
+    static boolean wasSeen(Context ctx, String id) {
+        String saved = ctx.getSharedPreferences(PREFS, MODE_PRIVATE).getString(KEY_SEEN, "");
+        return saved != null && Arrays.asList(saved.split(",")).contains(id);
+    }
+
+    static synchronized void markSeen(Context ctx, String id) {
+        SharedPreferences p = ctx.getSharedPreferences(PREFS, MODE_PRIVATE);
+        if (!p.contains(KEY_SEEN)) return;   // первая проверка ленты ещё не было: она сама запомнит всё, что на сайте
+        String saved = p.getString(KEY_SEEN, "");
+        if (saved == null) saved = "";
+        if (Arrays.asList(saved.split(",")).contains(id)) return;
+        p.edit().putString(KEY_SEEN, saved.isEmpty() ? id : id + "," + saved).apply();
     }
 
     static void ensureChannel(Context ctx, NotificationManager nm) {
