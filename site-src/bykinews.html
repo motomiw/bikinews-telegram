@@ -513,13 +513,14 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .teams > :last-child:hover .club.big img { transform: translateY(-3px) scale(1.1) rotate(4deg); }
 }
 
-/* на телефоне значки Telegram и MAX в шапке — с цветным фоном и белым знаком, как в блоке «Мы в Telegram и MAX»; у значка для слабовидящих — жёлтый контур */
+/* на телефоне значки Telegram и MAX в шапке — с цветным фоном и белым знаком, как в блоке «Мы в Telegram и MAX»; значок для слабовидящих — жёлтый, как мяч на логотипе, с тёмно-зелёным глазом */
 @media (max-width: 560px) {
   .site-head .nav a.tg, .site-head .nav a.tg:hover, .site-head .nav a.tg:focus-visible { background: #2AABEE; border: 0; color: #fff; box-shadow: none; filter: none; }
   .site-head .nav a.mx, .site-head .nav a.mx:hover, .site-head .nav a.mx:focus-visible { background: linear-gradient(135deg, #2F8CFF, #9B4DFF); border: 0; color: #fff; box-shadow: none; }
   .site-head .nav a.tg svg, .site-head .nav a.mx svg, .site-head .nav a.tg:hover svg, .site-head .nav a.mx:hover svg { fill: #fff; }
   .site-head .nav a.tg::after, .site-head .nav a.mx::after { display: none; }
-  .site-head .nav .a11y-btn { border-color: var(--signal); }
+  .site-head .nav .a11y-btn, .site-head .nav .a11y-btn:hover { background: linear-gradient(135deg, #F4C93A, #E3AE1C); border: 0; color: var(--turf); box-shadow: none; }
+  .site-head .nav .a11y-btn[aria-pressed="true"] { background: #fff; box-shadow: 0 0 0 3px var(--signal); }
 }
 
 /* подпись под названием в шапке */
