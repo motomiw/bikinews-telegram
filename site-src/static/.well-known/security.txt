@@ -1,0 +1,4 @@
+Contact: mailto:i@bikinews.ru
+Expires: 2027-10-24T00:00:00.000Z
+Preferred-Languages: ru, en
+Canonical: https://bikinews.ru/.well-known/security.txt
