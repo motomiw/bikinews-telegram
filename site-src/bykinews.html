@@ -519,6 +519,13 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   .teams > :last-child:hover .club.big img { transform: translateY(-3px) scale(1.1) rotate(4deg); }
 }
 
+/* на телефоне значок Telegram в шапке — как у MAX: контур и зелёный фон, самолёт белый */
+@media (max-width: 560px) {
+  .site-head .nav a.tg { background: transparent; border: 1.5px solid var(--signal); color: #fff; box-shadow: none; }
+  .site-head .nav a.tg svg, .site-head .nav a.tg.auto svg { fill: #fff; }
+  .site-head .nav a.tg.auto { border-color: transparent; }
+}
+
 /* на телефоне «прыжок» эмблем: в карточке ближайшего матча — по таймеру (.auto), в строках ближайших матчей — у строки в середине экрана (.focus); в таблице и в сыгранных матчах прыжка нет */
 @media (hover: none) and (prefers-reduced-motion: no-preference) {
   .club img, img.lg { transition: transform .38s cubic-bezier(.34, 1.56, .64, 1), filter .3s ease; transform-origin: 50% 65%; }
