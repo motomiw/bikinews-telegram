@@ -58,13 +58,12 @@ sh('cmd', 'uimode', 'night', 'no')
 sh('am', 'start', '-W', '-n', PKG + '/.MainActivity')
 time.sleep(10)
 # уведомление о cookie: ищем кнопку «Понятно», иначе жмём по её обычному месту
-for _ in range(4):
-    if tap_node('text', 'Понятно'):
+for _ in range(6):
+    xml = nodes()
+    if tap_node('text', 'Отказаться', xml) or tap_node('text', 'Понятно', xml):
         break
     time.sleep(3)
-else:
-    sh('input', 'tap', '540', '2040')
-time.sleep(2)
+time.sleep(6)
 shot('01-home', 3)
 sh('input', 'swipe', '540', '1600', '540', '500', '400')
 shot('02-home-feed', 2)
