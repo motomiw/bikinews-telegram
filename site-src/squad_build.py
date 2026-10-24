@@ -253,6 +253,7 @@ main.cl { display: block; padding-block: 8px 56px; }
   .cblocks { grid-template-columns: minmax(0, 1fr); }
   .cl .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cl .kpi b { font-size: 19px; }
+  html.a11y-s2 .cl .kpis { grid-template-columns: minmax(0, 1fr); }
 }
 '''
 club_main = f'''<main class="wrap cl" id="top">
