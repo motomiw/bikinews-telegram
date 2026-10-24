@@ -78,6 +78,8 @@ public class MainActivity extends Activity {
         applyInsets();
         buildTabs();
         setupWeb();
+        NewsJob.schedule(this);
+        askNotifyPermission();
 
         swipe.setColorSchemeColors(getColor(R.color.accent));
         swipe.setProgressBackgroundColorSchemeColor(getColor(R.color.surface));
@@ -252,6 +254,7 @@ public class MainActivity extends Activity {
         m.add(2, 5, 5, R.string.more_share);
         m.add(2, 6, 6, R.string.more_privacy);
         m.add(2, 7, 7, R.string.more_about);
+        m.add(3, 8, 8, NewsJob.enabled(this) ? R.string.more_notify_off : R.string.more_notify_on);
         pm.setOnMenuItemClickListener(it -> {
             switch (it.getItemId()) {
                 case 1: go(SITE + "squad.html"); setCurrent(4); break;
@@ -261,10 +264,42 @@ public class MainActivity extends Activity {
                 case 5: sharePage(); break;
                 case 6: go(SITE + "privacy.html"); setCurrent(4); break;
                 case 7: showAbout(); break;
+                case 8: toggleNotify(); break;
             }
             return true;
         });
         pm.show();
+    }
+
+    // ---------- уведомления о новых новостях ----------
+    static final int REQ_NOTIFY = 7;
+
+    void askNotifyPermission() {
+        if (Build.VERSION.SDK_INT < 33 || !NewsJob.enabled(this)) return;
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) return;
+        android.content.SharedPreferences p = getSharedPreferences(NewsJob.PREFS, MODE_PRIVATE);
+        if (p.getBoolean("asked", false)) return;   // спрашиваем один раз; дальше — через меню «Ещё»
+        p.edit().putBoolean("asked", true).apply();
+        requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFY);
+    }
+
+    void toggleNotify() {
+        boolean on = !NewsJob.enabled(this);
+        NewsJob.setEnabled(this, on);
+        if (on && Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)
+                    || !getSharedPreferences(NewsJob.PREFS, MODE_PRIVATE).getBoolean("asked", false)) {
+                getSharedPreferences(NewsJob.PREFS, MODE_PRIVATE).edit().putBoolean("asked", true).apply();
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFY);
+            } else {
+                // разрешение отклонено навсегда — открываем настройки уведомлений приложения
+                Intent i = new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                i.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, getPackageName());
+                try { startActivity(i); } catch (ActivityNotFoundException ignored) { }
+            }
+        }
+        Toast.makeText(this, on ? R.string.notify_on_toast : R.string.notify_off_toast, Toast.LENGTH_SHORT).show();
     }
 
     void go(String url) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Те же цвета, что на сайте (светлая тема) -->
-    <color name="icon_bg">#FFFFFF</color>
+    <color name="icon_bg">#0F3B25</color>
     <color name="turf">#0F3B25</color>
     <color name="bg">#F2F5F1</color>
     <color name="surface">#FFFFFF</color>
