@@ -55,6 +55,7 @@ sh('settings', 'put', 'global', 'window_animation_scale', '0')
 sh('settings', 'put', 'global', 'transition_animation_scale', '0')
 sh('pm', 'set-app-links-user-selection', '--user', '0', '--package', PKG, 'true', 'all')
 sh('cmd', 'uimode', 'night', 'no')
+sh('pm', 'grant', PKG, 'android.permission.POST_NOTIFICATIONS')   # без системного окна с вопросом на первом кадре
 sh('am', 'start', '-W', '-n', PKG + '/.MainActivity')
 time.sleep(10)
 # уведомление о cookie: ищем кнопку «Понятно», иначе жмём по её обычному месту
