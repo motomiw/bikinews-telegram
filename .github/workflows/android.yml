@@ -53,7 +53,12 @@ jobs:
           KEY_ALIAS: bikinews
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          gradle --no-daemon assembleRelease bundleRelease lint
+          set -o pipefail
+          gradle --no-daemon assembleRelease bundleRelease lint 2>&1 | tee ../build.log || {
+            # причина падения — в аннотации запуска (журнал целиком скачивается только из веб-интерфейса)
+            grep -E "error:|Error|FAILED|What went wrong|Could not|Execution failed|Lint found|Unresolved|cannot find symbol|not found" -A3 ../build.log | head -50 | tr -d '\r' | while IFS= read -r l; do echo "::error::${l:0:300}"; done
+            exit 1
+          }
 
       - name: Проверка подписи
         if: steps.key.outputs.signed == 'true'
