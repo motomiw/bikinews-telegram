@@ -342,6 +342,10 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(true);
         s.setSupportMultipleWindows(false);     // ссылки target=_blank идут через shouldOverrideUrlLoading
         s.setUserAgentString(s.getUserAgentString() + UA_MARK + versionName());
+        // Сайт свёрстан под обычный размер шрифта; системное «крупный шрифт» в WebView раздувало текст.
+        // Берём 90% от обычного и не даём системе увеличить больше чем до 100% (для крупного шрифта на сайте есть режим для слабовидящих).
+        float fs = getResources().getConfiguration().fontScale;
+        s.setTextZoom(Math.round(90 * Math.min(Math.max(fs, 0.85f), 1.11f)));
         updateCacheMode();
 
         web.setWebChromeClient(new WebChromeClient() {
