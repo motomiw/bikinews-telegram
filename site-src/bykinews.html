@@ -395,7 +395,7 @@ html.app nav.f-col { display: none; }
 .a11y-bar button { white-space: nowrap; font: 700 16px var(--font-body); color: var(--bg); background: transparent; border: 2px solid var(--bg); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
 .a11y-bar button[aria-pressed="true"] { background: var(--bg); color: var(--ink); }
 .a11y-bar .a11y-off { margin-left: 8px; }
-html.a11y-s1 main, html.a11y-s2 main, html.a11y-s1 .foot, html.a11y-s2 .foot { margin-inline: 0; }
+@media (max-width: 560px) { html.a11y-s1 main, html.a11y-s2 main, html.a11y-s1 .foot, html.a11y-s2 .foot { margin-inline: 0; } }
 html.a11y-s1 main, html.a11y-s1 .foot { zoom: 1.2; }
 html.a11y-s2 main, html.a11y-s2 .foot { zoom: 1.5; }
 html.a11y-bw:root { --bg: #FFFFFF; --surface: #FFFFFF; --ink: #000000; --muted: #000000; --line: #000000; --soft: #E6E6E6; --accent: #000000; --accent-soft: #E6E6E6; --turf: #000000; --turf-2: #333333; --on-turf: #FFFFFF; --on-turf-muted: #FFFFFF; --signal: #FFD400; --on-signal: #000000; --loss: #000000; --thumb-a: #000000; --thumb-b: #333333; color-scheme: light; }
