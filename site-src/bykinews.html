@@ -295,6 +295,20 @@ html.a11y .st td.team .tn { gap: 6px; }
 .f-soc a { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--signal); color: var(--signal); border-radius: 999px; padding: 5px 12px; font-weight: 700; font-size: 13px; }
 .f-soc a:hover { background: var(--signal); color: var(--on-signal); }
 .f-soc svg { width: 15px; height: 15px; fill: currentColor; }
+/* Telegram и MAX в подвале: всегда цветные, как кнопки в блоке перед новостями; по контуру постоянно бежит линия (как раньше в шапке) */
+.f-soc a { position: relative; border: 0; padding: 6.5px 13.5px; color: #fff; }
+.f-soc a[href*="t.me"] { background: #157AB1; }
+.f-soc a[href*="max.ru"] { background: linear-gradient(135deg, #2F6FE0, #7B3FE0); }
+.f-soc a:hover, .f-soc a:focus-visible { background: #157AB1; color: #fff; filter: brightness(1.12); }
+.f-soc a[href*="max.ru"]:hover, .f-soc a[href*="max.ru"]:focus-visible { background: linear-gradient(135deg, #2F6FE0, #7B3FE0); }
+@media (prefers-reduced-motion: no-preference) {
+  .f-soc a::after { content: ''; position: absolute; inset: -2px; border: 2.5px solid transparent; border-radius: inherit; pointer-events: none;
+    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+    animation: mxgrow 1.53s linear both, mxrun 1.8s linear infinite; }
+  .f-soc a[href*="t.me"]::after { background: conic-gradient(from calc(var(--h) - var(--L) - 90deg) at 50% 50%, transparent 0deg, #1B7FC0 calc(var(--L) * .35), #5CC8FF calc(var(--L) * .96), transparent var(--L)) border-box; }
+  .f-soc a[href*="max.ru"]::after { background: conic-gradient(from calc(var(--h) - var(--L) - 90deg) at 50% 50%, transparent 0deg, #2F8CFF calc(var(--L) * .35), #9B4DFF calc(var(--L) * .96), transparent var(--L)) border-box; }
+}
+html.a11y .f-soc a::after { display: none; }
 .f-col { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .f-col h2 { font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--signal); margin: 0 0 2px; }
 .f-col span { font-size: 14px; }
@@ -317,7 +331,7 @@ nav.f-col { justify-content: center; justify-items: start; border-inline: 1px so
   .f-brand { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
   .f-brand p { order: 3; flex: 0 0 100%; margin: 0; font-size: 13px; }
   .f-name { font-size: 17px; }
-  .f-soc a { padding: 4px 10px; font-size: 12px; }
+  .f-soc a { padding: 5.5px 11.5px; font-size: 12px; }
   nav.f-col { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; gap: 6px 18px; }
   .f-col h2 { display: none; }
   .f-col a { font-size: 14px; }
