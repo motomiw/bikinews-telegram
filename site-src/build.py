@@ -230,8 +230,9 @@ NEWS_JS = r'''
   function aboutKrd(n) {
     if (String(n.source || '').indexOf('ФК') === 0) return true;
     var t = String(n.title || '').toLowerCase().replace(/ё/g, 'е').replace(/воробьев/g, 'воробьёв');
-    // «Мусаев» без других признаков «Краснодара» в материале о «Зените» — это игрок «Зенита», не наш тренер
-    if (/зенит/.test(t) && !KRD_RE.test(t.replace(/мусаев[а-я]*/g, ''))) return false;
+    // «Мусаев» без других признаков «Краснодара» в материале о «Зените», ЦСКА или «Спартаке» — это игрок другого клуба
+    // (Мусаев из ЦСКА, Мусаев из «Зенита»), а не наш тренер Мурад Мусаев; слова «тренер», «Мурад» возвращают материал в ленту
+    if (/зенит|цска|спартак/.test(t) && !KRD_RE.test(t.replace(/мусаев[а-я]*/g, '')) && !/мурад|тренер|наставник/.test(t)) return false;
     return KRD_RE.test(t);
   }
   function kind(n) { return n.own ? 'own' : (n.source.indexOf('ФК') === 0 ? 'club' : 'media'); }
