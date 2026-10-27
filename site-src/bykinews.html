@@ -670,10 +670,10 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
       <div class="match-top"><span class="eyebrow" id="match-title">Ближайший матч</span><span class="mono" style="font-size:13px">Кубок России · группа B, 5 тур</span></div>
       <div class="teams">
         <div><span class="club big us" data-logo="krasnodar">КРД</span><div class="name">Краснодар</div><div class="pos">5 место в РПЛ</div></div>
-        <div class="kick mono">20:30<small>вт, 27 окт</small></div>
+        <div class="kick mono">2:0<small>после 1-го тайма</small></div>
         <div><span class="club big" data-logo="dynamo">ДИН</span><div class="name">Динамо</div><div class="pos">2 место в РПЛ</div></div>
       </div>
-      <div class="countdown"><span>Дома, «Ozon Арена» · начало по Москве</span><span id="cdwrap">до матча <b id="cd">3 дня</b></span></div>
+      <div class="countdown"><span>Дома, «Ozon Арена» · вт, 27 окт, 20:30</span><span id="cdwrap" data-live><b>⚽ Воробьёв</b> 12′, 43′</span></div>
       <a class="allnews calink" href="matches.ics" download="krasnodar-matches.ics"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg> Все матчи — в календарь телефона</a>
       <div class="last">
         <span class="lastl">Прошлый матч · РПЛ, 12 тур</span><span class="lastm"><span class="club us" data-logo="krasnodar">КРД</span><b>Краснодар — Балтика</b><span class="club" data-logo="baltika">БАЛ</span></span>
@@ -1329,12 +1329,13 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 
   // Обратный отсчёт
   var kickoff = new Date('2026-10-27T20:30:00+03:00'), el = document.getElementById('cd'), ms = kickoff - new Date();
+  if (!el) ms = 0;
   if (ms > 86400000) {
     var d = Math.floor(ms / 86400000), n = d % 100, n1 = n % 10;
     el.textContent = d + ' ' + ((n > 10 && n < 20) ? 'дней' : n1 === 1 ? 'день' : (n1 >= 2 && n1 <= 4) ? 'дня' : 'дней');
   } else if (ms > 0) {
     var h = Math.floor(ms / 3600000);
     el.textContent = h >= 1 ? h + ' ч ' + Math.floor(ms % 3600000 / 60000) + ' мин' : Math.ceil(ms / 60000) + ' мин';
-  } else { document.getElementById('cdwrap').textContent = 'матч сыгран — счёт скоро обновим'; }
+  } else if (!document.getElementById('cdwrap').hasAttribute('data-live')) { document.getElementById('cdwrap').textContent = 'матч сыгран — счёт скоро обновим'; }
 })();
 </script>
