@@ -6,7 +6,7 @@
   • дайджест изданий (data/news.json) — в 12:00 и 20:00 по Москве.
 Токен и канал берутся из секретов репозитория TG_TOKEN и TG_CHAT.
 """
-import datetime, html, json, os, sys, urllib.parse, urllib.request
+import datetime, html, json, os, sys, urllib.parse, urllib.request, urllib.error
 
 SITE = os.environ.get('SITE_URL', 'https://bikinews.ru/')
 API = os.environ.get('TG_API', 'https://api.telegram.org')
@@ -36,7 +36,12 @@ def send(text):
         with urllib.request.urlopen(req, timeout=20) as r:
             res = json.loads(r.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
-        res = json.loads(e.read().decode('utf-8') or '{}')
+        print('Ошибка Telegram: HTTP', e.code)
+        return False
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError):
+        # Не выводим исключение: URL запроса содержит токен бота.
+        print('Ошибка Telegram: сеть или некорректный ответ')
+        return False
     if not res.get('ok'):
         print('Ошибка Telegram:', res.get('description'))
     return bool(res.get('ok'))
@@ -83,19 +88,30 @@ def push(g):
         print('::warning::RuStore Push: ошибка', e)
 
 
+def save_state(st):
+    # Замена файла целиком защищает от частично записанного JSON.
+    tmp = STATE + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(st, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, STATE)
+
+
 def main():
     if not TOKEN or not CHAT:
         sys.exit('Не заданы секреты TG_TOKEN и TG_CHAT')
     try:
-        st = json.load(open(STATE, encoding='utf-8'))
+        with open(STATE, encoding='utf-8') as f:
+            st = json.load(f)
         first = False
-    except (FileNotFoundError, ValueError):
+    except FileNotFoundError:
         st, first = {'posted': [], 'digest': {}}, True
 
+    failed = False
     if os.environ.get('TG_TEST') == 'true':
         ok = send('✅ Быки News подключены к каналу. Новости будут появляться здесь автоматически.\n\n'
                   f'<a href="{SITE}">bikinews.ru</a>')
         print('Тестовое сообщение:', 'отправлено' if ok else 'ошибка')
+        return 0 if ok else 1
 
     gl = get_json('data/glavnoe.json').get('items', [])
     sent = 0
@@ -122,8 +138,10 @@ def main():
         for g in new[:MAX_PER_RUN]:
             text = item_text(g)
             if not send(text):
+                failed = True
                 break
             st['posted'].append(g['id']); sent += 1
+            save_state(st)
             push(g)
         print('Опубликовано пересказов:', sent)
 
@@ -135,21 +153,24 @@ def main():
             try:
                 items = [i for i in get_json('data/news.json').get('items', []) if i['ts'] >= since][:7]
             except Exception as e:
-                print('Лента изданий недоступна:', e); items = []
+                print('Лента изданий недоступна'); items = []; failed = True
             if items:
                 lines = [f"▪️ <a href=\"{esc(i['url'])}\">{esc(i['title'])}</a> <i>— {esc(i['source'])}</i>" for i in items]
                 text = (f"<b>📰 Что пишут о «Краснодаре» · {now:%d.%m}, {'день' if now.hour == 12 else 'вечер'}</b>\n\n"
                         + '\n\n'.join(lines) + f"\n\n📲 <a href=\"{SITE}news.html\">Все новости со ссылками</a>")
-                print('Дайджест:', 'опубликован' if send(text) else 'ошибка')
-            st['digest'][slot] = 1
+                ok = send(text)
+                print('Дайджест:', 'опубликован' if ok else 'ошибка')
+                if ok:
+                    st['digest'][slot] = 1
+                    save_state(st)
+                else:
+                    failed = True
 
     st['posted'] = st['posted'][-500:]
     st['digest'] = dict(list(st['digest'].items())[-20:])
-    json.dump(st, open(STATE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    save_state(st)
+    return 1 if failed else 0
 
 
 if __name__ == '__main__':
-    main()
-
-if __name__ == '__main__':
-    main()
+    sys.exit(main())
