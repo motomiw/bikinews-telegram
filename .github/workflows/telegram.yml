@@ -35,6 +35,7 @@ jobs:
           RUSTORE_PROJECT_ID: yjFEIHAngjHe3cf8bohYyeSRzDcc7gqf
         run: python poster.py
       - name: Сохранить, что уже опубликовано
+        if: ${{ always() && !cancelled() }}
         run: |
           git config user.name "bikinews-bot"
           git config user.email "bikinews-bot@users.noreply.github.com"
