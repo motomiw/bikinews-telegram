@@ -26,6 +26,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Проверка логики без сетевых отправок
+        run: python -m unittest test_poster -v
       - name: Публикация новостей
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
