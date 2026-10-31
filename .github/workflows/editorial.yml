@@ -40,7 +40,7 @@ jobs:
       - name: Локальная модель и извлечение текста
         run: |
           pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cpu
-          pip install transformers==4.57.1 trafilatura==2.0.0 pillow
+          pip install transformers==4.57.1 trafilatura==2.0.0 lm-format-enforcer==0.11.3 pillow
       - name: Анализ источников и собственный пересказ
         run: |
           if [ "$NEWS_AUTOPUBLISH" = 'true' ]; then
