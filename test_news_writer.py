@@ -4,6 +4,15 @@ import news_writer as w
 MASTER = '<ul class="feed"><li><article><h3>Кордоба извинился перед болельщиками за последние результаты команды</h3></article></li></ul>'
 
 class EditorialTests(unittest.TestCase):
+    def test_backdated_news_does_not_displace_a_newer_item(self):
+        import datetime as dt
+        master='<ul class="feed"><li><article><time>1 ноя<br>10:00</time><h3>NEWER</h3></article></li><li><article><time>31 окт<br>21:00</time><h3>OLDER</h3></article></li></ul>'
+        now=dt.datetime(2026,11,1,12,tzinfo=w.MSK)
+        item={'ts':dt.datetime(2026,11,1,9,tzinfo=w.MSK).timestamp()}
+        result=w.insert_story(master,item,'<li><article>MIDDLE</article></li>',now)
+        self.assertLess(result.index('NEWER'),result.index('MIDDLE'))
+        self.assertLess(result.index('MIDDLE'),result.index('OLDER'))
+
     def test_sources_are_restricted(self):
         for url in ('http://fckrasnodar.ru/a', 'https://fckrasnodar.ru.attacker.test/a',
                     'https://user:secret@fckrasnodar.ru/a', 'https://127.0.0.1/a'):
@@ -18,6 +27,8 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(len(w.candidates([other],MASTER,100100)),1)
         self.assertEqual(w.candidates([dict(other,ts=1)],MASTER,100100),[])
         self.assertEqual(w.candidates([dict(other,ts=100101)],MASTER,100100),[])
+        official=dict(title='Цифры и факты выездной игры',url='https://fckrasnodar.ru/team/news/object/?object_id=154406',ts=100000)
+        self.assertEqual(len(w.candidates([official],MASTER,100100)),1)
 
     def test_rejects_unsupported_numbers_and_copying(self):
         draft = dict(publish=True,title='Краснодар начал подготовку к следующей игре',

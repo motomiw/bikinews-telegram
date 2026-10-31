@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: editorial-main
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
   write:
