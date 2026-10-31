@@ -90,7 +90,7 @@ def candidates(items, master, now):
             continue
         if not any(same_story(title, other['title']) for other in result):
             result.append(item)
-    return result[:5]
+    return result[:15]
 
 
 def number_tokens(text):
@@ -162,12 +162,19 @@ def writer():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--publish', action='store_true')
+    parser.add_argument('--smoke-test', action='store_true')
     args = parser.parse_args()
     master = MASTER.read_text(encoding='utf-8')
     items = json.loads(fetch('https://bikinews.ru/data/news.json', feed=True))['items']
     selection = candidates(items, master, dt.datetime.now(MSK).timestamp())
     report = {'model': MODEL, 'published': False, 'draft': None, 'skipped': []}
     ask = None
+    if args.smoke_test:
+        ask = writer()
+        check = ask('Return only valid JSON: {"ok":true}.', {'task':'Check local model execution, do not write a news item.'})
+        if check.get('ok') is not True:
+            raise ValueError('Локальная модель не прошла проверку запуска')
+        print('Локальная модель: проверка запуска пройдена')
     import trafilatura
     for item in selection:
         try:
@@ -175,6 +182,7 @@ def main():
                                           include_tables=False, favor_precision=True)
             if not article or len(article) < 500:
                 raise ValueError('Полный текст источника недоступен')
+            print('Источник прочитан:', item['url'], 'символов:', len(article), flush=True)
             # Официальный клуб — первичный источник. Для остальных требуется второй материал.
             sources = [article[:7000]]
             if urllib.parse.urlsplit(item['url']).hostname not in ('fckrasnodar.ru','www.fckrasnodar.ru'):
@@ -226,7 +234,7 @@ def main():
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print('Редакция:', 'опубликовано' if report['published'] else 'черновик' if report['draft'] else 'нет подтверждённых новых сюжетов')
     for entry in report['skipped']:
-        print('Пропуск:', entry['reason'])
+        print('Пропуск:', entry['url'], entry['reason'])
     return 0
 
 

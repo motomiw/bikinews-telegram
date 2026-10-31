@@ -3,7 +3,7 @@ name: Редакция → Главное
 on:
   schedule:
     # За полчаса до дайджестов, UTC (МСК = UTC+3).
-    - cron: '30 0,2,5,7,9,11,13,15,17,19,20 * * *'
+    - cron: '30 2,5,7,9,11,13,15,17,19,20,23 * * *'
   push:
     branches: [main]
     paths: ['news_writer.py', 'test_news_writer.py', '.github/workflows/editorial.yml']
@@ -46,7 +46,7 @@ jobs:
           if [ "$NEWS_AUTOPUBLISH" = 'true' ]; then
             python news_writer.py --publish
           else
-            python news_writer.py
+            python news_writer.py --smoke-test
           fi
       - name: Проверка сборки
         run: python site-src/build.py
