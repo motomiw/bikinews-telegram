@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Быки News → Telegram. Запускается GitHub Actions каждые 20 минут.
+"""Быки News → Telegram. Запускается после деплоя и каждые 10 минут.
 
 Берёт новости с сайта bikinews.ru и публикует новые в канал через вашего бота:
   • наши пересказы (data/glavnoe.json) — по мере появления, не больше 3 за запуск;
-  • дайджест изданий (data/news.json) — в 12:00 и 20:00 по Москве.
+  • дайджест изданий (data/news.json) — по DIGEST_HOURS, время московское.
 Токен и канал берутся из секретов репозитория TG_TOKEN и TG_CHAT.
 """
 import datetime, html, json, os, sys, urllib.parse, urllib.request, urllib.error
@@ -18,6 +18,7 @@ RS_PROJECT = os.environ.get('RUSTORE_PROJECT_ID', '').strip()
 RS_TOPIC = 'news'
 STATE = 'state.json'
 MAX_PER_RUN = 3
+DIGEST_HOURS = (0, 3, 6, 9, 11, 13, 15, 17, 19, 21, 23)
 MSK = datetime.timezone(datetime.timedelta(hours=3))
 UA = {'User-Agent': 'Mozilla/5.0 (compatible; BikinewsPoster/1.0; +https://bikinews.ru)'}
 
@@ -146,17 +147,19 @@ def main():
         print('Опубликовано пересказов:', sent)
 
     now = datetime.datetime.now(MSK)
-    if now.hour in (12, 20):
+    if now.hour in DIGEST_HOURS:
         slot = now.strftime('%Y-%m-%d-') + str(now.hour)
         if not st['digest'].get(slot):
-            since = now.timestamp() - 12 * 3600
+            previous_hour = max(h for h in DIGEST_HOURS if h < now.hour) if now.hour else DIGEST_HOURS[-1] - 24
+            since = now.replace(minute=0, second=0, microsecond=0).timestamp() - (now.hour - previous_hour) * 3600
             try:
-                items = [i for i in get_json('data/news.json').get('items', []) if i['ts'] >= since][:7]
+                until = now.replace(minute=0, second=0, microsecond=0).timestamp()
+                items = [i for i in get_json('data/news.json').get('items', []) if since <= i['ts'] < until][:7]
             except Exception as e:
                 print('Лента изданий недоступна'); items = []; failed = True
             if items:
                 lines = [f"▪️ <a href=\"{esc(i['url'])}\">{esc(i['title'])}</a> <i>— {esc(i['source'])}</i>" for i in items]
-                text = (f"<b>📰 Что пишут о «Краснодаре» · {now:%d.%m}, {'день' if now.hour == 12 else 'вечер'}</b>\n\n"
+                text = (f"<b>📰 Что пишут о «Краснодаре» · {now:%d.%m}, {now.hour:02d}:00 МСК</b>\n\n"
                         + '\n\n'.join(lines) + f"\n\n📲 <a href=\"{SITE}news.html\">Все новости со ссылками</a>")
                 ok = send(text)
                 print('Дайджест:', 'опубликован' if ok else 'ошибка')
@@ -167,7 +170,7 @@ def main():
                     failed = True
 
     st['posted'] = st['posted'][-500:]
-    st['digest'] = dict(list(st['digest'].items())[-20:])
+    st['digest'] = dict(list(st['digest'].items())[-80:])
     save_state(st)
     return 1 if failed else 0
 

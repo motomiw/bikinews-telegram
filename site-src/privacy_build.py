@@ -6,7 +6,7 @@ YM_ID = '113747465'              # номер счётчика Яндекс.Ме
                         # Google Analytics отключён 23.10.2026 (передача данных в США); счётчик включается только после согласия
 GOOGLE_VERIFY = ''    # Google Search Console: значение content из <meta name="google-site-verification" ...>
 YANDEX_VERIFY = '0f3fa5f2f3f50b3c'    # Яндекс.Вебмастер: значение content из <meta name="yandex-verification" ...>
-POLICY_DATE = '24 октября 2026 г.'
+POLICY_DATE = '1 ноября 2026 г.'
 
 PRIVACY_CSS = r'''
 /* политика конфиденциальности */
@@ -34,11 +34,12 @@ if YM_ID:
   <h2>5. Ваше согласие и как отказаться</h2>
   <p>При первом визите сайт показывает уведомление о cookie с двумя кнопками. Аналитика включается только после вашего согласия. Передумать можно в любой момент:</p>
   <ul>
-    <li><a href="#" data-ck-reset>изменить выбор</a> — уведомление появится снова;</li>
+    <li>открыть <a href="#" data-ck-reset>«Настройки cookies»</a> и нажать «Отказаться» — согласие на аналитику будет отозвано;</li>
     <li>запретить или удалить cookie в настройках браузера — сайт продолжит работать;</li>
     <li>пользоваться режимом инкогнито или блокировщиком счётчиков;</li>
-    <li>отозвать согласие, написав на <a href="mailto:i@bikinews.ru">i@bikinews.ru</a>, либо просто покинуть сайт.</li>
+    <li>направить запрос об обработке и удалении ранее переданных сведений на <a href="mailto:i@bikinews.ru">i@bikinews.ru</a>.</li>
   </ul>
+  <p>Закрытие вкладки прекращает текущий просмотр, но не отменяет сохранённое согласие: при следующем посещении аналитика может снова включиться. Отказ в настройках прекращает дальнейшую работу счётчика; уже переданные сведения не удаляются автоматически.</p>
 '''
 else:
     S45 = '''  <h2>4. Cookie и сервисы веб-аналитики</h2>
@@ -110,6 +111,7 @@ COOKIE_HTML = r"""
   <p>Мы считаем посещаемость сервисом Яндекс.Метрика (он использует cookie) — только с вашего согласия. <a href="privacy.html">Подробнее</a></p>
   <span class="ckb-btns"><button type="button" id="ckbOk">Согласен</button><button type="button" id="ckbNo" class="ghost">Отказаться</button></span>
 </div>
+<p style="text-align:center"><a href="#" data-ck-reset>Настройки cookies</a></p>
 <style>
 .ckb { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 50; max-width: 680px; margin-inline: auto;
   display: flex; align-items: center; gap: 12px 16px; padding: 14px 16px; border-radius: 14px;
@@ -124,10 +126,13 @@ COOKIE_HTML = r"""
 </style>
 <script>
 (function () {
-  var K = 'bn_consent', ID = __YM__, box = document.getElementById('ckb');
+  var K = 'bn_consent', ID = __YM__, box = document.getElementById('ckb'), started = false;
   function get() { try { return localStorage.getItem(K); } catch (e) { return null; } }
   function set(v) { try { localStorage.setItem(K, v); } catch (e) {} }
   function start() {   // Метрика грузится только здесь — после явного согласия
+    if (started) return;
+    started = true;
+    window['disableYaCounter' + ID] = false;
     (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); }; m[i].l = 1 * new Date();
       k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a); })
       (window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
@@ -136,10 +141,15 @@ COOKIE_HTML = r"""
   var v = get();
   if (v === 'yes') start(); else if (v !== 'no') box.hidden = false;
   document.getElementById('ckbOk').addEventListener('click', function () { box.hidden = true; set('yes'); start(); });
-  document.getElementById('ckbNo').addEventListener('click', function () { box.hidden = true; set('no'); });
+  document.getElementById('ckbNo').addEventListener('click', function () {
+    box.hidden = true; set('no');
+    window['disableYaCounter' + ID] = true;
+    if (window.ym) try { window.ym(ID, 'destruct'); } catch (e) {}
+    if (started) location.reload();
+  });
   document.addEventListener('click', function (ev) {
     var a = ev.target.closest && ev.target.closest('[data-ck-reset]');
-    if (a) { ev.preventDefault(); try { localStorage.removeItem(K); } catch (e) {} box.hidden = false; }
+    if (a) { ev.preventDefault(); box.hidden = false; }
   });
 })();
 </script>

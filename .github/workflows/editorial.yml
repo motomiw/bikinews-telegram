@@ -1,0 +1,68 @@
+name: Редакция → Главное
+
+on:
+  schedule:
+    # За полчаса до дайджестов, UTC (МСК = UTC+3).
+    - cron: '30 0,2,5,7,9,11,13,15,17,19,20 * * *'
+  push:
+    branches: [main]
+    paths: ['news_writer.py', 'test_news_writer.py', '.github/workflows/editorial.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: editorial-main
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Первый запуск — проверяем реальные тексты до включения автопубликации.
+      NEWS_AUTOPUBLISH: 'false'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      DO_NOT_TRACK: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Проверка отбора, дублей и неподтверждённых чисел
+        run: python -m unittest test_news_writer -v
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: editorial-qwen25-15b-v1
+      - name: Локальная модель и извлечение текста
+        run: |
+          pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install transformers==4.57.1 trafilatura==2.0.0 pillow
+      - name: Анализ источников и собственный пересказ
+        run: |
+          if [ "$NEWS_AUTOPUBLISH" = 'true' ]; then
+            python news_writer.py --publish
+          else
+            python news_writer.py
+          fi
+      - name: Проверка сборки
+        run: python site-src/build.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editorial-report
+          path: news-draft.json
+          retention-days: 7
+      - name: Сохранить подготовленную новость
+        if: env.NEWS_AUTOPUBLISH == 'true'
+        run: |
+          git config user.name 'bikinews-editor'
+          git config user.email 'bikinews-editor@users.noreply.github.com'
+          git add site-src/bykinews.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Редакция: новый проверенный пересказ в Главное'
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -33,7 +33,7 @@ class PosterTests(unittest.TestCase):
         with open(self.state, encoding='utf-8') as f:
             return json.load(f)
 
-    def run_main(self, items, responses, hour=12, feed_error=False):
+    def run_main(self, items, responses, hour=13, feed_error=False):
         class Clock(datetime.datetime):
             @classmethod
             def now(cls, tz=None):
@@ -43,7 +43,7 @@ class PosterTests(unittest.TestCase):
                 return {'items': items}
             if feed_error:
                 raise OSError('offline')
-            return {'items': [{'ts': Clock.now().timestamp(), 'url': 'https://example.com', 'title': 'Test', 'source': 'Source'}]}
+            return {'items': [{'ts': Clock.now().replace(minute=0).timestamp()-60, 'url': 'https://example.com', 'title': 'Test', 'source': 'Source'}]}
         with patch.object(p.datetime, 'datetime', Clock), patch.object(p, 'get_json', side_effect=feed), patch.object(p, 'send', side_effect=responses) as send, patch.object(p, 'push'):
             result = p.main()
         return result, send.call_count
@@ -54,6 +54,16 @@ class PosterTests(unittest.TestCase):
         self.assertEqual(self.run_main([], [True])[0], 0)
         self.assertTrue(self.read()['digest'])
         self.assertEqual(self.run_main([], [])[1], 0)
+
+    def test_all_requested_digest_hours(self):
+        for hour in (0, 3, 6, 9, 11, 13, 15, 17, 19, 21, 23):
+            with self.subTest(hour=hour):
+                self.write(self.base)
+                self.assertEqual(self.run_main([], [True], hour=hour), (0, 1))
+        for hour in (1, 2, 4, 5, 7, 8, 10, 12, 14, 16, 18, 20, 22):
+            with self.subTest(hour=hour):
+                self.write(self.base)
+                self.assertEqual(self.run_main([], [], hour=hour), (0, 0))
 
     def test_feed_error_does_not_consume_slot(self):
         self.assertEqual(self.run_main([], [], feed_error=True)[0], 1)
