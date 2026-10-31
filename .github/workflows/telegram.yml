@@ -2,7 +2,14 @@ name: Быки News → Telegram
 
 on:
   schedule:
-    - cron: '*/20 * * * *'     # каждые 20 минут
+    - cron: '7,17,27,37,47,57 * * * *' # резервная проверка каждые 10 минут
+  push:
+    branches: [main]
+    paths: ['.github/workflows/telegram.yml']
+  workflow_run:
+    workflows: ['Сайт → хостинг']
+    types: [completed]
+    branches: [main]
   workflow_dispatch:            # кнопка «Run workflow» для ручного запуска
     inputs:
       test:
@@ -19,6 +26,7 @@ concurrency:
 
 jobs:
   post:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
