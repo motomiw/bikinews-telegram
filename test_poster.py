@@ -33,7 +33,7 @@ class PosterTests(unittest.TestCase):
         with open(self.state, encoding='utf-8') as f:
             return json.load(f)
 
-    def run_main(self, items, responses, hour=13, feed_error=False):
+    def run_main(self, items, responses, hour=13, feed_error=False, digest_items=None):
         class Clock(datetime.datetime):
             @classmethod
             def now(cls, tz=None):
@@ -43,9 +43,10 @@ class PosterTests(unittest.TestCase):
                 return {'items': items}
             if feed_error:
                 raise OSError('offline')
-            return {'items': [{'ts': Clock.now().replace(minute=0).timestamp()-60, 'url': 'https://example.com', 'title': 'Test', 'source': 'Source'}]}
+            return {'items': digest_items if digest_items is not None else [{'ts': Clock.now().replace(minute=0).timestamp()-60, 'url': 'https://example.com', 'title': 'Test', 'source': 'Source'}]}
         with patch.object(p.datetime, 'datetime', Clock), patch.object(p, 'get_json', side_effect=feed), patch.object(p, 'send', side_effect=responses) as send, patch.object(p, 'push'):
             result = p.main()
+            self.sent_texts = [call.args[0] for call in send.call_args_list]
         return result, send.call_count
 
     def test_digest_retry_then_success(self):
@@ -68,6 +69,17 @@ class PosterTests(unittest.TestCase):
     def test_feed_error_does_not_consume_slot(self):
         self.assertEqual(self.run_main([], [], feed_error=True)[0], 1)
         self.assertEqual(self.read()['digest'], {})
+
+    def test_digest_windows_do_not_overlap_at_midnight(self):
+        midnight=datetime.datetime(2026,10,30,tzinfo=p.MSK).timestamp()
+        feed=[dict(ts=midnight-60,url='https://example.com/a',title='Before midnight',source='Source'),
+              dict(ts=midnight+60,url='https://example.com/b',title='After midnight',source='Source')]
+        self.run_main([], [True],hour=0,digest_items=feed)
+        self.assertIn('Before midnight',self.sent_texts[0])
+        self.assertNotIn('After midnight',self.sent_texts[0])
+        self.run_main([], [True],hour=3,digest_items=feed)
+        self.assertIn('After midnight',self.sent_texts[0])
+        self.assertNotIn('Before midnight',self.sent_texts[0])
 
     def test_partial_success_is_saved(self):
         items = [dict(id=str(i), ts=i, title='Test', paras=['Text'], url='https://example.com', source='Source') for i in range(5)]
