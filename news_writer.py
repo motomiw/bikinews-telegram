@@ -1,4 +1,4 @@
-"""Отбор и пересказ новостей локальной моделью, без платного API.
+"""Отбор и пересказ новостей бесплатными моделями, без платных API.
 
 По умолчанию сохраняет черновик. --publish добавляет проверенный пересказ
 в мастер главной; таблицы, результаты и шапку не изменяет.
@@ -13,9 +13,10 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+import urllib.error
 
 MSK = dt.timezone(dt.timedelta(hours=3))
-MODEL = 'Qwen/Qwen2.5-1.5B-Instruct'
+MODEL = 'openrouter/free'
 ALLOWED = ('fckrasnodar.ru', 'championat.com', 'championat.ru',
            'sport-express.ru', 'sport-express.net', 'matchtv.ru', 'sports.ru',
            'euro-football.ru', 'tass.ru', 'ria.ru', 'rfs.ru', 'premierliga.ru')
@@ -129,6 +130,8 @@ def validate(draft, sources, existing):
         raise ValueError('В пересказе появились неподтверждённые числа')
     if re.search(r'https?://|<|>|```|инструкци|как языковая модель', text, re.I):
         raise ValueError('Посторонний код или инструкции в пересказе')
+    if re.search(r'[\u3400-\u9fff]',text):
+        raise ValueError('В русском пересказе появились китайские иероглифы')
     if len(re.findall('[а-яё]', text, re.I)) < len(re.findall('[a-z]', text, re.I))*3:
         raise ValueError('Материал должен быть на русском')
     if any(same_story(title, old) for old in existing):
@@ -177,40 +180,38 @@ def insert_story(master, item, article, now=None):
 
 
 def writer():
-    import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-    from lmformatenforcer import JsonSchemaParser
-    from lmformatenforcer.integrations.transformers import build_transformers_prefix_allowed_tokens_fn
-    torch.set_num_threads(max(1, min(4, os.cpu_count() or 2)))
-    tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=False)
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL, trust_remote_code=False, use_safetensors=True, torch_dtype=torch.float32)
-    model.eval()
+    key=os.environ.get('OPENROUTER_API_KEY','').strip()
+    if not key:
+        raise ValueError('Нужен бесплатный ключ OPENROUTER_API_KEY в секретах GitHub')
+    return free_writer(key)
 
-    def ask(system, payload, schema=None):
-        if schema is None:
-            schema = {'type':'object','properties':{
-                'publish':{'type':'boolean'},'title':{'type':'string'},
-                'paras':{'type':'array','items':{'type':'string'},'minItems':2,'maxItems':2},
-                'tag':{'type':'string'}},'required':['publish','title','paras','tag'],
-                'additionalProperties':False}
-        text = tokenizer.apply_chat_template([
-            {'role': 'system', 'content': system},
-            {'role': 'user', 'content': json.dumps(payload, ensure_ascii=False)}],
-            tokenize=False, add_generation_prompt=True)
-        inputs = tokenizer(text, return_tensors='pt')
-        options = {}
+
+def free_writer(key):
+    """Только бесплатный маршрут; платные модели и запасные маршруты не используются."""
+    def ask(system,payload,schema=None):
+        body={'model':'openrouter/free','messages':[
+            {'role':'system','content':system},
+            {'role':'user','content':json.dumps(payload,ensure_ascii=False)}],
+            'max_tokens':1200,'temperature':0.2}
         if schema is not False:
-            options['prefix_allowed_tokens_fn'] = build_transformers_prefix_allowed_tokens_fn(tokenizer,JsonSchemaParser(schema))
-        with torch.inference_mode():
-            output = model.generate(**inputs, max_new_tokens=400, do_sample=False,
-                                    repetition_penalty=1.15,no_repeat_ngram_size=6,
-                                    **options,
-                                    pad_token_id=tokenizer.eos_token_id)
-        reply = tokenizer.decode(output[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
+            body['response_format']={'type':'json_object'}
+        request=urllib.request.Request('https://openrouter.ai/api/v1/chat/completions',
+            data=json.dumps(body,ensure_ascii=False).encode(),headers={
+                'Authorization':'Bearer '+key,'Content-Type':'application/json',
+                'HTTP-Referer':'https://bikinews.ru','X-Title':'Bikinews Editorial'})
+        try:
+            with urllib.request.urlopen(request,timeout=90) as response:
+                result=json.loads(response.read(1000000))
+        except urllib.error.HTTPError as exc:
+            raise ValueError('Бесплатный API: HTTP '+str(exc.code)) from None
+        except (urllib.error.URLError,TimeoutError):
+            raise ValueError('Бесплатный API: сеть недоступна') from None
+        reply=result['choices'][0]['message']['content']
+        if not isinstance(reply,str) or not reply.strip():
+            raise ValueError('Бесплатный API вернул пустой ответ')
         if schema is False:
             print('Ответ редактора:',json.dumps(reply,ensure_ascii=False),flush=True)
-            blocks = [b.strip() for b in re.split(r'\n\s*\n',reply.strip()) if b.strip()]
+            blocks=[b.strip() for b in re.split(r'\n\s*\n',reply.strip()) if b.strip()]
             if len(blocks)!=3 or '\n' in blocks[0]:
                 raise ValueError('Редактор не вернул заголовок и два абзаца')
             return dict(publish=True,title=re.sub(r'^(?:#+\s*|Заголовок:\s*)','',blocks[0]).strip('* '),paras=blocks[1:],tag='Клуб')
@@ -226,7 +227,6 @@ def flag_schema(name):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--publish', action='store_true')
-    parser.add_argument('--smoke-test', action='store_true')
     args = parser.parse_args()
     master = MASTER.read_text(encoding='utf-8')
     items = json.loads(fetch('https://bikinews.ru/data/news.json', feed=True))['items']
@@ -234,12 +234,6 @@ def main():
     report = {'model': MODEL, 'published': False, 'draft': None, 'skipped': []}
     ask = None
     attempts = 0
-    if args.smoke_test:
-        ask = writer()
-        check = ask('Return only valid JSON: {"ok":true}.', {'task':'Check local model execution, do not write a news item.'},flag_schema('ok'))
-        if check.get('ok') is not True:
-            raise ValueError('Локальная модель не прошла проверку запуска')
-        print('Локальная модель: проверка запуска пройдена')
     import trafilatura
     for item in selection:
         try:

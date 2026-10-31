@@ -19,45 +19,51 @@ concurrency:
 jobs:
   write:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     env:
-      # Первый запуск — проверяем реальные тексты до включения автопубликации.
+      # Включить после проверки первого пересказа бесплатного API.
       NEWS_AUTOPUBLISH: 'false'
-      HF_HUB_DISABLE_TELEMETRY: '1'
-      DO_NOT_TRACK: '1'
-      TOKENIZERS_PARALLELISM: 'false'
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Проверка отбора, дублей и неподтверждённых чисел
+      - name: Проверка отбора, дублей и бесплатного маршрута
         run: python -m unittest test_news_writer -v
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/huggingface
-          key: editorial-qwen25-15b-v1
-      - name: Локальная модель и извлечение текста
+      - name: Проверка бесплатного подключения
+        id: backend
         run: |
-          pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cpu
-          pip install transformers==4.57.1 trafilatura==2.0.0 lm-format-enforcer==0.11.3 pillow
+          if [ -z "$OPENROUTER_API_KEY" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo '::notice::Добавьте бесплатный ключ OpenRouter в секрет OPENROUTER_API_KEY. Анализ и публикация пока не включены.'
+            echo '### Нужен бесплатный ключ OpenRouter' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Добавьте OPENROUTER_API_KEY в секреты репозитория. Баланс пополнять не требуется. Используется только openrouter/free; платного запасного маршрута нет.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Извлечение текстов и сборка
+        if: steps.backend.outputs.ready == 'true'
+        run: pip install trafilatura==2.0.0 pillow
       - name: Анализ источников и собственный пересказ
+        if: steps.backend.outputs.ready == 'true'
         run: |
           if [ "$NEWS_AUTOPUBLISH" = 'true' ]; then
             python news_writer.py --publish
           else
-            python news_writer.py --smoke-test
+            python news_writer.py
           fi
       - name: Проверка сборки
+        if: steps.backend.outputs.ready == 'true'
         run: python site-src/build.py
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.backend.outputs.ready == 'true'
         with:
           name: editorial-report
           path: news-draft.json
           retention-days: 7
       - name: Сохранить подготовленную новость
-        if: env.NEWS_AUTOPUBLISH == 'true'
+        if: env.NEWS_AUTOPUBLISH == 'true' && steps.backend.outputs.ready == 'true'
         run: |
           git config user.name 'bikinews-editor'
           git config user.email 'bikinews-editor@users.noreply.github.com'
