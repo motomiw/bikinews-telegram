@@ -76,5 +76,36 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('&amp;',output)
         self.assertIn('target="_blank"',output)
 
+
+    def test_reads_marked_article_body_without_related_news(self):
+        body = ('Мостовой обсудил работу Мусаева и результаты клуба. '
+                'Бывший футболист высказал мнение о подготовке игроков, '
+                'ответственности тренерского штаба, игре команды и выступлении нападающего. '
+                'Эксперт считает важным разобраться в причинах поражения и продолжить работу. '
+                'По его оценке, ближайшие встречи помогут понять состояние состава и перспективы сезона.')
+        document = '<nav>Навигация</nav><div id="articleBody"><p>'+body+'</p><div class="external-article">ПОСТОРОННИЙ ТЕКСТ</div></div>'
+        text = w.extract_article(document)
+        self.assertIn('подготовке игроков',text)
+        self.assertNotIn('ПОСТОРОННИЙ',text)
+        self.assertNotIn('Навигация',text)
+
+    def test_reads_jsonld_article_body(self):
+        body = ' '.join(['Краснодар продолжает подготовку к следующему матчу. Тренерский штаб определил программу занятий футболистов, восстановление состава и работу команды над реализацией моментов. Медицинская служба контролирует нагрузки, защитники отрабатывают взаимодействия, нападающие совершенствуют завершающие удары, полузащитники выполняют упражнения.']*3)
+        document = '<script type="application/ld+json">'+json.dumps({'@graph':[{'@type':'NewsArticle','articleBody':body}]})+'</script>'
+        self.assertEqual(w.extract_article(document),body)
+
+    def test_tries_next_confirmation_when_first_is_unavailable(self):
+        title='Мостовой обсудил работу Мусаева после поражения Краснодара'
+        item=dict(title=title,url='https://euro-football.ru/a',ts=1000)
+        supports=[dict(title=title,url='https://championat.com/a',ts=1000),
+                  dict(title=title,url='https://sport-express.ru/a',ts=1000)]
+        article=title+' Мостовой считает, что Мусаев должен объяснить причины поражения.'
+        def read(url):
+            if 'championat' in url:
+                raise ValueError('Нет текста')
+            return article
+        self.assertEqual(w.supporting_text(item,article,supports,read),article)
+
+
 if __name__=='__main__':
     unittest.main()

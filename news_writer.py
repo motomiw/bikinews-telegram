@@ -6,6 +6,7 @@
 import argparse
 import datetime as dt
 import html
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path
@@ -59,6 +60,91 @@ def fetch(url, feed=False):
 
 def plain(text):
     return html.unescape(re.sub('<[^>]+>', ' ', text))
+
+
+class ArticleParser(HTMLParser):
+    """Читает только размеченное тело статьи, исключая связанные материалы."""
+    VOID = {'br','img','meta','link','input','hr','source','wbr','area','base','embed','param','track','col'}
+    def __init__(self):
+        super().__init__()
+        self.stack = []
+        self.parts = []
+        self.scripts = []
+        self.script = None
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        parent = self.stack[-1] if self.stack else (None, False, False)
+        active = parent[1] or attrs.get('id') == 'articleBody' or attrs.get('itemprop') == 'articleBody'
+        classes = set(attrs.get('class','').split())
+        ignored = parent[2] or tag in ('script','style','nav','aside') or bool(classes & {'external-article','banner','related','comments'})
+        if tag == 'script' and attrs.get('type','').lower() == 'application/ld+json':
+            self.script = []
+        if active and not ignored and tag in ('p','div','br'):
+            self.parts.append('\n')
+        if tag not in self.VOID:
+            self.stack.append((tag,active,ignored))
+    def handle_endtag(self, tag):
+        if tag == 'script' and self.script is not None:
+            self.scripts.append(''.join(self.script))
+            self.script = None
+        if tag in ('p','div'):
+            self.parts.append('\n')
+        for i in range(len(self.stack)-1,-1,-1):
+            if self.stack[i][0] == tag:
+                del self.stack[i:]
+                break
+    def handle_data(self, data):
+        if self.script is not None:
+            self.script.append(data)
+        if self.stack and self.stack[-1][1] and not self.stack[-1][2]:
+            self.parts.append(data)
+
+
+def extract_article(document):
+    parser = ArticleParser()
+    parser.feed(document)
+    text = re.sub(r'[ \t]+',' ', ''.join(parser.parts)).strip()
+    if len(words(text)) >= 20 and len(text) >= 300:
+        return text
+    def bodies(value):
+        if isinstance(value,list):
+            for child in value:
+                yield from bodies(child)
+        elif isinstance(value,dict):
+            if isinstance(value.get('articleBody'),str):
+                yield plain(value['articleBody'])
+            for key in ('@graph','mainEntity'):
+                yield from bodies(value.get(key))
+    for script in parser.scripts:
+        try:
+            for body in bodies(json.loads(script)):
+                if len(body) >= 300 and len(words(body)) >= 20:
+                    return body
+        except ValueError:
+            continue
+    import trafilatura
+    text = trafilatura.extract(document, include_comments=False, include_tables=False, favor_precision=True)
+    if not text or len(text) < 300 or len(words(text)) < 20:
+        raise ValueError('Полный текст недоступен: нет пригодного тела статьи')
+    return text
+
+
+def supporting_text(item, article, items, read):
+    host = urllib.parse.urlsplit(item['url']).hostname.removeprefix('www.')
+    supports = [i for i in items if permitted(str(i.get('url','')))
+                and abs(i.get('ts',0)-item['ts']) < 86400
+                and urllib.parse.urlsplit(i['url']).hostname.removeprefix('www.') != host
+                and (same_story(item['title'],i['title']) or corroborates(article,i))]
+    if not supports:
+        raise ValueError('Нет второго независимого источника')
+    for support in supports[:5]:
+        try:
+            text = read(support['url'])
+            if len(words(support['title']) & words(text)) >= 2 and corroborates(article,dict(support,text=text[:1000])):
+                return text
+        except (ValueError,OSError):
+            continue
+    raise ValueError('Подтверждающий текст недоступен: проверено '+str(min(5,len(supports)))+' источников')
 
 
 def words(text):
@@ -252,28 +338,26 @@ def main():
     report = {'model': MODEL, 'published': False, 'draft': None, 'skipped': []}
     ask = None
     attempts = 0
-    import trafilatura
+    cache = {}
+    def read(url):
+        if url not in cache:
+            try:
+                cache[url] = extract_article(fetch(url))
+            except (ValueError,OSError) as exc:
+                cache[url] = exc
+        if isinstance(cache[url],Exception):
+            raise cache[url]
+        return cache[url]
     for item in selection:
         try:
-            article = trafilatura.extract(fetch(item['url']), include_comments=False,
-                                          include_tables=False, favor_precision=True)
-            if not article or len(article) < 500:
-                raise ValueError('Полный текст источника недоступен')
+            article = read(item['url'])
             if len(words(item['title']) & words(article)) < 2:
                 raise ValueError('Текст страницы не соответствует заголовку ленты')
             print('Источник прочитан:', item['url'], 'символов:', len(article), flush=True)
             # Официальный клуб — первичный источник. Для остальных требуется второй материал.
             sources = [article[:7000]]
             if urllib.parse.urlsplit(item['url']).hostname not in ('fckrasnodar.ru','www.fckrasnodar.ru'):
-                support = next((i for i in items if permitted(str(i.get('url', '')))
-                                and abs(i.get('ts',0)-item['ts']) < 86400
-                                and urllib.parse.urlsplit(i['url']).hostname.removeprefix('www.') != urllib.parse.urlsplit(item['url']).hostname.removeprefix('www.')
-                                and (same_story(item['title'], i['title']) or corroborates(article,i))), None)
-                if not support:
-                    raise ValueError('Нет второго независимого источника')
-                second = trafilatura.extract(fetch(support['url']), favor_precision=True)
-                if not second or len(second) < 400:
-                    raise ValueError('Подтверждающий текст недоступен')
+                second = supporting_text(item,article,items,read)
                 sources.append(second[:5000])
             if ask is None:
                 ask = writer()
