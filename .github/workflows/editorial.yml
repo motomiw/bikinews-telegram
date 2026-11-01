@@ -23,7 +23,7 @@ jobs:
     env:
       # Включить после проверки первого пересказа DeepSeek API.
       NEWS_AUTOPUBLISH: 'false'
-      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      NORDROUTER_API_KEY: ${{ secrets.nordroutercom }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,18 +31,18 @@ jobs:
           python-version: '3.12'
       - name: Проверка отбора, дублей и прямого API
         run: python -m unittest test_news_writer -v
-      - name: Проверка подключения DeepSeek
+      - name: Проверка подключения NordRouter
         id: backend
         run: |
-          if [ -z "$DEEPSEEK_API_KEY" ]; then
+          if [ -z "$NORDROUTER_API_KEY" ]; then
             echo 'ready=false' >> "$GITHUB_OUTPUT"
-            echo '::notice::Добавьте ключ DeepSeek в секрет DEEPSEEK_API_KEY. Анализ и публикация пока не включены.'
-            echo '### Нужен ключ DeepSeek' >> "$GITHUB_STEP_SUMMARY"
-            echo 'Добавьте DEEPSEEK_API_KEY в секреты репозитория. Используется прямой API DeepSeek (deepseek-flash). Нужен доступный баланс API.' >> "$GITHUB_STEP_SUMMARY"
+            echo '::notice::Добавьте ключ NordRouter в секрет nordroutercom. Анализ и публикация пока не включены.'
+            echo '### Нужен ключ NordRouter' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Добавьте nordroutercom в секреты репозитория. Используется API NordRouter (DeepSeek V4.1 Flash). Нужен доступный баланс API.' >> "$GITHUB_STEP_SUMMARY"
           else
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           fi
-      - name: Проверка ключа и доступности DeepSeek
+      - name: Проверка ключа и доступности NordRouter
         if: steps.backend.outputs.ready == 'true'
         run: python news_writer.py --check-api
       - name: Извлечение текстов и сборка

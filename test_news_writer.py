@@ -10,8 +10,8 @@ MASTER = '<ul class="feed"><li><article><h3>Кордоба извинился п
 
 class EditorialTests(unittest.TestCase):
     def test_missing_key_stops_without_using_a_local_or_paid_model(self):
-        with patch.dict(os.environ,{'DEEPSEEK_API_KEY':''}),patch.object(w.urllib.request,'urlopen') as call:
-            with self.assertRaisesRegex(ValueError,'DEEPSEEK_API_KEY'):
+        with patch.dict(os.environ,{'NORDROUTER_API_KEY':''}),patch.object(w.urllib.request,'urlopen') as call:
+            with self.assertRaisesRegex(ValueError,'NORDROUTER_API_KEY'):
                 w.writer()
         call.assert_not_called()
     def test_remote_writer_uses_direct_deepseek(self):
@@ -20,10 +20,10 @@ class EditorialTests(unittest.TestCase):
             self.assertEqual(w.deepseek_writer('test-key')('Return JSON',{},w.flag_schema('supported')),{'supported':True})
         request=call.call_args.args[0]
         body=json.loads(request.data)
-        self.assertEqual(body['model'],'deepseek-flash')
+        self.assertEqual(body['model'],'deepseek/deepseek-v4.1-flash:fjord')
         self.assertNotIn('models',body)
         self.assertEqual(body['thinking'],{'type':'disabled'})
-        self.assertEqual(request.full_url,'https://api.deepseek.com/chat/completions')
+        self.assertEqual(request.full_url,'https://nordrouter.com/v1/chat/completions')
 
     def test_remote_limit_error_does_not_reveal_key_or_fall_back(self):
         with patch.object(w.urllib.request,'urlopen',side_effect=w.urllib.error.HTTPError('https://openrouter.ai',429,'Limit',{},None)) as call:

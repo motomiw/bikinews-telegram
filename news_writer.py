@@ -1,4 +1,4 @@
-"""Отбор и пересказ новостей через прямой API DeepSeek.
+"""Отбор и пересказ новостей через API NordRouter.
 
 По умолчанию сохраняет черновик. --publish добавляет проверенный пересказ
 в мастер главной; таблицы, результаты и шапку не изменяет.
@@ -16,7 +16,7 @@ import urllib.request
 import urllib.error
 
 MSK = dt.timezone(dt.timedelta(hours=3))
-MODEL = 'deepseek-flash'
+MODEL = 'deepseek/deepseek-v4.1-flash:fjord'
 ALLOWED = ('fckrasnodar.ru', 'championat.com', 'championat.ru',
            'sport-express.ru', 'sport-express.net', 'matchtv.ru', 'sports.ru',
            'euro-football.ru', 'tass.ru', 'ria.ru', 'rfs.ru', 'premierliga.ru')
@@ -180,14 +180,14 @@ def insert_story(master, item, article, now=None):
 
 
 def writer():
-    key=os.environ.get('DEEPSEEK_API_KEY','').strip()
+    key=os.environ.get('NORDROUTER_API_KEY','').strip()
     if not key:
-        raise ValueError('Нужен ключ DEEPSEEK_API_KEY в секретах GitHub')
+        raise ValueError('Нужен ключ NORDROUTER_API_KEY в секретах GitHub')
     return deepseek_writer(key)
 
 
 def deepseek_writer(key):
-    """Прямой API DeepSeek; без сторонних маршрутизаторов."""
+    """DeepSeek через NordRouter; без сторонних маршрутизаторов."""
     def ask(system,payload,schema=None):
         body={'model':MODEL,'messages':[
             {'role':'system','content':system},
@@ -196,7 +196,7 @@ def deepseek_writer(key):
             'thinking':{'type':'disabled'}}
         if schema is not False:
             body['response_format']={'type':'json_object'}
-        request=urllib.request.Request('https://api.deepseek.com/chat/completions',
+        request=urllib.request.Request('https://nordrouter.com/v1/chat/completions',
             data=json.dumps(body,ensure_ascii=False).encode(),headers={
                 'Authorization':'Bearer '+key,'Content-Type':'application/json',
                 'HTTP-Referer':'https://bikinews.ru','X-Title':'Bikinews Editorial'})
@@ -211,15 +211,15 @@ def deepseek_writer(key):
                 except (ValueError, OSError, AttributeError):
                     pass
             detail = re.sub(r'sk-or-v1-[A-Za-z0-9_-]+','[скрыто]',detail.replace(key,'[скрыто]'))
-            raise ValueError('DeepSeek API: HTTP '+str(exc.code)+(' — '+detail[:240] if detail else '')) from None
+            raise ValueError('NordRouter API: HTTP '+str(exc.code)+(' — '+detail[:240] if detail else '')) from None
         except (urllib.error.URLError,TimeoutError):
-            raise ValueError('DeepSeek API: сеть недоступна') from None
+            raise ValueError('NordRouter API: сеть недоступна') from None
         choice=result['choices'][0]
-        print('DeepSeek API: модель',result.get('model','не указана'),
+        print('NordRouter API: модель',result.get('model','не указана'),
               'завершение',choice.get('finish_reason','не указано'),flush=True)
         reply=choice['message']['content']
         if not isinstance(reply,str) or not reply.strip():
-            raise ValueError('DeepSeek API вернул пустой ответ: '+str(choice.get('finish_reason','unknown')))
+            raise ValueError('NordRouter API вернул пустой ответ: '+str(choice.get('finish_reason','unknown')))
         if schema is False:
             print('Ответ редактора:',json.dumps(reply,ensure_ascii=False),flush=True)
             blocks=[b.strip() for b in re.split(r'\n\s*\n',reply.strip()) if b.strip()]
@@ -320,7 +320,7 @@ def main():
             break
         except (ValueError, OSError, KeyError, TypeError) as exc:
             report['skipped'].append({'url': item.get('url'), 'reason': str(exc)[:320]})
-            if str(exc).startswith('DeepSeek API: HTTP '):
+            if str(exc).startswith('NordRouter API: HTTP '):
                 break
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print('Редакция:', 'опубликовано' if report['published'] else 'черновик' if report['draft'] else 'нет подтверждённых новых сюжетов')
@@ -328,7 +328,7 @@ def main():
         print('Проверяемый пересказ:',json.dumps(report['draft'],ensure_ascii=False))
     for entry in report['skipped']:
         print('Пропуск:', entry['url'], entry['reason'])
-    if not report['draft'] and any(e['reason'].startswith('DeepSeek API') for e in report['skipped']):
+    if not report['draft'] and any(e['reason'].startswith('NordRouter API') for e in report['skipped']):
         print('::error::Модель DeepSeek не подготовила проверенный текст; см. причины в отчёте')
         return 1
     return 0
