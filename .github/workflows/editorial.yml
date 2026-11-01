@@ -38,7 +38,7 @@ jobs:
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             echo '::notice::Добавьте бесплатный ключ OpenRouter в секрет OPENROUTER_API_KEY. Анализ и публикация пока не включены.'
             echo '### Нужен бесплатный ключ OpenRouter' >> "$GITHUB_STEP_SUMMARY"
-            echo 'Добавьте OPENROUTER_API_KEY в секреты репозитория. Баланс пополнять не требуется. Используется только qwen/qwen3-next-80b-a3b-instruct:free; платного запасного маршрута нет.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Добавьте OPENROUTER_API_KEY в секреты репозитория. Баланс пополнять не требуется. Используется только google/gemma-4-31b-it:free; платного запасного маршрута нет.' >> "$GITHUB_STEP_SUMMARY"
           else
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           fi

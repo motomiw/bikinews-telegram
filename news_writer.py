@@ -16,7 +16,7 @@ import urllib.request
 import urllib.error
 
 MSK = dt.timezone(dt.timedelta(hours=3))
-MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free'
+MODEL = 'google/gemma-4-31b-it:free'
 ALLOWED = ('fckrasnodar.ru', 'championat.com', 'championat.ru',
            'sport-express.ru', 'sport-express.net', 'matchtv.ru', 'sports.ru',
            'euro-football.ru', 'tass.ru', 'ria.ru', 'rfs.ru', 'premierliga.ru')
@@ -193,7 +193,7 @@ def free_writer(key):
             {'role':'system','content':system},
             {'role':'user','content':json.dumps(payload,ensure_ascii=False)}],
             'max_tokens':4096,'temperature':0.2,
-            'reasoning':{'effort':'low','exclude':True}}
+            'reasoning':{'enabled':False,'exclude':True}}
         if schema is not False:
             body['response_format']={'type':'json_object'}
         request=urllib.request.Request('https://openrouter.ai/api/v1/chat/completions',
@@ -312,6 +312,9 @@ def main():
         print('Проверяемый пересказ:',json.dumps(report['draft'],ensure_ascii=False))
     for entry in report['skipped']:
         print('Пропуск:', entry['url'], entry['reason'])
+    if not report['draft'] and any(e['reason'].startswith('Бесплатный API') for e in report['skipped']):
+        print('::error::Бесплатная модель не подготовила проверенный текст; см. причины в отчёте')
+        return 1
     return 0
 
 
