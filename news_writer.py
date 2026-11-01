@@ -192,7 +192,8 @@ def free_writer(key):
         body={'model':'openrouter/free','messages':[
             {'role':'system','content':system},
             {'role':'user','content':json.dumps(payload,ensure_ascii=False)}],
-            'max_tokens':1200,'temperature':0.2}
+            'max_tokens':4096,'temperature':0.2,
+            'reasoning':{'effort':'low','exclude':True}}
         if schema is not False:
             body['response_format']={'type':'json_object'}
         request=urllib.request.Request('https://openrouter.ai/api/v1/chat/completions',
@@ -206,9 +207,12 @@ def free_writer(key):
             raise ValueError('Бесплатный API: HTTP '+str(exc.code)) from None
         except (urllib.error.URLError,TimeoutError):
             raise ValueError('Бесплатный API: сеть недоступна') from None
-        reply=result['choices'][0]['message']['content']
+        choice=result['choices'][0]
+        print('Бесплатный API: модель',result.get('model','не указана'),
+              'завершение',choice.get('finish_reason','не указано'),flush=True)
+        reply=choice['message']['content']
         if not isinstance(reply,str) or not reply.strip():
-            raise ValueError('Бесплатный API вернул пустой ответ')
+            raise ValueError('Бесплатный API вернул пустой ответ: '+str(choice.get('finish_reason','unknown')))
         if schema is False:
             print('Ответ редактора:',json.dumps(reply,ensure_ascii=False),flush=True)
             blocks=[b.strip() for b in re.split(r'\n\s*\n',reply.strip()) if b.strip()]
