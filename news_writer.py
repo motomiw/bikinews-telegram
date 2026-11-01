@@ -204,7 +204,14 @@ def free_writer(key):
             with urllib.request.urlopen(request,timeout=90) as response:
                 result=json.loads(response.read(1000000))
         except urllib.error.HTTPError as exc:
-            raise ValueError('Бесплатный API: HTTP '+str(exc.code)) from None
+            detail = ''
+            if exc.fp is not None:
+                try:
+                    detail = str(json.loads(exc.read(8000)).get('error',{}).get('message',''))
+                except (ValueError, OSError, AttributeError):
+                    pass
+            detail = re.sub(r'sk-or-v1-[A-Za-z0-9_-]+','[скрыто]',detail.replace(key,'[скрыто]'))
+            raise ValueError('Бесплатный API: HTTP '+str(exc.code)+(' — '+detail[:240] if detail else '')) from None
         except (urllib.error.URLError,TimeoutError):
             raise ValueError('Бесплатный API: сеть недоступна') from None
         choice=result['choices'][0]
@@ -305,7 +312,9 @@ def main():
                 report['published'] = True
             break
         except (ValueError, OSError, KeyError, TypeError) as exc:
-            report['skipped'].append({'url': item.get('url'), 'reason': str(exc)[:160]})
+            report['skipped'].append({'url': item.get('url'), 'reason': str(exc)[:320]})
+            if str(exc).startswith('Бесплатный API: HTTP '):
+                break
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print('Редакция:', 'опубликовано' if report['published'] else 'черновик' if report['draft'] else 'нет подтверждённых новых сюжетов')
     if report['draft']:
