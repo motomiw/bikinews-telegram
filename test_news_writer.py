@@ -20,7 +20,7 @@ class EditorialTests(unittest.TestCase):
             self.assertEqual(w.free_writer('test-key')('Return JSON',{},w.flag_schema('supported')),{'supported':True})
         request=call.call_args.args[0]
         body=json.loads(request.data)
-        self.assertEqual(body['model'],'openrouter/free')
+        self.assertEqual(body['model'],'qwen/qwen3-next-80b-a3b-instruct:free')
         self.assertNotIn('models',body)
         self.assertEqual(request.full_url,'https://openrouter.ai/api/v1/chat/completions')
 

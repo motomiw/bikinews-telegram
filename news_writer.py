@@ -16,7 +16,7 @@ import urllib.request
 import urllib.error
 
 MSK = dt.timezone(dt.timedelta(hours=3))
-MODEL = 'openrouter/free'
+MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free'
 ALLOWED = ('fckrasnodar.ru', 'championat.com', 'championat.ru',
            'sport-express.ru', 'sport-express.net', 'matchtv.ru', 'sports.ru',
            'euro-football.ru', 'tass.ru', 'ria.ru', 'rfs.ru', 'premierliga.ru')
@@ -189,7 +189,7 @@ def writer():
 def free_writer(key):
     """Только бесплатный маршрут; платные модели и запасные маршруты не используются."""
     def ask(system,payload,schema=None):
-        body={'model':'openrouter/free','messages':[
+        body={'model':MODEL,'messages':[
             {'role':'system','content':system},
             {'role':'user','content':json.dumps(payload,ensure_ascii=False)}],
             'max_tokens':4096,'temperature':0.2,
