@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      # Включить после проверки первого пересказа DeepSeek API.
-      NEWS_AUTOPUBLISH: 'false'
+      # Публикуются только материалы, прошедшие все проверки.
+      NEWS_AUTOPUBLISH: 'true'
       NORDROUTER_API_KEY: ${{ secrets.nordroutercom }}
     steps:
       - uses: actions/checkout@v4
