@@ -50,7 +50,9 @@ def fetch(url, feed=False):
     elif not permitted(url):
         raise ValueError('Источник не разрешён')
     request = urllib.request.Request(url, headers={
-        'User-Agent': 'Mozilla/5.0 (compatible; BikinewsEditorial/1.0; +https://bikinews.ru)'})
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept':'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
+        'Accept-Language':'ru-RU,ru;q=0.9,en;q=0.5'})
     with urllib.request.build_opener(RestrictedRedirect()).open(request, timeout=30) as response:
         data = response.read(1500001)
         if len(data) > 1500000:
@@ -125,7 +127,9 @@ def extract_article(document):
     import trafilatura
     text = trafilatura.extract(document, include_comments=False, include_tables=False, favor_precision=True)
     if not text or len(text) < 300 or len(words(text)) < 20:
-        raise ValueError('Полный текст недоступен: нет пригодного тела статьи')
+        title = re.search(r'<title[^>]*>(.*?)</title>',document,re.I|re.S)
+        label = plain(title[1]).strip()[:100] if title else 'нет заголовка'
+        raise ValueError('Полный текст недоступен: '+label+'; HTML '+str(len(document))+' символов')
     return text
 
 
