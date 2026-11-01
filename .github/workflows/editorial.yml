@@ -53,6 +53,15 @@ jobs:
           else
             python news_writer.py
           fi
+      - name: Отчёт о пробном пересказе
+        if: always() && steps.backend.outputs.ready == 'true'
+        run: |
+          if [ -f news-draft.json ]; then
+            echo '### Результат редакции' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat news-draft.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Проверка сборки
         if: steps.backend.outputs.ready == 'true'
         run: python site-src/build.py
