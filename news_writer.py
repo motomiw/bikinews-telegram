@@ -20,7 +20,10 @@ MSK = dt.timezone(dt.timedelta(hours=3))
 MODEL = 'deepseek/deepseek-v4.1-flash:fjord'
 ALLOWED = ('fckrasnodar.ru', 'championat.com', 'championat.ru',
            'sport-express.ru', 'sport-express.net', 'matchtv.ru', 'sports.ru',
-           'euro-football.ru', 'tass.ru', 'ria.ru', 'rfs.ru', 'premierliga.ru')
+           'euro-football.ru', 'tass.ru', 'ria.ru', 'rfs.ru', 'premierliga.ru',
+           'silasporta.ru','abcsport.ru','sport.ru','sport.rbc.ru','sportrbc.ru',
+           'sportbox.ru','news.sportbox.ru','sport24.ru','sovsport.ru',
+           'soccer365.ru','soccer.ru','rusfootball.info')
 ROOT = Path(__file__).resolve().parent
 MASTER = ROOT / 'site-src/bykinews.html'
 REPORT = ROOT / 'news-draft.json'
@@ -154,6 +157,120 @@ def supporting_text(item, article, items, read):
         except (ValueError,OSError):
             continue
     raise ValueError('Подтверждающий текст недоступен: проверено '+str(min(5,len(supports)))+' источников')
+
+
+EXTRA_SOURCES = {
+    'silasporta.ru':'Сила спорта', 'abcsport.ru':'ABCSport',
+    'sport.ru':'Sport.ru', 'sport-express.ru':'Спорт-Экспресс',
+    'sportrbc.ru':'РБК Спорт', 'news.sportbox.ru':'Sportbox',
+    'sport24.ru':'Sport24', 'euro-football.ru':'Евро-Футбол',
+    'sports.ru':'Sports.ru', 'championat.com':'Чемпионат',
+    'sovsport.ru':'Советский спорт', 'soccer365.ru':'Soccer365',
+    'soccer.ru':'Soccer.ru', 'rusfootball.info':'Rusfootball'
+}
+
+
+class NewsLinks(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+        self.current = None
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a':
+            self.current = [dict(attrs).get('href',''),[]]
+    def handle_data(self, data):
+        if self.current is not None:
+            self.current[1].append(data)
+    def handle_endtag(self, tag):
+        if tag == 'a' and self.current is not None:
+            self.links.append((self.current[0], ' '.join(self.current[1])))
+            self.current = None
+
+
+def publication_time(document):
+    # Только опубликованная структурированная дата, без подстановки времени загрузки.
+    parser = ArticleParser()
+    parser.feed(document)
+    def dates(value):
+        if isinstance(value,list):
+            for child in value:
+                yield from dates(child)
+        elif isinstance(value,dict):
+            kind = value.get('@type',[])
+            kind = [kind] if isinstance(kind,str) else kind
+            if any(k in ('NewsArticle','Article','ReportageNewsArticle') for k in kind):
+                if isinstance(value.get('datePublished'),str):
+                    yield value['datePublished']
+            yield from dates(value.get('@graph'))
+            yield from dates(value.get('mainEntity'))
+    raw = []
+    for script in parser.scripts:
+        try:
+            raw.extend(dates(json.loads(script)))
+        except ValueError:
+            pass
+    for tag in re.findall(r'<meta\b[^>]*>',document,re.I):
+        attrs = dict(re.findall(r'([\w:-]+)\s*=\s*["\x27]([^"\x27]*)["\x27]',tag))
+        if attrs.get('property',attrs.get('name',attrs.get('itemprop',''))).lower() in ('article:published_time','datepublished'):
+            raw.append(html.unescape(attrs.get('content','')))
+    for value in raw:
+        try:
+            stamp = dt.datetime.fromisoformat(value.replace('Z','+00:00'))
+            if stamp.tzinfo is not None:
+                return stamp.timestamp()
+        except (ValueError,TypeError):
+            continue
+    return None
+
+
+def discover_source_items(fetcher, now, known_urls=()):
+    from concurrent.futures import ThreadPoolExecutor
+    def one(entry):
+        host,name = entry
+        homepage = 'https://'+host+'/'
+        report = {'source':name,'host':host,'found':0}
+        result = []
+        try:
+            parser = NewsLinks()
+            parser.feed(fetcher(homepage))
+            seen = set()
+            links = []
+            for href,title in parser.links:
+                url = urllib.parse.urljoin(homepage,href).split('#')[0]
+                target = urllib.parse.urlsplit(url)
+                if (url in seen or url in known_urls or not permitted(url)
+                    or target.hostname.removeprefix('www.') != host.removeprefix('www.')
+                    or not re.search(r'краснодар|мурад\s+мусаев|кордоб|агкацев',title,re.I)):
+                    continue
+                seen.add(url)
+                links.append((url,re.sub(r'\s+',' ',title).strip()))
+            for url,title in links[:3]:
+                try:
+                    document = fetcher(url)
+                    stamp = publication_time(document)
+                    if stamp is None or not now-86400 <= stamp <= now:
+                        continue
+                    h1 = re.search(r'<h1\b[^>]*>(.*?)</h1>',document,re.I|re.S)
+                    headline = plain(h1[1]).strip() if h1 else title
+                    if not re.search(r'краснодар|мурад\s+мусаев|кордоб|агкацев',headline,re.I):
+                        continue
+                    text = extract_article(document)
+                    if len(words(headline) & words(text)) < 2:
+                        continue
+                    result.append(dict(title=headline,url=url,source=name,ts=stamp,text=text[:1000]))
+                except (ValueError,OSError):
+                    continue
+            report['found'] = len(result)
+        except (ValueError,OSError) as exc:
+            report['error'] = str(exc)[:160]
+        return result,report
+    items,checks = [],[]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for result,report in pool.map(one,EXTRA_SOURCES.items()):
+            items.extend(result)
+            checks.append(report)
+            print('Источник каталога:',report,flush=True)
+    return items,checks
 
 
 def words(text):
@@ -343,8 +460,12 @@ def main():
         return 0
     master = MASTER.read_text(encoding='utf-8')
     items = json.loads(fetch('https://bikinews.ru/data/news.json', feed=True))['items']
-    selection = candidates(items, master, dt.datetime.now(MSK).timestamp())
-    report = {'model': MODEL, 'published': False, 'draft': None, 'skipped': []}
+    now = dt.datetime.now(MSK).timestamp()
+    extra,checks = discover_source_items(fetch,now,set(re.findall(r'href="([^"]+)"',master)))
+    seen_urls = {item.get('url') for item in items}
+    items += [item for item in extra if item['url'] not in seen_urls]
+    selection = candidates(items, master, now)
+    report = {'model': MODEL, 'published': False, 'draft': None, 'skipped': [], 'source_checks':checks}
     ask = None
     attempts = 0
     cache = {}

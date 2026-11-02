@@ -114,5 +114,27 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('полузащитники',result)
         self.assertNotIn('ЧУЖАЯ',result)
 
+
+    def test_source_dates_require_timezone_and_never_use_download_time(self):
+        doc = '<meta property="article:published_time" content="2026-11-02T09:00:00+03:00">'
+        self.assertIsNotNone(w.publication_time(doc))
+        self.assertIsNone(w.publication_time('<meta property="article:published_time" content="2026-11-02T09:00:00">'))
+        self.assertIsNone(w.publication_time('<h1>Новость без даты</h1>'))
+
+    def test_new_source_discovery_ignores_external_links_and_undated_pages(self):
+        homepage = '<a href="https://attacker.test/a">Краснодар объявил состав</a><a href="/a">Краснодар объявил состав</a>'
+        article = '<h1>Краснодар объявил состав</h1><p>Нет даты</p>'
+        def read(url):
+            if url=='https://sport24.ru/':
+                return homepage
+            if url=='https://sport24.ru/a':
+                return article
+            self.fail('Неожиданный адрес '+url)
+        with patch.object(w,'EXTRA_SOURCES',{'sport24.ru':'Sport24'}):
+            items,checks = w.discover_source_items(read,1793600000)
+        self.assertEqual(items,[])
+        self.assertEqual(checks[0]['found'],0)
+
+
 if __name__=='__main__':
     unittest.main()
