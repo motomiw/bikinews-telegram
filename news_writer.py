@@ -60,7 +60,17 @@ def fetch(url, feed=False):
         data = response.read(1500001)
         if len(data) > 1500000:
             raise ValueError('Страница слишком велика')
-        return data.decode('utf-8')
+        return decode_document(data,response.headers.get_content_charset())
+
+
+def decode_document(data, charset=None):
+    if not charset:
+        match = re.search(br'charset\s*=\s*["\x27]?\s*([\w-]+)',data[:8192],re.I)
+        charset = match[1].decode('ascii') if match else 'utf-8'
+    try:
+        return data.decode(charset)
+    except LookupError:
+        raise ValueError('Неизвестная кодировка источника') from None
 
 
 def plain(text):

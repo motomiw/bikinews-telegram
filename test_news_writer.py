@@ -136,5 +136,10 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(checks[0]['found'],0)
 
 
+    def test_decodes_declared_windows1251_and_utf8(self):
+        page = '<meta charset="windows-1251"><h1>Краснодар объявил состав</h1>'
+        self.assertEqual(w.decode_document(page.encode('cp1251')),page)
+        self.assertEqual(w.decode_document('Новости Краснодара'.encode('utf-8')),'Новости Краснодара')
+
 if __name__=='__main__':
     unittest.main()
