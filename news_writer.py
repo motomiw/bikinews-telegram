@@ -78,6 +78,7 @@ class ArticleParser(HTMLParser):
         parent = self.stack[-1] if self.stack else (None, False, False)
         active = parent[1] or attrs.get('id') == 'articleBody' or attrs.get('itemprop') == 'articleBody'
         classes = set(attrs.get('class','').split())
+        active = active or 'full-news' in classes
         ignored = parent[2] or tag in ('script','style','nav','aside') or bool(classes & {'external-article','banner','related','comments'})
         if tag == 'script' and attrs.get('type','').lower() == 'application/ld+json':
             self.script = []
@@ -105,9 +106,13 @@ class ArticleParser(HTMLParser):
 def extract_article(document):
     parser = ArticleParser()
     parser.feed(document)
+    heading = re.search(r'<h1\b[^>]*>(.*?)</h1>',document,re.I|re.S)
+    heading = plain(heading[1]).strip() if heading else ''
+    def titled(body):
+        return heading+'\n'+body if heading else body
     text = re.sub(r'[ \t]+',' ', ''.join(parser.parts)).strip()
     if len(words(text)) >= 20 and len(text) >= 300:
-        return text
+        return titled(text)
     def bodies(value):
         if isinstance(value,list):
             for child in value:
@@ -121,7 +126,7 @@ def extract_article(document):
         try:
             for body in bodies(json.loads(script)):
                 if len(body) >= 300 and len(words(body)) >= 20:
-                    return body
+                    return titled(body)
         except ValueError:
             continue
     import trafilatura
@@ -130,7 +135,7 @@ def extract_article(document):
         title = re.search(r'<title[^>]*>(.*?)</title>',document,re.I|re.S)
         label = plain(title[1]).strip()[:100] if title else 'нет заголовка'
         raise ValueError('Полный текст недоступен: '+label+'; HTML '+str(len(document))+' символов')
-    return text
+    return titled(text)
 
 
 def supporting_text(item, article, items, read):

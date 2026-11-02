@@ -107,5 +107,12 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(w.supporting_text(item,article,supports,read),article)
 
 
+    def test_club_protocol_preserves_headline_and_skips_navigation(self):
+        body = 'Краснодар продолжает подготовку к следующему матчу. Тренерский штаб определил программу занятий футболистов, восстановление состава и работу команды над реализацией моментов. Медицинская служба контролирует нагрузки, защитники отрабатывают взаимодействия, нападающие совершенствуют завершающие удары, полузащитники выполняют упражнения.'
+        result = w.extract_article('<nav>ЧУЖАЯ НОВОСТЬ</nav><h1>Молодёжка уверенно обыграла московское Динамо</h1><div class="full-news"><p>'+body+'</p></div>')
+        self.assertIn('Молодёжка уверенно обыграла',result)
+        self.assertIn('полузащитники',result)
+        self.assertNotIn('ЧУЖАЯ',result)
+
 if __name__=='__main__':
     unittest.main()
