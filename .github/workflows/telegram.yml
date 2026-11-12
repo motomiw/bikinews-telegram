@@ -6,7 +6,7 @@ on:
     - cron: '7,17,27,37,47,57 * * * *' # резервная проверка каждые 10 минут
   push:
     branches: [main]
-    paths: ['.github/workflows/telegram.yml']
+    paths: ['.github/workflows/telegram.yml', 'poster.py', 'test_poster.py']
   workflow_run:
     workflows: ['Сайт → хостинг']
     types: [completed]
