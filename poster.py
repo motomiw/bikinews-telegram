@@ -102,9 +102,9 @@ def main():
         with open(STATE, encoding='utf-8') as f:
             st = json.load(f)
         first = False
-    st.pop('digest', None)  # удаляем историю отключённых дайджестов
     except FileNotFoundError:
         st, first = {'posted': []}, True
+    st.pop('digest', None)  # удаляем историю отключённых дайджестов
 
     failed = False
     if os.environ.get('TG_TEST') == 'true':
