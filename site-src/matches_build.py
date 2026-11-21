@@ -93,6 +93,28 @@ UPCOMING = [
  ('2027-05-29', '', 'РПЛ', '30 тур', 'lokomotiv', True),
 ]
 
+# Итоговые счета РПЛ, подтверждённые автоматической проверкой.  Подробности
+# (авторы голов и расширенная статистика) редакция добавляет отдельно.
+try:
+    import json as _json
+    _sync_file = ROOT / 'rpl-sync.json'
+    _sync_data = _json.loads(_sync_file.read_text(encoding='utf-8')) if _sync_file.exists() else {'matches': []}
+    _synced = {(m['d'], m['opp'], m['home']): m for m in _sync_data.get('matches', [])}
+    _played_keys = {(m['d'], m['opp'], m['home']) for m in PLAYED}
+    _future = []
+    for _d, _t, _comp, _rnd, _opp, _home in UPCOMING:
+        _item = _synced.get((_d, _opp, _home)) if _comp == 'РПЛ' else None
+        if _item and (_d, _opp, _home) not in _played_keys:
+            PLAYED.append(dict(d=_d, t=_t, comp=_comp, rnd=_rnd, opp=_opp, home=_home,
+                               gf=_item['gf'], ga=_item['ga'], goals=[], stats={},
+                               note='Итоговый счёт автоматически подтверждён. Подробности матча появятся после протокола.'))
+        elif not _item:
+            _future.append((_d, _t, _comp, _rnd, _opp, _home))
+    UPCOMING = _future
+except (OSError, ValueError, KeyError, TypeError):
+    # Отсутствие или повреждение служебного файла не должно мешать сборке сайта.
+    pass
+
 MON_G = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
 MON_S = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
 WD = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
