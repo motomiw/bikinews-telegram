@@ -38,6 +38,11 @@ class RPLSyncTests(unittest.TestCase):
         page = PAGE.replace("33−18", "33</td><td>18", 1)
         self.assertEqual(rpl_sync.parse_standings(page)[0][5:7], [33, 18])
 
+    def test_last_match_score_cell_is_ignored(self):
+        page = PAGE.replace("33−18", "33</td><td>18", 1)
+        page = page.replace("<td>Зенит</td>", "<td>Зенит</td><td>1 - 0</td>", 1)
+        self.assertEqual(rpl_sync.parse_standings(page)[0], ["zenit", 15, 10, 1, 4, 33, 18, 31])
+
     def test_same_opponent_on_another_date_is_not_removed(self):
         master = '''  var table = [\n    ["zenit",1,0,1,0,1,1,1]\n  ];\n  var upcoming = [\n    ['22 ноя', 'вс', 'РПЛ · 15 тур', 'dynamo', false, '14:00'],\n    ['20 мар', 'сб', 'РПЛ · 21 тур', 'dynamo', true, '14:00']\n  ];\n  var played = [\n    ['7 ноя', 'РПЛ · 14 тур', 'cska', true, 4, 2]\n  ];'''
         table = [[slug, 1, 0, 1, 0, 1, 1, 1] for slug in sorted(rpl_sync.EXPECTED_TEAMS)]

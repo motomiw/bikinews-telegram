@@ -102,8 +102,11 @@ def parse_standings(page: str) -> list[list]:
         slug = next((team_slug(cell) for cell in row if team_slug(cell)), None)
         if not slug:
             continue
-        numbers = [int(n) for cell in row for n in re.findall(r"(?<!\d)\d+(?!\d)", cell)]
-        scores = next((re.findall(r"(\d+)\s*[−–—-]\s*(\d+)", cell) for cell in row if re.search(r"\d+\s*[−–—-]\s*\d+", cell)), [])
+        # В полной таблице у некоторых клубов сайт показывает рядом отдельный
+        # счёт последнего матча («1 - 0»). Это не столбец таблицы.
+        cells = [cell for cell in row if not (len(row) > 9 and re.fullmatch(r"\d+\s*[−–—-]\s*\d+", cell))]
+        numbers = [int(n) for cell in cells for n in re.findall(r"(?<!\d)\d+(?!\d)", cell)]
+        scores = next((re.findall(r"(\d+)\s*[−–—-]\s*(\d+)", cell) for cell in cells if re.search(r"\d+\s*[−–—-]\s*\d+", cell)), [])
         if len(numbers) < 8:
             continue
         # Обычно: место, команда, И, В, Н, П, разница, О. Берём первые 5 и последнее число.
