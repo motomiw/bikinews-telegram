@@ -1392,9 +1392,18 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
     });
   });
 
-  // Обратный отсчёт
-  var kickoff = new Date('2026-11-22T14:00:00+03:00'), el = document.getElementById('cd'), ms = kickoff - new Date();
-  if (!el) ms = 0;
+  // Обратный отсчёт всегда берёт первый матч из того же календаря, что и блок
+  // «Ближайшие». Дата не должна оставаться от уже сыгранной встречи.
+  var nextMatch = upcoming[0], kickoff = null, el = document.getElementById('cd');
+  if (nextMatch && nextMatch[5]) {
+    var nextDate = nextMatch[0].split(' '), nextMonth = MID[nextDate[1]], nextYear = nextMonth >= 7 ? 2026 : 2027;
+    kickoff = new Date(nextYear + '-' + (nextMonth < 10 ? '0' : '') + nextMonth + '-' + (+nextDate[0] < 10 ? '0' : '') + (+nextDate[0]) + 'T' + nextMatch[5] + ':00+03:00');
+  }
+  if (!el || !kickoff) {
+    if (el) document.getElementById('cdwrap').textContent = 'время матча уточняется';
+    return;
+  }
+  var ms = kickoff - new Date();
   if (ms > 86400000) {
     var d = Math.floor(ms / 86400000), n = d % 100, n1 = n % 10;
     el.textContent = d + ' ' + ((n > 10 && n < 20) ? 'дней' : n1 === 1 ? 'день' : (n1 >= 2 && n1 <= 4) ? 'дня' : 'дней');
