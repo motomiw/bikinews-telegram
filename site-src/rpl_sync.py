@@ -21,6 +21,7 @@ MASTER = ROOT / "bykinews.html"
 MATCHES = ROOT / "matches_build.py"
 STATE = ROOT / "rpl-sync.json"
 SOURCE_URL = "https://www.sports.ru/football/tournament/rfpl/"
+SOURCE_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; BikiNewsRPLUpdater/1.1; +https://bikinews.ru/)"}
 
 TEAM_ALIASES = {
     "Зенит": "zenit", "Динамо": "dynamo", "Динамо Москва": "dynamo",
@@ -32,6 +33,9 @@ TEAM_ALIASES = {
     "Локомотив": "lokomotiv", "Факел": "fakel",
 }
 EXPECTED_TEAMS = set(TEAM_ALIASES.values())
+SPORTS_MATCH_SLUGS = {
+    "dynamo-mkh": "dinamo-mx", "krylia": "krylia-sovetov", "rodina": "rodina-moscow",
+}
 MONTH_SHORT = ("янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек")
 WEEKDAY = ("пн", "вт", "ср", "чт", "пт", "сб", "вс")
 
@@ -147,6 +151,48 @@ def parse_completed_matches(page: str) -> dict[tuple[str, str, str], tuple[int, 
     return results
 
 
+def sports_match_slug(slug: str) -> str:
+    """Slug клуба в URL протокола Sports.ru."""
+    return SPORTS_MATCH_SLUGS.get(slug, slug)
+
+
+def match_protocol_url(home: str, away: str) -> str:
+    return "https://www.sports.ru/football/match/{}-vs-{}/".format(
+        sports_match_slug(home), sports_match_slug(away))
+
+
+def _text(fragment: str) -> str:
+    return clean(re.sub(r"<[^>]+>", " ", fragment))
+
+
+def parse_match_protocol(page: str, krasnodar_home: bool) -> list[tuple[str, str, str, str]]:
+    """Достаёт авторов и ассистентов из протокола матча Sports.ru.
+
+    Возвращает кортежи в формате, который использует страница матчей: минута,
+    игрок, команда (k/o), ассистент. Некорректный или неполный протокол не
+    считается ошибкой синхронизации — счёт и таблица от него не зависят.
+    """
+    goal_re = re.compile(
+        r"<li(?P<attrs>[^>]*\bgoal-wrapper\b[^>]*)>(?P<body>.*?)</li>", re.S)
+    goals = []
+    for item in goal_re.finditer(page):
+        attrs, body = item.group("attrs"), item.group("body")
+        is_home = "goal-wrapper--home" in attrs
+        is_away = "goal-wrapper--away" in attrs
+        minute = re.search(r"goal-time[^>]*>(?P<value>.*?)</", body, re.S)
+        scorer = re.search(r"goal-scorer[^>]*>.*?<a[^>]*>(?P<value>.*?)</a>", body, re.S)
+        assist = re.search(r"goal-assists__link[^>]*>(?P<value>.*?)</a>", body, re.S)
+        if not (minute and scorer and (is_home or is_away)):
+            continue
+        value = _text(minute.group("value")).replace("'", "").replace("’", "")
+        name = _text(scorer.group("value"))
+        if not value or not name:
+            continue
+        side = "k" if is_home == krasnodar_home else "o"
+        goals.append((value, name, side, _text(assist.group("value")) if assist else ""))
+    return goals
+
+
 def load_schedule() -> list[tuple]:
     tree = ast.parse(MATCHES.read_text(encoding="utf-8"))
     for node in tree.body:
@@ -196,12 +242,16 @@ def update_master(source: str, table: list[list], completed: list[dict]) -> str:
     return source
 
 
-def fetch_page() -> str:
-    request = urllib.request.Request(SOURCE_URL, headers={"User-Agent": "Mozilla/5.0 (compatible; BikiNewsRPLUpdater/1.0; +https://bikinews.ru/)"})
+def fetch_url(url: str) -> str:
+    request = urllib.request.Request(url, headers=SOURCE_HEADERS)
     with urllib.request.urlopen(request, timeout=30) as response:
         if response.status != 200:
             raise ValueError(f"источник вернул HTTP {response.status}")
         return response.read().decode("utf-8", errors="replace")
+
+
+def fetch_page() -> str:
+    return fetch_url(SOURCE_URL)
 
 
 def run(page: str | None = None) -> bool:
@@ -218,7 +268,20 @@ def run(page: str | None = None) -> bool:
         score = source_results.get((d, host, guest))
         if score:
             gf, ga = score if home else score[::-1]
-            results[(d, opp, home)] = {"d": d, "t": time, "rnd": rnd, "opp": opp, "home": home, "gf": gf, "ga": ga}
+            old = results.get((d, opp, home), {})
+            item = {**old, "d": d, "t": time, "rnd": rnd, "opp": opp, "home": home, "gf": gf, "ga": ga}
+            # Счёт уже подтверждён таблицей матчей. Протокол добавляем только
+            # если он сходится со счётом: иначе сайт не получит выдуманные голы.
+            if not item.get("goals"):
+                try:
+                    protocol_url = match_protocol_url(host, guest)
+                    goals = parse_match_protocol(fetch_url(protocol_url), home)
+                    if len(goals) == gf + ga:
+                        item["goals"] = goals
+                        item["protocol_source"] = protocol_url
+                except (OSError, ValueError, urllib.error.URLError):
+                    pass
+            results[(d, opp, home)] = item
     completed = sorted(results.values(), key=lambda x: x["d"])
     original = MASTER.read_text(encoding="utf-8")
     updated = update_master(original, table, completed)

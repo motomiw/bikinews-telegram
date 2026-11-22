@@ -99,8 +99,8 @@ UPCOMING = [
  ('2027-05-29', '', 'РПЛ', '30 тур', 'lokomotiv', True),
 ]
 
-# Итоговые счета РПЛ, подтверждённые автоматической проверкой.  Подробности
-# (авторы голов и расширенная статистика) редакция добавляет отдельно.
+# Итоговые счета РПЛ и авторы голов, подтверждённые автоматической проверкой.
+# Статистика владения и ударов по-прежнему добавляется только из полного протокола.
 try:
     import json as _json
     _sync_file = ROOT / 'rpl-sync.json'
@@ -112,8 +112,10 @@ try:
         _item = _synced.get((_d, _opp, _home)) if _comp == 'РПЛ' else None
         if _item and (_d, _opp, _home) not in _played_keys:
             PLAYED.append(dict(d=_d, t=_t, comp=_comp, rnd=_rnd, opp=_opp, home=_home,
-                               gf=_item['gf'], ga=_item['ga'], goals=[], stats={},
-                               note='Итоговый счёт автоматически подтверждён. Подробности матча появятся после протокола.'))
+                               gf=_item['gf'], ga=_item['ga'], goals=_item.get('goals', []), stats={},
+                               note=('Автоматически подтверждены итоговый счёт и авторы голов.'
+                                     if _item.get('goals') else
+                                     'Итоговый счёт автоматически подтверждён. Подробности матча появятся после протокола.')))
         elif not _item:
             _future.append((_d, _t, _comp, _rnd, _opp, _home))
     UPCOMING = _future

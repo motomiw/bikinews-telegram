@@ -11,7 +11,7 @@ import datetime as _dt2, html as _h2, json as _j2
 # Голы с датами и соперниками берутся сами из PLAYED (matches_build.py) по полю «g» (часть имени автора гола).
 # В списке только те, кто выходил на поле в РПЛ или Кубке; ушедших в аренду/проданных — убирать.
 # Даты рождения и гражданство — Спорт Mail (sportmail.ru/team/547/players/).
-SQUAD_UPDATED = '7 ноября 2026 · РПЛ: 14 туров · Кубок: 5 туров'
+SQUAD_UPDATED = '22 ноября 2026 · РПЛ: 15 туров · Кубок: 5 туров'
 SQUAD = [
  dict(n=1,  name='Станислав Агкацев',   pos='gk', bd='2002-01-09', c='Россия',     rpl=(14, 1260, 0, 0, 1, 0), cup=(0, 0, 0, 0)),
  dict(n=16, name='Александр Корякин',   pos='gk', bd='2002-03-10', c='Россия',     rpl=(0, 0, 0, 0, 0, 0),    cup=(5, 0, 0, 0)),
@@ -64,11 +64,23 @@ def _goals(key):
                                 min=(g[0] + "'") if g[0] else '', pen='пенальти' in g[1], anchor='m-' + m['d']))
     return out
 
+def _rpl(p):
+    """Голы РПЛ считаем по карточкам завершённых матчей.
+
+    Поэтому после автоматического протокола число голов игрока не остаётся
+    прежним до ручной правки состава.
+    """
+    stats = list(p['rpl'])
+    if p.get('g'):
+        stats[2] = sum(1 for m in PLAYED if m['comp'] == 'РПЛ'
+                       for g in m.get('goals', []) if g[2] == 'k' and p['g'] in g[1])
+    return tuple(stats)
+
 def _stat(v, w):
     return f'<span><b>{v}</b>{w}</span>'
 
 def _card(p):
-    rg, rm, rgl, ra, ry, rr = p['rpl']; cg, cgl, ca, cy = p['cup']
+    rg, rm, rgl, ra, ry, rr = _rpl(p); cg, cgl, ca, cy = p['cup']
     a = _age(p['bd'])
     gk = p['pos'] == 'gk'
     cols = ['Игры', 'Мин'] + ([] if gk else ['Голы']) + ['Пасы', 'ЖК'] + (['КК'] if rr else [])
@@ -93,12 +105,12 @@ def _card(p):
 
 _POS = [('gk', 'Вратари'), ('df', 'Защитники'), ('mf', 'Полузащитники'), ('fw', 'Нападающие')]
 def _sortkey(p):
-    return (-(p['rpl'][0] + p['cup'][0]), -p['rpl'][1], p['n'])
+    return (-(_rpl(p)[0] + p['cup'][0]), -_rpl(p)[1], p['n'])
 _groups = ''.join(
     f'<h2 class="grp">{t} <span>{sum(1 for p in SQUAD if p["pos"] == k)}</span></h2><ul class="pls">'
     + ''.join(_card(p) for p in sorted([p for p in SQUAD if p['pos'] == k], key=_sortkey)) + '</ul>'
     for k, t in _POS)
-_lead_data = [dict(n=p['name'], id=p['n'], rg=p['rpl'][0], rgl=p['rpl'][2], ra=p['rpl'][3],
+_lead_data = [dict(n=p['name'], id=p['n'], rg=_rpl(p)[0], rgl=_rpl(p)[2], ra=p['rpl'][3],
                    cg=p['cup'][0], cgl=p['cup'][1], ca=p['cup'][2]) for p in SQUAD]
 
 SQUAD_CSS = r'''

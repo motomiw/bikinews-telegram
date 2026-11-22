@@ -8,7 +8,22 @@
       "opp": "dynamo",
       "home": false,
       "gf": 1,
-      "ga": 1
+      "ga": 1,
+      "goals": [
+        [
+          "27",
+          "Гладышев",
+          "o",
+          ""
+        ],
+        [
+          "11",
+          "Кордоба",
+          "k",
+          "Родригес"
+        ]
+      ],
+      "protocol_source": "https://www.sports.ru/football/match/dynamo-vs-krasnodar/"
     }
   ]
 }

@@ -24,6 +24,11 @@ PAGE = '''
 <time datetime="2026-11-22T14:00:00+03:00" title="Время проведения матча Динамо - Краснодар: 2026-11-22 в 14:00:00 МСК"></time><span>Завершен</span><div data-testid="actual-matches-widget-score" aria-label="Счёт: 1 — 2"></div>
 '''
 
+PROTOCOL = '''
+<li class="timeline__event goal-wrapper goal-wrapper--away"><span class="goal-time">11&#39;</span><span class="goal-scorer"><a>Джон Кордоба</a></span><a class="goal-assists__link">Диего Родригес</a></li>
+<li class="timeline__event goal-wrapper goal-wrapper--home"><span class="goal-time">27&#39;</span><span class="goal-scorer"><a>Ярослав Гладышев</a></span><a class="goal-assists__link">Максим Осипенко</a></li>
+'''
+
 
 class RPLSyncTests(unittest.TestCase):
     def test_standings_are_parsed_and_checked(self):
@@ -33,6 +38,12 @@ class RPLSyncTests(unittest.TestCase):
 
     def test_finished_match_is_parsed(self):
         self.assertEqual(rpl_sync.parse_completed_matches(PAGE), {("2026-11-22", "dynamo", "krasnodar"): (1, 2)})
+
+    def test_goal_authors_are_parsed_from_protocol(self):
+        self.assertEqual(rpl_sync.parse_match_protocol(PROTOCOL, False), [
+            ("11", "Джон Кордоба", "k", "Диего Родригес"),
+            ("27", "Ярослав Гладышев", "o", "Максим Осипенко"),
+        ])
 
     def test_separate_goal_columns_are_parsed(self):
         page = PAGE.replace("33−18", "33</td><td>18", 1)
