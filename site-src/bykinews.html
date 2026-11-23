@@ -1410,6 +1410,6 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   } else if (ms > 0) {
     var h = Math.floor(ms / 3600000);
     el.textContent = h >= 1 ? h + ' ч ' + Math.floor(ms % 3600000 / 60000) + ' мин' : Math.ceil(ms / 60000) + ' мин';
-  } else if (!document.getElementById('cdwrap').hasAttribute('data-live')) { document.getElementById('cdwrap').textContent = 'матч сыгран — счёт скоро обновим'; }
+  } else { document.getElementById('cdwrap').textContent = 'ожидаем данные матча'; }
 })();
 </script>

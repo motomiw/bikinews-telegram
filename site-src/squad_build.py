@@ -42,6 +42,21 @@ SQUAD = [
 ]
 COACH = 'Мурад Мусаев'
 
+_snapshots = MATCHDAY.get('players', {})
+def _season_stats(name, comp):
+    norm = lambda s: s.casefold().replace('ё','е')
+    return next((vals for key,vals in _snapshots.get(comp, {}).items() if norm(name)==norm(key)), None)
+
+for _p in SQUAD:
+    _league = _season_stats(_p['name'], 'РПЛ')
+    _cup = _season_stats(_p['name'], 'Кубок')
+    if _league:
+        _p['rpl'] = tuple(_league)
+    if _cup:
+        _p['cup'] = (_cup[0], _cup[2], _cup[3], _cup[4])
+if _snapshots:
+    SQUAD_UPDATED = 'по сезонным протоколам РПЛ и Кубка России'
+
 _e = lambda s: _h2.escape(str(s), quote=True)
 _MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
 _TODAY = _dt2.date.today()
@@ -71,7 +86,7 @@ def _rpl(p):
     прежним до ручной правки состава.
     """
     stats = list(p['rpl'])
-    if p.get('g'):
+    if p.get('g') and not _season_stats(p['name'], 'РПЛ'):
         stats[2] = sum(1 for m in PLAYED if m['comp'] == 'РПЛ'
                        for g in m.get('goals', []) if g[2] == 'k' and p['g'] in g[1])
     return tuple(stats)

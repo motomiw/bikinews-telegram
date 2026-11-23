@@ -123,6 +123,10 @@ except (OSError, ValueError, KeyError, TypeError):
     # Отсутствие или повреждение служебного файла не должно мешать сборке сайта.
     pass
 
+_confirmed = {m['d']: m for m in matchday.final_rows(MATCHDAY)}
+PLAYED = sorted({m['d']: m for m in PLAYED + list(_confirmed.values())}.values(), key=lambda m:m['d'])
+UPCOMING = [(d, MATCHDAY.get('matches', {}).get(d, {}).get('t', t), comp, rnd, opp, home)
+            for d,t,comp,rnd,opp,home in UPCOMING if d not in _confirmed]
 MON_G = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
 MON_S = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
 WD = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
@@ -171,7 +175,7 @@ for m in reversed(PLAYED):
         res_note = {'w': 'Победа', 'd': 'Ничья', 'l': 'Поражение'}[res]
     W += res == 'w'; D += res == 'd'; L += res == 'l'; GF += m['gf']; GA += m['ga']
     opp_n = CLUBN[m['opp']]
-    meta = [m.get('stad') or HOME_STADIUM]
+    meta = [m.get('stad') or (HOME_STADIUM if m['home'] else 'Выездной матч')]
     if m.get('ref'): meta.append('судья — ' + m['ref'])
     if m.get('att'): meta.append('зрителей — ' + f"{m['att']:,}".replace(',', ' '))
     if m.get('ht'): meta.append('первый тайм — ' + m['ht'])
@@ -185,6 +189,8 @@ for m in reversed(PLAYED):
     ev_html = ('<ol class="ev">' + ''.join(ev) + '</ol>') if ev else '<p class="none">Голов не было.</p>'
     if m.get('pens'):
         ev_html += f'<p class="pen">Серия пенальти: «Краснодар» выиграл {m["pens"]}.</p>'
+    if not ev and (m['gf'] or m['ga']):
+        ev_html = '<p class="none">Авторы голов уточняются.</p>'
     if m.get('note'):
         ev_html += f'<p class="pen">{e(m["note"])}</p>'
     st_html = (('<div class="stats"><div class="sh"><span>Краснодар</span><span>' + e(opp_n) + '</span></div>' + stat_rows(m['stats']) + '</div>')

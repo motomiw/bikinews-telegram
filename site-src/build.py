@@ -12,8 +12,31 @@ from pathlib import Path
 import os, shutil
 ROOT = Path(__file__).resolve().parent
 SRC = (ROOT / 'bykinews.html').read_text(encoding='utf-8')
+import matchday
+from matchday_render import render as render_matchday
+MATCHDAY = matchday.read_state()
+if MATCHDAY:
+    SRC = render_matchday(SRC, MATCHDAY)
 OUT = Path(os.environ.get('BIKINEWS_OUT', ROOT.parent / 'dist'))
 (OUT / 'data').mkdir(parents=True, exist_ok=True)
+if MATCHDAY:
+    from hashlib import sha256
+    match_version = sha256(matchday.FILE.read_bytes()).hexdigest()[:16]
+    (OUT / 'data/match-version.json').write_text(json.dumps(match_version), encoding='utf8')
+    # An open match tab also receives the latest deployed scoreboard.
+    watcher = """<script>
+    (function () {
+      async function checkMatch() {
+        if (document.hidden) return;
+        try {
+          const response = await fetch('data/match-version.json', {cache: 'no-store'});
+          if (response.ok && await response.json() !== 'VERSION') location.reload();
+        } catch (err) {}
+      }
+      setInterval(checkMatch, 60000);
+      document.addEventListener('visibilitychange', checkMatch);
+    })();</script>"""
+    SRC += watcher.replace('VERSION', match_version)
 FAV = base64.b64encode((ROOT / 'assets/favicon-32.png').read_bytes()).decode()
 YEAR = 2026
 
@@ -80,7 +103,7 @@ for n, li in enumerate(re.findall(r'<li><article>(.*?)</article></li>', feed_htm
     hm = re.search(r'(\d{1,2}):(\d{2})', t)
     day, mon = int(m.group(1)), MON[m.group(2)]
     hh, mm = (int(hm.group(1)), int(hm.group(2))) if hm else (12, 0)
-    ts = calendar.timegm((YEAR, mon, day, hh, mm, 0)) - 3 * 3600   # время московское
+    ts = calendar.timegm((YEAR if mon >= 7 else YEAR + 1, mon, day, hh, mm, 0)) - 3 * 3600
     a = re.search(r'<a class="src" href="([^"]+)"[^>]*>(.*?)</a>', li, flags=re.S)
     items.append({
         'id': 'n' + __import__('hashlib').sha1((html.unescape(re.search(r'<a class="src" href="([^"]+)"', li).group(1)) + '|' + html.unescape(re.search(r'<h3>(.*?)</h3>', li, flags=re.S).group(1))).encode()).hexdigest()[:8],

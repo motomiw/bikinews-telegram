@@ -1,6 +1,9 @@
 import unittest
 
 import rpl_sync
+import matchday
+import matchday_render
+from datetime import datetime, timedelta
 
 
 PAGE = '''
@@ -31,6 +34,39 @@ PROTOCOL = '''
 
 
 class RPLSyncTests(unittest.TestCase):
+    def test_cup_cycle(self):
+        import json
+        fixture = ('2026-11-25', '18:00', 'Кубок', 'группа B, 6 тур', 'akhmat', False)
+        start = datetime.fromisoformat('2026-11-25T18:00:00+03:00')
+        event = dict(startDate=start.isoformat(), homeTeam=dict(name='Ахмат'), awayTeam=dict(name='Краснодар'),
+                     description='Кубок России', **{'@type':'SportsEvent'})
+        page = '<script type="application/ld+json">'+json.dumps(event)+'</script>'
+        page += '<div data-testid="match-status">Перерыв</div><div class="matchboard-score">0</div><div class="matchboard-score">1</div>'
+        _, stage, score = matchday.protocol(page, fixture)
+        self.assertEqual((stage, score), ('live', [0, 1]))
+        with self.assertRaises(ValueError):
+            matchday.protocol(page.replace('2026-11-25', '2026-11-24'), fixture)
+        rec = dict(zip(('d','t','comp','rnd','opp','home'), fixture))
+        rec.update(teams=['Ахмат','Краснодар'], start=start.isoformat(), url='https://www.sports.ru/',
+                   preview=int((start-timedelta(days=1)).timestamp()))
+        state = {'matches':{fixture[0]:rec}}
+        rec['preview_text'] = matchday.preview_text(rec,state)
+        master = rpl_sync.MASTER.read_text(encoding='utf8')
+        matchday.advance(rec,stage,score,start)
+        self.assertIn('0:1<small>',matchday_render.render(master,state))
+        _, stage, score = matchday.protocol(page.replace('Перерыв','Завершен'),fixture)
+        end = start+timedelta(minutes=96)
+        matchday.advance(rec,stage,score,end)
+        matchday.advance(rec,stage,score,end+timedelta(minutes=14))
+        self.assertNotIn('report',rec)
+        matchday.advance(rec,stage,score,end+timedelta(minutes=15))
+        stamp = rec['report']
+        matchday.advance(rec,stage,score,end+timedelta(minutes=30))
+        self.assertEqual(rec['report'],stamp)
+        src = matchday_render.render(master,state)
+        self.assertEqual(src.count('<h3>Ахмат — Краснодар · 0:1</h3>'),1)
+        self.assertIn('Ростов',src.split('id="match-title"')[1].split('</aside>')[0])
+
     def test_standings_are_parsed_and_checked(self):
         table = rpl_sync.parse_standings(PAGE)
         self.assertEqual(len(table), 16)
