@@ -79,7 +79,7 @@ def final_rows(state):
     for m in state.get('matches', {}).values():
         if m.get('stage') == 'final':
             gf, ga = m['score'] if m['home'] else m['score'][::-1]
-            yield dict(m, gf=gf, ga=ga, stats={}, goals=m.get('goals', []))
+            yield dict(m, gf=gf, ga=ga, stats=m.get('stats', {}), goals=m.get('verified_goals', m.get('goals', [])))
 
 
 def preview_text(record, state):

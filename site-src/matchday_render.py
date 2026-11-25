@@ -66,13 +66,17 @@ def render(src, state):
             lines = [f"{m['comp']}, {m['rnd']}. {title} — {score}."]
             if names:
                 lines.append('Голы: '+', '.join(names)+'.')
-            stories.append((m['report'], title+' · '+score, lines, m))
+            article = m.get('article', {})
+            stories.append((m['report'], article.get('title', title+' · '+score), article.get('paragraphs', lines), m))
     for ts,title,lines,m in sorted(stories, key=lambda s:s[0]):
         dt = datetime.fromtimestamp(ts, md.MSK)
         paragraphs = ''.join('<p>'+html.escape(s)+'</p>' for s in lines)
+        source, url = ('Sports.ru', m['url'])
+        if ts == m.get('report') and m.get('article'):
+            source, url = m['article']['source'], m['article']['url']
         entry = (f'<li><article><time class="mono" datetime="{dt.isoformat()}">{date_label(dt.date().isoformat())} · {dt:%H:%M}</time>'
                  f'<div class="nb"><span class="tag">Матч</span><h3>{html.escape(title)}</h3>{paragraphs}'
-                 f'<a class="src" href="{html.escape(m["url"])}" target="_blank" rel="noopener">Источник: Sports.ru ↗</a></div></article></li>')
+                 f'<a class="src" href="{html.escape(url)}" target="_blank" rel="noopener">Источник: {html.escape(source)} ↗</a></div></article></li>')
         start = src.index('<ul class="feed">')+len('<ul class="feed">')
         # Keep later newsroom posts above the automatic story.
         end = src.index('</ul>',start)
@@ -90,6 +94,7 @@ def render(src, state):
         src = src[:start+offset]+entry+'\n'+src[start+offset:]
     if stories:
         _,title,lines,m = max(stories,key=lambda s:s[0])
-        lead = f'<article class="lead"><h1>{html.escape(title)}</h1><p>{html.escape(" ".join(lines))}</p><a class="read" href="matches.html#m-{m["d"]}">Календарь и статистика →</a></article>'
+        summary = lines[0] if m.get('article') else ' '.join(lines)
+        lead = f'<article class="lead"><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p><a class="read" href="matches.html#m-{m["d"]}">Календарь и статистика →</a></article>'
         src = re.sub(r'<article class="lead">.*?</article>',lambda _:lead,src,count=1,flags=re.S)
     return src
