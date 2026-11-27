@@ -59,7 +59,7 @@ def render(src, state):
     for m in records.values():
         title = ' — '.join(m['teams'])
         if m.get('preview'):
-            stories.append((m['preview'], title+' · превью', m['preview_text'], m))
+            stories.append((m['preview'], m.get('preview_title', title+' · превью'), m['preview_text'], m))
         if m.get('report'):
             score = ':'.join(map(str,m['score']))
             names = [f'{g[1]} ({g[0]}′)' for g in m.get('goals',[])]
@@ -94,7 +94,7 @@ def render(src, state):
         src = src[:start+offset]+entry+'\n'+src[start+offset:]
     if stories:
         _,title,lines,m = max(stories,key=lambda s:s[0])
-        summary = lines[0] if m.get('article') else ' '.join(lines)
+        summary = lines[0]
         lead = f'<article class="lead"><h1>{html.escape(title)}</h1><p>{html.escape(summary)}</p><a class="read" href="matches.html#m-{m["d"]}">Календарь и статистика →</a></article>'
         src = re.sub(r'<article class="lead">.*?</article>',lambda _:lead,src,count=1,flags=re.S)
     return src

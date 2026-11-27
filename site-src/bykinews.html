@@ -701,7 +701,7 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
 
   <div class="two two-wide">
     <section id="table" aria-labelledby="t-h">
-      <div class="sec-head"><h2 id="t-h">Таблица РПЛ</h2><span class="src">14 тур, все матчи сыграны · при равенстве очков выше команда с большим числом побед</span></div>
+      <div class="sec-head"><h2 id="t-h">Таблица РПЛ</h2><span class="src" id="round-summary">Сезон 2026/27</span></div>
       <div class="tbl-wrap">
         <table class="st">
           <thead><tr><th>#</th><th class="l">Команда</th><th>И</th><th class="opt">В</th><th class="opt">Н</th><th class="opt">П</th><th>Мячи</th><th>О</th></tr></thead>
@@ -1276,6 +1276,11 @@ html.a11y *, html.a11y *::before, html.a11y *::after { transition: none !importa
   if (moreNews) { foldNews(false); moreNews.addEventListener('click', function () { foldNews(moreNews.getAttribute('aria-expanded') !== 'true'); }); }
 
   var rpl = played.slice(0, 5).reverse();
+  var games = table.map(function (row) { return row[1]; });
+  var least = Math.min.apply(null, games), most = Math.max.apply(null, games);
+  document.getElementById('round-summary').textContent = least === most
+    ? 'Матчей у каждого клуба: ' + most
+    : 'Сыграно матчей у клубов: от ' + least + ' до ' + most;
   document.getElementById('form').innerHTML = 'форма ' + rpl.map(function (m) {
     var r = resClass(m[4], m[5]); return '<span class="res ' + r[0] + '" title="' + r[2] + ', ' + clubs[m[2]][0] + '">' + r[1] + '</span>';
   }).join('');

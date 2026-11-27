@@ -91,7 +91,6 @@ INDEX_LD = ('<script type="application/ld+json">' + json.dumps({
 index_src_head = re.sub(r'<title>.*?</title>', '<title>' + INDEX_TITLE + '</title>', SRC[:style_end], count=1, flags=re.S)
 index = (head(INDEX_TITLE, INDEX_DESC) + INDEX_LD
          + index_src_head + '\n</head>\n<body>\n' + SRC[style_end:].lstrip('\n') + '</body>\n</html>\n')
-(OUT / 'index.html').write_text(index, encoding='utf-8')
 
 # ---------- «Главное» → JSON ----------
 MON = {'янв': 1, 'фев': 2, 'мар': 3, 'апр': 4, 'мая': 5, 'июн': 6, 'июл': 7, 'авг': 8, 'сен': 9, 'окт': 10, 'ноя': 11, 'дек': 12}
@@ -125,6 +124,30 @@ for _it in items:
     _it['page'] = news_slug(_it['title'], _it['id'])
     if _it['url'].startswith('https://bikinews.ru/'):   # своя статья (article_build.py): заголовок ведёт прямо на неё
         _it['page'] = _it['url'][len('https://bikinews.ru/'):]; _it['article'] = True
+# Apply editorial corrections after resolving the original permanent addresses.
+revisions = json.loads((ROOT / 'editorial-revisions.json').read_text(encoding='utf-8'))
+feed_items = iter(items)
+
+
+def edit_card(match):
+    item = next(feed_items)
+    revision = revisions.get(item['id'])
+    if not revision:
+        return match[0]
+    item.update(revision)
+    markup = re.sub(r'<h3>.*?</h3>', lambda _: '<h3>' + html.escape(item['title'], quote=False) + '</h3>', match[0], count=1, flags=re.S)
+    body = ''.join('<p>' + html.escape(p) + '</p>' for p in item['paras'])
+    paragraphs = iter([body])
+    return re.sub(r'<p>.*?</p>', lambda _: next(paragraphs, ''), markup, flags=re.S)
+
+
+edited_feed = re.sub(r'<li><article>.*?</article></li>', edit_card, feed_html, flags=re.S)
+SRC = SRC.replace(feed_html, edited_feed, 1)
+index = index.replace(feed_html, edited_feed, 1)
+if items and '<h1>' + html.escape(items[0]['title']) + '</h1>' in index:
+    index = re.sub(r'(<article class="lead">.*?<a class="read" href=")[^"]+(">).*?(</a>)',
+                   lambda m: m[1] + items[0]['page'] + m[2] + 'Читать полностью →' + m[3], index, count=1, flags=re.S)
+(OUT / 'index.html').write_text(index, encoding='utf-8')
 from email.utils import formatdate as _fd
 _rss = ['<?xml version="1.0" encoding="UTF-8"?>', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>',
         '<title>Быки News — новости ФК «Краснодар»</title>', '<link>https://bikinews.ru/</link>',

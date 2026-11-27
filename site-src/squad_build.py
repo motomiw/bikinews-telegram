@@ -39,13 +39,16 @@ SQUAD = [
  dict(n=10, name='Дмитрий Воробьёв',    pos='fw', bd='1997-11-28', c='Россия',     rpl=(12, 714, 0, 3, 1, 0),  cup=(5, 2, 1, 1), g='Воробьёв'),
  dict(n=70, name='Артём Дряхлов',       pos='fw', bd='2008-05-08', c='Россия',     rpl=(0, 0, 0, 0, 0, 0),    cup=(1, 0, 0, 1)),
  dict(n=74, name='Даниэль Амбарцумов',  pos='fw', bd='2008-03-07', c='Россия',     rpl=(0, 0, 0, 0, 0, 0),    cup=(1, 0, 0, 0)),
+ dict(n=29, name='Эльдар Гусейнов', pos='fw', bd='2008-02-09', c='Россия', rpl=(0, 0, 0, 0, 0, 0), cup=(1, 0, 0, 1)),
 ]
 COACH = 'Мурад Мусаев'
 
 _snapshots = MATCHDAY.get('players', {})
+_provider_names = {'Витор Тормена': 'Тормена', 'Дуглас Аугусто': 'Дуглас', 'Хуан Мануэль Боселли': 'Хуан Боселли'}
 def _season_stats(name, comp):
     norm = lambda s: s.casefold().replace('ё','е')
-    return next((vals for key,vals in _snapshots.get(comp, {}).items() if norm(name)==norm(key)), None)
+    names = {norm(name), norm(_provider_names.get(name, name))}
+    return next((vals for key, vals in _snapshots.get(comp, {}).items() if norm(key) in names), None)
 
 for _p in SQUAD:
     _league = _season_stats(_p['name'], 'РПЛ')
@@ -54,8 +57,8 @@ for _p in SQUAD:
         _p['rpl'] = tuple(_league)
     if _cup:
         _p['cup'] = (_cup[0], _cup[2], _cup[3], _cup[4])
-if _snapshots:
-    SQUAD_UPDATED = 'по сезонным протоколам РПЛ и Кубка России'
+if _snapshots and PLAYED:
+    SQUAD_UPDATED = 'после матчей по ' + _dt2.date.fromisoformat(max(m['d'] for m in PLAYED)).strftime('%d.%m.%Y')
 
 _e = lambda s: _h2.escape(str(s), quote=True)
 _MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
@@ -98,14 +101,17 @@ def _card(p):
     rg, rm, rgl, ra, ry, rr = _rpl(p); cg, cgl, ca, cy = p['cup']
     a = _age(p['bd'])
     gk = p['pos'] == 'gk'
-    cols = ['Игры', 'Мин'] + ([] if gk else ['Голы']) + ['Пасы', 'ЖК'] + (['КК'] if rr else [])
+    cup_stats = _season_stats(p['name'], 'Кубок')
+    cup_minutes, cup_red = (cup_stats[1], cup_stats[5]) if cup_stats else ('·', '·')
+    show_red = bool(rr or (cup_stats and cup_red))
+    cols = ['Игры', 'Мин'] + ([] if gk else ['Голы']) + ['Пасы', 'ЖК'] + (['КК'] if show_red else [])
     def _row(lbl, cls, vals):
         return f'<tr><th scope="row"><i class="{cls}">{lbl}</i></th>' + ''.join(f'<td>{v}</td>' for v in vals) + '</tr>'
     body = ''
     if rg:
-        body += _row('РПЛ', 't-rpl', [rg, rm] + ([] if gk else [rgl]) + [ra, ry] + ([rr] if rr else []))
+        body += _row('РПЛ', 't-rpl', [rg, rm] + ([] if gk else [rgl]) + [ra, ry] + ([rr] if show_red else []))
     if cg:
-        body += _row('Кубок', 't-cup', [cg, '—'] + ([] if gk else [cgl]) + [ca, cy] + (['—'] if rr else []))
+        body += _row('Кубок', 't-cup', [cg, cup_minutes] + ([] if gk else [cgl]) + [ca, cy] + ([cup_red] if show_red else []))
     rows = ('<table class="pl-t"><thead><tr><td></td>' + ''.join(f'<th scope="col">{c}</th>' for c in cols)
             + '</tr></thead><tbody>' + body + '</tbody></table>')
     gl = _goals(p['g']) if p.get('g') else []
