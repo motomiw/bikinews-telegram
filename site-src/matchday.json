@@ -269,6 +269,21 @@
      "Пальцев"
     ]
    ]
+  },
+  "2026-11-29": {
+   "d": "2026-11-29",
+   "t": "15:15",
+   "opp": "rostov",
+   "home": false,
+   "rnd": "16 тур",
+   "comp": "РПЛ",
+   "url": "https://www.sports.ru/football/match/1952711/",
+   "teams": [
+    "Ростов",
+    "Краснодар"
+   ],
+   "start": "2026-11-29T15:15:00+03:00",
+   "stage": "scheduled"
   }
  },
  "players": {
